@@ -12,6 +12,12 @@ import java.util.Date;
 public class StudentResponse {
     public Long studentId;
 
+    private String fullName;
+
+    private String email;
+
+    private String phoneNumber;
+
     public String studentCode;
 
     public String major;

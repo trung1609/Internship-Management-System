@@ -13,19 +13,12 @@ public class StudentMapper {
                 .classRoom(student.getClassRoom())
                 .dateOfBirth(student.getDateOfBirth())
                 .address(student.getAddress())
+                .fullName(student.getUser().getFullName())
+                .email(student.getUser().getEmail())
+                .phoneNumber(student.getUser().getPhoneNumber())
                 .build();
     }
 
-    public static Student toEntity(StudentResponse studentResponse){
-        return Student.builder()
-                .studentId(studentResponse.getStudentId())
-                .studentCode(studentResponse.getStudentCode())
-                .major(studentResponse.getMajor())
-                .classRoom(studentResponse.getClassRoom())
-                .dateOfBirth(studentResponse.getDateOfBirth())
-                .address(studentResponse.getAddress())
-                .build();
-    }
 
     public static void updateFromDto(Student student, StudentUpdateRequest request){
         if (request.getStudentCode() != null) {
@@ -42,6 +35,15 @@ public class StudentMapper {
         }
         if (request.getDateOfBirth() != null) {
             student.setDateOfBirth(request.getDateOfBirth());
+        }
+        if (request.getFullName() != null) {
+            student.getUser().setFullName(request.getFullName());
+        }
+        if (request.getEmail() != null) {
+            student.getUser().setEmail(request.getEmail());
+        }
+        if (request.getPhoneNumber() != null) {
+            student.getUser().setPhoneNumber(request.getPhoneNumber());
         }
     }
 }

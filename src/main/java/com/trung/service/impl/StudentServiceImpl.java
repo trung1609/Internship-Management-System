@@ -140,6 +140,9 @@ public class StudentServiceImpl implements IStudentService {
         if (currentUser.getRole() == Role.ROLE_ADMIN){
             Student existingStudent = studentRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
+            if (iUserRepository.existsByEmailAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(request.getEmail(), existingStudent.getUser().getUserId())) {
+                errorList.put("email", "Email already exists");
+            }
 
             if (studentRepository.existsByStudentCodeAndStudentIdNot(request.getStudentCode(), id)) {
                 errorList.put("studentCode", "Student code already exists");
@@ -160,10 +163,14 @@ public class StudentServiceImpl implements IStudentService {
             Student existingStudent = studentRepository.findById(id).orElseThrow(
                     () -> new ResourceNotFoundException("Student not found with id: " + id)
             );
-
             if (!existingStudent.getUser().getUserId().equals(currentUser.getUserId())){
                 throw new ResourceForbiddenException("You cannot update other student's information");
             }
+
+            if (iUserRepository.existsByEmailAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(request.getEmail(), existingStudent.getUser().getUserId())) {
+                errorList.put("email", "Email already exists");
+            }
+
             if (studentRepository.existsByStudentCodeAndStudentIdNot(request.getStudentCode(), id)) {
                 errorList.put("studentCode", "Student code already exists");
             }

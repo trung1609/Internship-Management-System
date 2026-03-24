@@ -11,6 +11,9 @@ import java.util.Date;
 @Builder
 public class StudentUpdateRequest {
     private String studentCode;
+    private String fullName;
+    private String email;
+    private String phoneNumber;
     private String major;
     private String classRoom;
     private String address;
