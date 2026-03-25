@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/evaluation-criterias/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
                         .requestMatchers("/api/v1/assessment-rounds/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
                         .requestMatchers("/api/v1/round-criterias/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
+                        .requestMatchers("/api/v1/internship-assignments/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -15,4 +15,9 @@ public interface InternshipAssignmentRepository extends JpaRepository<Internship
     @Query("select ia.student from InternshipAssignment ia " +
             "where ia.mentor.mentorId = :mentorId")
     Page<Student> findStudentsByMentorId(@Param("mentorId") Long mentorId, Pageable pageable);
+
+    boolean existsByStudent_StudentIdAndPhase_PhaseId(Long studentId, Long phaseId);
+
+    Page<InternshipAssignment> findStudent_StudentIdByMentor_MentorId(Long mentorId, Pageable pageable);
+    Page<InternshipAssignment> findByStudent_StudentId(Long studentId, Pageable pageable);
 }

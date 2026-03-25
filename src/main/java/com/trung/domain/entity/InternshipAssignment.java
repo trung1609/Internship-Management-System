@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "internship_assignments",
+uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "phase_id"}))
 public class InternshipAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +31,7 @@ public class InternshipAssignment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "phase_id")
-    private InternshipPhase internshipPhase;
+    private InternshipPhase phase;
 
     private LocalDateTime assignedDate;
 

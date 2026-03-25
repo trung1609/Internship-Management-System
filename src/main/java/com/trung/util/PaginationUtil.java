@@ -35,6 +35,8 @@ public class PaginationUtil {
 
         List<String> roundCriteriaAllowedSortFields = List.of("roundCriteriaId", "round", "criterion", "weight", "createdAt", "updatedAt");
 
+        List<String> internshipAssignmentAllowedSortFields = List.of("assignmentId", "student", "mentor", "phase", "assignedDate",  "status", "createdAt", "updatedAt");
+
         int page = pageRequestDTO.getPage() != null && pageRequestDTO.getPage() > 0 ? pageRequestDTO.getPage() : 0;
         int size = pageRequestDTO.getSize() != null && pageRequestDTO.getSize() > 0 ? pageRequestDTO.getSize() : 10;
 
@@ -48,6 +50,7 @@ public class PaginationUtil {
         allAllowedFields.addAll(evaluationAllowedSortFields);
         allAllowedFields.addAll(assessmentRoundAllowedSortFields);
         allAllowedFields.addAll(roundCriteriaAllowedSortFields);
+        allAllowedFields.addAll(internshipAssignmentAllowedSortFields);
 
         String sortBy = pageRequestDTO.getSortBy() != null && allAllowedFields.contains(pageRequestDTO.getSortBy())
                 ? pageRequestDTO.getSortBy()
