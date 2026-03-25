@@ -5,6 +5,7 @@ import com.trung.domain.entity.EvaluationCriteria;
 import com.trung.domain.entity.RoundCriteria;
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.request.RoundCriterionCreateRequest;
+import com.trung.dto.request.RoundCriterionUpdateRequest;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.RoundCriterionResponse;
@@ -31,14 +32,14 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     @Override
     public PageResponseDTO<RoundCriterionResponse> getAllCriteriaInRound(Long roundId, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
-        Page<RoundCriteria> roundCriteriaPage = roundCriteriaPage = roundCriteriaRepository.findAllByRound_RoundIdAndIsDeletedFalseAndRound_IsDeletedFalseAndCriterion_IsDeletedFalse(roundId, pageable);
+        Page<RoundCriteria> roundCriteriaPage = roundCriteriaPage = roundCriteriaRepository.findAllByRound_RoundId(roundId, pageable);
 
         return PaginationUtil.toPageResponseDTO(roundCriteriaPage, RoundCriteriaMapper::toDto);
     }
 
     @Override
     public ApiResponse<RoundCriterionResponse> getCriterionInRoundById(Long roundCriteriaId) throws ResourceNotFoundException {
-        RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaIdAndIsDeletedFalse(roundCriteriaId)
+        RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaId(roundCriteriaId)
                 .orElseThrow(() -> new ResourceNotFoundException("RoundCriteria not found with id: " + roundCriteriaId));
         return new ApiResponse<>(
                 RoundCriteriaMapper.toDto(roundCriteria),
@@ -69,6 +70,37 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
         roundCriteriaRepository.save(roundCriteria);
         return new ApiResponse<>(
                 RoundCriteriaMapper.toDto(roundCriteria),
+                true,
+                "SUCCESS",
+                null,
+                null);
+    }
+
+    @Override
+    public ApiResponse<RoundCriterionResponse> updateWeight(Long roundCriteriaId, RoundCriterionUpdateRequest request) throws ResourceNotFoundException {
+
+        RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaId(roundCriteriaId)
+                .orElseThrow(() -> new ResourceNotFoundException("RoundCriteria not found with id: " + roundCriteriaId));
+
+        RoundCriteriaMapper.updateFromDto(roundCriteria, request);
+        roundCriteriaRepository.save(roundCriteria);
+
+        return new ApiResponse<>(
+                RoundCriteriaMapper.toDto(roundCriteria),
+                true,
+                "SUCCESS",
+                null,
+                null);
+    }
+
+    @Override
+    public ApiResponse<String> deleteCriterionInRound(Long roundCriteriaId) throws ResourceNotFoundException {
+        RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaId(roundCriteriaId)
+                .orElseThrow(() -> new ResourceNotFoundException("RoundCriteria not found with id: " + roundCriteriaId));
+
+        roundCriteria.setDeleted(true);
+        roundCriteriaRepository.save(roundCriteria);
+        return new ApiResponse<>("RoundCriteria deleted successfully",
                 true,
                 "SUCCESS",
                 null,

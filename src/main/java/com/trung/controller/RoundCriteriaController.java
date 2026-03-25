@@ -2,6 +2,7 @@ package com.trung.controller;
 
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.request.RoundCriterionCreateRequest;
+import com.trung.dto.request.RoundCriterionUpdateRequest;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.RoundCriterionResponse;
@@ -35,5 +36,15 @@ public class RoundCriteriaController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<RoundCriterionResponse>> createCriterionInRound(@Valid @RequestBody RoundCriterionCreateRequest request) throws ResourceNotFoundException {
         return new ResponseEntity<>(roundCriteriaService.createCriterionInRound(request), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{roundCriteriaId}")
+    public ResponseEntity<ApiResponse<RoundCriterionResponse>> updateWeight(@PathVariable Long roundCriteriaId, @Valid @RequestBody RoundCriterionUpdateRequest request) throws ResourceNotFoundException {
+        return new ResponseEntity<>(roundCriteriaService.updateWeight(roundCriteriaId, request), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{roundCriteriaId}")
+    public ResponseEntity<ApiResponse<String>> deleteCriterionInRound(@PathVariable Long roundCriteriaId) throws ResourceNotFoundException {
+        return new ResponseEntity<>(roundCriteriaService.deleteCriterionInRound(roundCriteriaId), HttpStatus.OK);
     }
 }

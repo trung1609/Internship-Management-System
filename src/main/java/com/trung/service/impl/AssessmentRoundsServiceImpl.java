@@ -95,9 +95,9 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
         } else if (search != null && !search.isBlank()) {
             assessmentRoundsPage = assessmentRoundsRepository.findAllByKeyword(search, pageable);
         } else if (phaseId != null && phaseId != 0) {
-            assessmentRoundsPage = assessmentRoundsRepository.findAllByPhase_PhaseIdAndIsDeletedFalse(phaseId, pageable);
+            assessmentRoundsPage = assessmentRoundsRepository.findAllByPhase_PhaseId(phaseId, pageable);
         } else {
-            assessmentRoundsPage = assessmentRoundsRepository.findAllByIsDeletedFalse(pageable);
+            assessmentRoundsPage = assessmentRoundsRepository.findAll(pageable);
         }
         return PaginationUtil.toPageResponseDTO(assessmentRoundsPage, AssessmentRoundsMapper::toDto);
     }
@@ -154,6 +154,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
         AssessmentRound assessmentRound = assessmentRoundsRepository.findByRoundIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));
         assessmentRound.setDeleted(true);
+        assessmentRound.setIsActive(false);
         assessmentRoundsRepository.save(assessmentRound);
         return new ApiResponse<>(
                 "Assessment round with id: " + id + " has been deleted successfully",

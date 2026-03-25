@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class RoundCriterionUpdateRequest {
+    private Long roundId;
     private Long criterionId;
 
     @Positive(message = "Weight must be a positive number.")

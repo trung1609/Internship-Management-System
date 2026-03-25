@@ -51,7 +51,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
         if (search != null && !search.isBlank()) {
             evaluationCriteriaPage = evaluationCriteriaRepository.findAllByKeyword(pageable, search);
         } else {
-            evaluationCriteriaPage = evaluationCriteriaRepository.findAllByIsDeletedFalse(pageable);
+            evaluationCriteriaPage = evaluationCriteriaRepository.findAll(pageable);
         }
 
         return PaginationUtil.toPageResponseDTO(evaluationCriteriaPage, EvaluationCriteriaMapper::toDTO);

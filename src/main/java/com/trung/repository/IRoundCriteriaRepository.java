@@ -22,14 +22,8 @@ public interface IRoundCriteriaRepository extends JpaRepository<RoundCriteria, L
             "rc.criterion.isDeleted = false and rc.round.isDeleted = false ")
     boolean existsByCriterionAndRound(@Param("roundId") Long roundId,  @Param("criterionId") Long criterionId);
 
-    Optional<RoundCriteria> findByRound_RoundIdAndRound_IsDeletedFalse(Long roundId);
 
-    @Query("select rc from RoundCriteria rc where " +
-            "rc.roundCriteriaId = :roundCriteriaId and " +
-            "rc.isDeleted = false and " +
-            "rc.criterion.isDeleted = false and " +
-            "rc.round.isDeleted = false")
-    Optional<RoundCriteria> findByRoundCriteriaIdAndIsDeletedFalse(Long roundCriteriaId);
+    Optional<RoundCriteria> findByRoundCriteriaId(Long roundCriteriaId);
 
     @Query("select case when count(rc) > 0 then true else false end from RoundCriteria rc where " +
             "rc.round.roundId = :roundId " +
@@ -40,5 +34,5 @@ public interface IRoundCriteriaRepository extends JpaRepository<RoundCriteria, L
     boolean existsByRoundIdAndCriterionId(Long roundId, Long criterionId);
 
 
-    Page<RoundCriteria> findAllByRound_RoundIdAndIsDeletedFalseAndRound_IsDeletedFalseAndCriterion_IsDeletedFalse(Long roundId, Pageable pageable);
+    Page<RoundCriteria> findAllByRound_RoundId(Long roundId, Pageable pageable);
 }

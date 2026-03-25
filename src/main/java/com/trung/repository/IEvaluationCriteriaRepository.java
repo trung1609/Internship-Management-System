@@ -20,10 +20,8 @@ public interface IEvaluationCriteriaRepository extends JpaRepository<EvaluationC
 
     boolean existsByCriterionNameIgnoreCaseAndIsDeletedFalseAndCriterionIdNot(String criterionName, Long criterionId);
 
-    @Query("select c from EvaluationCriteria c where c.isDeleted = false and " +
+    @Query("select c from EvaluationCriteria c where " +
            "(lower(c.criterionName) like lower(concat('%', :keyword, '%')) or " +
            "lower(c.description) like lower(concat('%', :keyword, '%')))")
     Page<EvaluationCriteria> findAllByKeyword(Pageable pageable, @Param("keyword") String keyword);
-
-    Page<EvaluationCriteria> findAllByIsDeletedFalse(Pageable pageable);
 }

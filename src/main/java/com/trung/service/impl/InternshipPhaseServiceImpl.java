@@ -53,7 +53,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
         if (search != null && !search.isBlank()) {
             internshipPhasePage = internshipPhaseRepository.findAllByKeyword(pageable, search);
         } else {
-            internshipPhasePage = internshipPhaseRepository.findAllByIsDeletedFalse(pageable);
+            internshipPhasePage = internshipPhaseRepository.findAll(pageable);
         }
         return PaginationUtil.toPageResponseDTO(internshipPhasePage, InternshipPhaseMapper::toDto);
     }

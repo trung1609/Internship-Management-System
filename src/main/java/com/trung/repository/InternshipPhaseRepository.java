@@ -18,11 +18,8 @@ public interface InternshipPhaseRepository extends JpaRepository<InternshipPhase
 
     boolean existsByPhaseNameIgnoreCaseAndIsDeletedFalseAndPhaseIdNot(String phaseName, Long phaseId);
 
-    Page<InternshipPhase> findAllByIsDeletedFalse(Pageable pageable);
-
     @Query("select i from InternshipPhase i where " +
-            "lower(i.phaseName) like lower(concat('%', :keyword, '%')) " +
-            "and i.isDeleted = false")
+            "lower(i.phaseName) like lower(concat('%', :keyword, '%'))")
     Page<InternshipPhase> findAllByKeyword(Pageable pageable, @Param("keyword") String keyword);
 
 
