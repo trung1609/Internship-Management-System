@@ -35,7 +35,6 @@ import java.util.*;
 public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
 
     private final IAssessmentRoundsRepository assessmentRoundsRepository;
-    private final IRoundCriteriaRepository roundCriteriaRepository;
     private final InternshipPhaseRepository internshipPhaseRepository;
     private final IEvaluationCriteriaRepository iEvaluationCriteriaRepository;
 

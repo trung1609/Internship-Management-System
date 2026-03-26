@@ -37,7 +37,6 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     private final InternshipPhaseRepository internshipPhaseRepository;
     private final IMentorRepository iMentorRepository;
     private final IStudentRepository iStudentRepository;
-    private final IUserRepository iUserRepository;
     private final CurrentUserUtil currentUserUtil;
 
     @Override

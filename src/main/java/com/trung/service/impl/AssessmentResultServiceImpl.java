@@ -35,7 +35,6 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     private final IAssessmentResultRepository assessmentResultRepository;
     private final InternshipAssignmentRepository internshipAssignmentRepository;
     private final IAssessmentRoundsRepository iAssessmentRoundsRepository;
-    private final IUserRepository iUserRepository;
     private final IEvaluationCriteriaRepository iEvaluationCriteriaRepository;
     private final CurrentUserUtil currentUserUtil;
 
