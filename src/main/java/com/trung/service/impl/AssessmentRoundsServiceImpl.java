@@ -104,7 +104,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
 
     @Override
     public ApiResponse<AssessmentRoundsResponse> getAssessmentRoundById(Long id) throws ResourceNotFoundException {
-        AssessmentRound assessmentRound = assessmentRoundsRepository.findByRoundIdAndIsDeletedFalse(id)
+        AssessmentRound assessmentRound = assessmentRoundsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));
 
         return new ApiResponse<>(AssessmentRoundsMapper.toDto(assessmentRound),

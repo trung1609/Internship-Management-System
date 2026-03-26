@@ -32,7 +32,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     @Override
     public PageResponseDTO<RoundCriterionResponse> getAllCriteriaInRound(Long roundId, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
-        Page<RoundCriteria> roundCriteriaPage = roundCriteriaPage = roundCriteriaRepository.findAllByRound_RoundId(roundId, pageable);
+        Page<RoundCriteria> roundCriteriaPage = roundCriteriaRepository.findAllByRound_RoundId(roundId, pageable);
 
         return PaginationUtil.toPageResponseDTO(roundCriteriaPage, RoundCriteriaMapper::toDto);
     }

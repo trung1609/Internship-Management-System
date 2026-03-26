@@ -25,14 +25,6 @@ public interface IRoundCriteriaRepository extends JpaRepository<RoundCriteria, L
 
     Optional<RoundCriteria> findByRoundCriteriaId(Long roundCriteriaId);
 
-    @Query("select case when count(rc) > 0 then true else false end from RoundCriteria rc where " +
-            "rc.round.roundId = :roundId " +
-            "and rc.criterion.criterionId = :criterionId " +
-            "and rc.isDeleted = false " +
-            "and rc.round.isDeleted = false " +
-            "and rc.criterion.isDeleted = false")
-    boolean existsByRoundIdAndCriterionId(Long roundId, Long criterionId);
-
 
     Page<RoundCriteria> findAllByRound_RoundId(Long roundId, Pageable pageable);
 }

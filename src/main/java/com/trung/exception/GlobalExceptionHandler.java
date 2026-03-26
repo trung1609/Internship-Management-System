@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleResourceForbiddenException(ResourceForbiddenException ex) {
         ApiResponse<Object> response = ApiResponse.builder()
                 .success(false)
-                .message("BAD_REQUEST")
+                .message("FORBIDDEN")
                 .data(null)
                 .error(Map.of("error", ex.getMessage()))
                 .timestamp(LocalDateTime.now())

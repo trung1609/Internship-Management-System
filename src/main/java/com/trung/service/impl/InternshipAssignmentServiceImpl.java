@@ -1,6 +1,7 @@
 package com.trung.service.impl;
 
 import com.trung.domain.entity.*;
+import com.trung.domain.enums.AssignmentStatus;
 import com.trung.domain.enums.Role;
 import com.trung.dto.request.InternshipAssignmentCreateRequest;
 import com.trung.dto.request.InternshipAssignmentUpdateRequest;
@@ -8,6 +9,7 @@ import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.InternshipAssignmentResponse;
 import com.trung.dto.response.PageResponseDTO;
+import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceForbiddenException;
 import com.trung.exception.ResourceNotFoundException;
@@ -20,7 +22,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.support.PageableUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -53,8 +54,6 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             errorList.put("studentIds", "Has duplicate student IDs in the request");
             throw new ResourceConflictException("Validation failed", errorList);
         }
-
-
 
         List<Student> studentList = iStudentRepository.findAllById(request.getStudentIds());
         if (studentList.size() != request.getStudentIds().size()) {
@@ -90,7 +89,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     }
 
     @Override
-    public PageResponseDTO<InternshipAssignmentResponse> getAllInternshipAssignment(PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
+    public PageResponseDTO<InternshipAssignmentResponse> getAllInternshipAssignment(String search, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
@@ -102,11 +101,11 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
         Page<InternshipAssignment> internshipAssignmentPage;
 
         if (user.getRole() == Role.ROLE_ADMIN) {
-            internshipAssignmentPage = internshipAssignmentRepository.findAll(pageable);
-        }else if (user.getRole() == Role.ROLE_MENTOR) {
-            internshipAssignmentPage = internshipAssignmentRepository.findStudent_StudentIdByMentor_MentorId(user.getMentor().getMentorId(), pageable);
+            internshipAssignmentPage = internshipAssignmentRepository.findAllByKeyword(search, pageable);
+        } else if (user.getRole() == Role.ROLE_MENTOR) {
+            internshipAssignmentPage = internshipAssignmentRepository.findStudent_StudentIdByMentor_MentorId(search, user.getMentor().getMentorId(), pageable);
         } else if (user.getRole() == Role.ROLE_STUDENT) {
-            internshipAssignmentPage = internshipAssignmentRepository.findByStudent_StudentId(user.getStudent().getStudentId(), pageable);
+            internshipAssignmentPage = internshipAssignmentRepository.findByStudent_StudentId(search, user.getStudent().getStudentId(), pageable);
         } else {
             throw new ResourceForbiddenException("User does not have permission to access internship assignments");
         }
@@ -115,13 +114,70 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     }
 
     @Override
-    public ApiResponse<InternshipAssignmentResponse> getInternshipAssignmentById(Long internshipAssignmentId) {
-        return null;
+    public ApiResponse<InternshipAssignmentResponse> getInternshipAssignmentById(Long internshipAssignmentId) throws ResourceNotFoundException, ResourceForbiddenException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = iUserRepository.findByUsernameAndIsDeletedFalseAndIsActiveTrue(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+
+        if (user.getRole() == Role.ROLE_ADMIN) {
+            InternshipAssignment internshipAssignment = internshipAssignmentRepository.findById(internshipAssignmentId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
+
+            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment),
+                    true,
+                    "Get internshipAssignment by id successfully",
+                    null,
+                    null);
+        } else if (user.getRole() == Role.ROLE_MENTOR) {
+            InternshipAssignment internshipAssignment = internshipAssignmentRepository.findByAssignmentIdAndMentor_MentorId(internshipAssignmentId, user.getMentor().getMentorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
+
+            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment),
+                    true,
+                    "Get internshipAssignment by id successfully",
+                    null,
+                    null);
+        } else if (user.getRole() == Role.ROLE_STUDENT) {
+            InternshipAssignment internshipAssignment = internshipAssignmentRepository.findByAssignmentIdAndStudent_StudentId(internshipAssignmentId, user.getStudent().getStudentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
+
+            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment),
+                    true,
+                    "Get internshipAssignment by id successfully",
+                    null,
+                    null);
+        } else {
+            throw new ResourceForbiddenException("User does not have permission to access internship assignment");
+        }
     }
 
     @Override
-    public ApiResponse<InternshipAssignmentResponse> updateInternshipAssignment(Long internshipAssignmentId, InternshipAssignmentUpdateRequest request) {
-        return null;
+    public ApiResponse<InternshipAssignmentResponse> updateInternshipAssignment(Long internshipAssignmentId, InternshipAssignmentUpdateRequest request) throws ResourceNotFoundException, ResourceBadRequestException {
+        Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
+        InternshipAssignment internshipAssignment = internshipAssignmentRepository.findById(internshipAssignmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
+
+        AssignmentStatus assignmentStatus = null;
+        if (request.getStatus() != null) {
+            try {
+                assignmentStatus = AssignmentStatus.valueOf(request.getStatus().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                ValidationErrorUtil.addError(errorList, "status", "Invalid status value");
+                throw new ResourceBadRequestException("Validation failed", errorList);
+            }
+        }
+
+        internshipAssignment.setStatus(assignmentStatus);
+
+        internshipAssignmentRepository.save(internshipAssignment);
+        return new ApiResponse<>(
+                InternshipAssignmentMapper.toDto(internshipAssignment),
+                true,
+                "Internship assignment updated status successfully",
+                null,
+                LocalDateTime.now());
     }
 
     @Override

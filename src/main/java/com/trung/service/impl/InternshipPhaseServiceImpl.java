@@ -60,7 +60,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
 
     @Override
     public ApiResponse<InternshipPhaseResponse> getInternshipPhaseById(Long id) throws ResourceNotFoundException {
-        InternshipPhase internshipPhase = internshipPhaseRepository.findByPhaseIdAndIsDeletedFalse(id)
+        InternshipPhase internshipPhase = internshipPhaseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Internship phase not found with id: " + id));
 
         return new ApiResponse<>(InternshipPhaseMapper.toDto(internshipPhase), true, "SUCCESS", null, LocalDateTime.now());

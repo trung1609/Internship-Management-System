@@ -45,11 +45,6 @@ public class StudentServiceImpl implements IStudentService {
         if (user.getRole() != Role.ROLE_STUDENT) {
             errorList.put("userId", "User is not a student");
         }
-
-
-        if (ValidationErrorUtil.hasErrors(errorList)) {
-            throw new InvalidDateFormatException("Validation failed");
-        }
         
         if (studentRepository.existsById(request.getUserId())) {
             errorList.put("userId", "Student with this user ID already exists");

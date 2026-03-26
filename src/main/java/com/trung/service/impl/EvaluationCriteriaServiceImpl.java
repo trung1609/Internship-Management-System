@@ -59,7 +59,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
 
     @Override
     public ApiResponse<EvaluationCriteriaResponse> getCriteriaById(Long id) throws ResourceNotFoundException {
-        EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findByCriterionIdAndIsDeletedFalse(id)
+        EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evaluation criteria not found with id: " + id));
 
         return new ApiResponse<>(
