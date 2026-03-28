@@ -4,6 +4,7 @@ import com.trung.domain.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,10 @@ import java.util.Map;
 
 
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
+
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Value("${jwt_secret}")
     private String secretKey;
@@ -45,6 +49,12 @@ public class JwtProvider {
 
     // validate token
     public boolean validateToken(String token, HttpServletRequest request){
+        // Kiểm tra token có trong blacklist không
+        if (tokenBlacklistService.isTokenBlacklisted(token)) {
+            request.setAttribute("error", "TokenBlacklisted");
+            return false;
+        }
+
         try {
             Jwts.parser()
                     .setSigningKey(key())

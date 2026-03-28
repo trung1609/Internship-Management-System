@@ -46,4 +46,15 @@ public class AuthController {
         ApiResponse<UserResponse> response = authService.getMyProfile(username);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PostMapping("/logout")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MENTOR', 'ROLE_STUDENT')")
+    public ResponseEntity<ApiResponse<String>> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        }
+        ApiResponse<String> response = authService.logout(token);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

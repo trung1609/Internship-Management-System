@@ -11,7 +11,9 @@ import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.UserMapper;
 import com.trung.repository.IUserRepository;
+import com.trung.security.jwt.JwtAuthenticationFilter;
 import com.trung.security.jwt.JwtProvider;
+import com.trung.security.jwt.TokenBlacklistService;
 import com.trung.security.principal.UserPrincipal;
 import com.trung.service.IAuthService;
 import com.trung.util.ValidationErrorUtil;
@@ -36,6 +38,7 @@ public class AuthServiceImpl implements IAuthService {
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Value("${jwt_expire}")
     private long expire;
@@ -89,11 +92,6 @@ public class AuthServiceImpl implements IAuthService {
                     .username(request.getUsername())
                     .user(UserMapper.toDto(users))
                     .build();
-
-            ResponseCookie cookie = ResponseCookie.from("accessToken", token)
-                    .httpOnly(true)
-                    .secure(true)
-                    .build();
             return new ApiResponse<>(response, true, "SUCCESS", null, LocalDateTime.now());
         }catch (AuthenticationException ex) {
             throw new InvalidCredentialsException("Invalid username or password");
@@ -105,5 +103,20 @@ public class AuthServiceImpl implements IAuthService {
         User users = userRepository.findByUsernameAndIsDeletedFalseAndIsActiveTrue(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         return new ApiResponse<>(UserMapper.toDto(users), true, "SUCCESS", null, LocalDateTime.now());
+    }
+
+    @Override
+    public ApiResponse<String> logout(String token) {
+        if (token != null && !token.isEmpty()) {
+            // Thêm token vào blacklist Redis
+            tokenBlacklistService.addToBlacklist(token);
+        }
+        return new ApiResponse<>(
+                "Logout successfully",
+                true,
+                "SUCCESS",
+                null,
+                LocalDateTime.now()
+        );
     }
 }
