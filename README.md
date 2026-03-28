@@ -113,11 +113,13 @@ Intership-Management-System/
   - Secret Key được cấu hình trong `application.properties`
   - Thời gian hết hạn: 24 giờ (86400000ms)
 
-### Token Blacklist (Redis)
-- **Redis**: Lưu trữ danh sách token bị logout (blacklist)
+### Redis
+- Lưu trữ danh sách token bị logout (blacklist)
   - Token vô hiệu hóa **ngay lập tức** sau logout
   - TTL tự động bằng thời gian còn lại của token
   - Tiết kiệm bộ nhớ và không cần quản lý thủ công
+- Lưu Refresh Token 
+    - Tự động xóa khi hết hạn hoặc logout
 
 ### Development Tools
 - **Lombok**: Giảm boilerplate code
