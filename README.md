@@ -160,7 +160,7 @@ cd Intership-Management-System
 psql -U postgres
 
 # Tạo cơ sở dữ liệu
-CREATE DATABASE intership_management_system;
+CREATE DATABASE your-postgres-database-name-here;
 
 # Thoát
 \q
@@ -203,7 +203,7 @@ gradle test
 ### Authentication
 - `POST /api/v1/auth/register` - Đăng ký tài khoản
 - `POST /api/v1/auth/login` - Đăng nhập (trả về accessToken, set refreshToken vào HttpOnly cookie)
-- `POST /api/v1/auth/logout` - Đăng xuất (blacklist cả accessToken & refreshToken, xóa cookie)
+- `POST /api/v1/auth/logout` - Đăng xuất (blacklist accessToken & xóa refreshToken, xóa cookie)
 - `POST /api/v1/auth/refresh` - Refresh access token bằng refreshToken từ cookie
 - `GET /api/v1/auth/me` - Lấy thông tin cá nhân người dùng
 
@@ -286,7 +286,7 @@ gradle test
 ```
 
 ### Token Blacklist (Redis)
-- Cả accessToken và refreshToken bị blacklist khi logout
+- AccessToken bị blacklist khi logout và refreshToken bị xóa khỏi Redis
 - TTL tự động = thời gian còn lại của token
 - Token không thể tái sử dụng ngay lập tức
 - Redis tự động cleanup khi TTL hết
