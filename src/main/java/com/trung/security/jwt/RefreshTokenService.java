@@ -38,6 +38,13 @@ public class RefreshTokenService {
         return exists != null && exists;
     }
 
+    public void deleteRefreshToken(String refreshToken) {
+        String key = REFRESH_TOKEN_PREFIX + refreshToken;
+        log.info("Deleting refresh token: {}", key);
+        redisTemplate.delete(REFRESH_TOKEN_PREFIX + refreshToken);
+        log.info("Delete result: {}", redisTemplate.hasKey(key));
+    }
+
     private long getExpireFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))

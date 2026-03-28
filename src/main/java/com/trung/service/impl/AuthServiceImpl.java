@@ -115,8 +115,10 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public ApiResponse<String> logout(String accessToken, String refreshToken) {
-        // Thêm cả hai token vào blacklist
-        tokenBlacklistService.addToBlacklist(accessToken, refreshToken);
+        // Them accessToken vao blacklist
+        tokenBlacklistService.addTokenToBlacklist(accessToken, "access");
+
+        refreshTokenService.deleteRefreshToken(refreshToken);
 
         return new ApiResponse<>(
                 "Logout successfully",
@@ -133,29 +135,16 @@ public class AuthServiceImpl implements IAuthService {
             throw new InvalidCredentialsException("Invalid refresh token or expired");
         }
 
-        if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
-            throw new InvalidCredentialsException("Refresh token has been blacklisted");
-        }
-
-//        if (oldAccessToken != null) {
-//            tokenBlacklistService.addTokenToBlacklist(oldAccessToken, "access");
-//        }
-
-        tokenBlacklistService.addTokenToBlacklist(refreshToken, "refresh");
-
         String username = jwtProvider.getUsernameFromToken(refreshToken);
         User users = userRepository.findByUsernameAndIsDeletedFalseAndIsActiveTrue(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
 
-
+        // Tao moi 1 accessToken
         String accessTokenNew = jwtProvider.generateAccessToken(users);
 
-        String refreshTokenNew = jwtProvider.generateRefreshToken(users);
-        refreshTokenService.saveRefreshToken(refreshTokenNew);
 
         RefreshTokenResponse response = RefreshTokenResponse.builder()
                 .accessToken(accessTokenNew)
-                .refreshToken(refreshTokenNew)
                 .expiresIn(new Date(new Date().getTime() + expire))
                 .build();
 

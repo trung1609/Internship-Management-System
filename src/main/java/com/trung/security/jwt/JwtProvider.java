@@ -38,6 +38,7 @@ public class JwtProvider {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", users.getRole().name());
         claims.put("email", users.getEmail());
+        claims.put("type", "access");
         return Jwts.builder()
                 .setSubject(users.getUsername())
                 .setIssuedAt(now)
@@ -54,6 +55,7 @@ public class JwtProvider {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().name());
         claims.put("email", user.getEmail());
+        claims.put("type", "refresh");
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(now)
@@ -65,12 +67,6 @@ public class JwtProvider {
 
     // validate token
     public boolean validateToken(String token, HttpServletRequest request){
-        // Kiểm tra token có trong blacklist không
-        if (tokenBlacklistService.isTokenBlacklisted(token)) {
-            request.setAttribute("error", "TokenBlacklisted");
-            return false;
-        }
-
         try {
             Jwts.parser()
                     .setSigningKey(key())
@@ -98,6 +94,18 @@ public class JwtProvider {
                     .parseClaimsJws(token)
                     .getBody()
                     .getSubject();
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public String getTypeFromToken(String token){
+        try {
+            return Jwts.parser()
+                    .setSigningKey(key())
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("type", String.class);
         }catch (Exception e){
             return null;
         }

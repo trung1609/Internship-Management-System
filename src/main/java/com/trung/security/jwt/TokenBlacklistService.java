@@ -24,33 +24,15 @@ public class TokenBlacklistService {
 
     private static final String BLACKLIST_PREFIX = "blacklist-token:";
 
-
-    public void addToBlacklist(String accessToken, String refreshToken) {
-        try {
-            // Add access token
-            if (accessToken != null && !accessToken.isBlank()) {
-                addTokenToBlacklist(accessToken, "access");
-            }
-            
-            // Add refresh token
-            if (refreshToken != null && !refreshToken.isBlank()) {
-                addTokenToBlacklist(refreshToken, "refresh");
-            }
-        } catch (Exception e) {
-            log.error("Error adding tokens to blacklist: {}", e.getMessage());
-        }
-    }
-
     public void addTokenToBlacklist(String token, String tokenType) {
         try {
             long expirationTime = getExpireFromToken(token);
-            long currentTime = System.currentTimeMillis();
-            long timeToLive = (expirationTime - currentTime) / 1000; // Convert to seconds
+            long ttl = (expirationTime - System.currentTimeMillis()) / 1000; // Convert to seconds
 
-            if (timeToLive > 0) {
+            if (ttl > 0) {
                 String blacklistKey = BLACKLIST_PREFIX + tokenType + ":" + token;
-                String ttlValue = "ttl=" + timeToLive + "|type=" + tokenType;
-                redisTemplate.opsForValue().set(blacklistKey, ttlValue, timeToLive, TimeUnit.SECONDS);
+                String ttlValue = "ttl=" + ttl + "|type=" + tokenType;
+                redisTemplate.opsForValue().set(blacklistKey, ttlValue, ttl, TimeUnit.SECONDS);
             }
         } catch (Exception e) {
             log.error("Error adding {} token to blacklist: {}", tokenType, e.getMessage());

@@ -43,7 +43,7 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                .path("/api/v1/auth/refresh")
+                .path("/api/v1/auth")
                 .maxAge((expire * 7) / 1000) // 7 ngày
                 .sameSite("Strict")
                 .build();
@@ -72,15 +72,16 @@ public class AuthController {
             accessToken = authHeader.substring(7);
         }
 
-        ApiResponse<String> response = authService.logout(accessToken, refreshToken);
-
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(true)
-                .path("/api/v1/auth/refresh")
+                .path("/api/v1/auth")
                 .maxAge(0) // Xóa cookie ngay lập tức
                 .sameSite("Strict")
                 .build();
+
+        ApiResponse<String> response = authService.logout(accessToken, refreshToken);
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(response);
@@ -89,24 +90,9 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<RefreshTokenResponse>> refreshToken(
             @CookieValue(value = "refreshToken", required = false) String refreshToken)throws InvalidCredentialsException, ResourceNotFoundException {
-//        String oldAccessToken = null;
-//        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-//            oldAccessToken = authHeader.substring(7);
-//        }
 
         ApiResponse<RefreshTokenResponse> response = authService.refreshToken(refreshToken);
 
-        String refreshTokenNew = response.getData().getRefreshToken();
-
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshTokenNew)
-                .httpOnly(true)
-                .secure(true)
-                .path("/api/v1/auth/refresh")
-                .maxAge((expire * 7) / 1000) // 7 ngày
-                .sameSite("Strict")
-                .build();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(response);
+        return ResponseEntity.ok().body(response);
     }
 }
