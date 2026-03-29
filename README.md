@@ -144,19 +144,33 @@ Intership-Management-System/
 
 ### Yêu Cầu
 - Java 17 trở lên
-- PostgreSQL 12 trở lên
+- PostgreSQL 16 trở lên (hoặc sử dụng Docker)
+- Redis 7 trở lên (hoặc sử dụng Docker)
 - Gradle 8.x (hoặc sử dụng gradlew)
+- Docker & Docker Compose (tuỳ chọn)
 
-### Bước Cài Đặt
+### Phương Án 1: Cài Đặt Với Docker Compose (Khuyến Nghị)
 
 #### 1. Clone hoặc tải mã nguồn
 ```bash
 cd Intership-Management-System
 ```
 
-#### 2. Cấu hình cơ sở dữ liệu PostgreSQL
+#### 2. Khởi động các dịch vụ với Docker Compose
 ```bash
-# Kết nối đến PostgreSQL
+# Khởi động Redis
+docker-compose up -d
+
+# Kiểm tra trạng thái
+docker-compose ps
+```
+
+Lệnh này sẽ khởi động:
+- **Redis Server** trên port 6379 (password: 123456)
+
+#### 3. Cấu hình PostgreSQL (Manual)
+```bash
+# Kết nối đến PostgreSQL (nếu đã cài sẵn)
 psql -U postgres
 
 # Tạo cơ sở dữ liệu
@@ -166,20 +180,28 @@ CREATE DATABASE your-postgres-database-name-here;
 \q
 ```
 
-#### 3. Cấu hình `application.properties`
-Chỉnh sửa file `src/main/resources/application.properties`:
+#### 4. Cấu hình `application.properties`
+File `src/main/resources/application.properties` đã được cấu hình sẵn:
 ```properties
+# Database Configuration
 spring.datasource.driver-class-name=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5432/your-postgres-database-name-here
 spring.datasource.username=postgres
 spring.datasource.password=your-postgres-password-here
+
+# Redis Configuration
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+spring.data.redis.password=123456
 
 # JWT Configuration
 jwt_secret=your-secret-key-here
 jwt_expire=your-token-expiration-time-here
 ```
 
-#### 4. Chạy dự án
+**Lưu ý**: Nếu muốn thay đổi cấu hình, chỉnh sửa các giá trị tương ứng.
+
+#### 5. Chạy dự án
 ```bash
 # Sử dụng Gradle Wrapper
 ./gradlew.bat bootRun
@@ -190,7 +212,7 @@ gradle bootRun
 
 Ứng dụng sẽ khởi động tại `http://localhost:8080`
 
-#### 5. Chạy Test
+#### 6. Chạy Test
 ```bash
 ./gradlew.bat test
 
@@ -198,14 +220,72 @@ gradle bootRun
 gradle test
 ```
 
+#### 7. Dừng các dịch vụ Docker Compose
+```bash
+# Dừng các container
+docker-compose down
+
+# Dừng và xóa volumes (xóa dữ liệu)
+docker-compose down -v
+```
+
+### Docker Compose Configuration
+
+File `docker-compose.yml` được cấu hình sẵn:
+```yaml
+services:
+  redis:
+    image: redis:7
+    container_name: redis_server
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass 123456
+    restart: always
+```
+
+**Thông tin chi tiết**:
+- **Service**: Redis 7
+- **Container Name**: redis_server
+- **Port Mapping**: 6379:6379
+- **Password**: 123456
+- **Restart Policy**: Tự động khởi động lại nếu crash
+
+### Phương Án 2: Cài Đặt Manual (Không Docker)
+
+#### 1. Cài Đặt PostgreSQL
+- Tải và cài đặt PostgreSQL từ [postgresql.org](https://www.postgresql.org/download/)
+- Tạo cơ sở dữ liệu: `intership_management_system`
+
+#### 2. Cài Đặt Redis
+- Tải Redis từ [redis.io](https://redis.io/download)
+- Chạy Redis server
+- Cấu hình password (nếu cần)
+
+#### 3. Cấu hình `application.properties`
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/your-postgres-database-name-here
+spring.datasource.username=postgres
+spring.datasource.password=your-password
+
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+spring.data.redis.password=your-redis-password
+```
+
+#### 4. Chạy dự án
+```bash
+./gradlew.bat bootRun
+```
+
 ## 📚 API Endpoints
 
 ### Authentication
-- `POST /api/v1/auth/register` - Đăng ký tài khoản
-- `POST /api/v1/auth/login` - Đăng nhập (trả về accessToken, set refreshToken vào HttpOnly cookie)
-- `POST /api/v1/auth/logout` - Đăng xuất (blacklist accessToken & xóa refreshToken, xóa cookie)
-- `POST /api/v1/auth/refresh` - Refresh access token bằng refreshToken từ cookie
-- `GET /api/v1/auth/me` - Lấy thông tin cá nhân người dùng
+- `POST /api/v1/auth/register` - Đăng ký tài khoản mới
+- `POST /api/v1/auth/login` - Đăng nhập và nhận JWT token
+- `POST /api/v1/auth/refresh` - Làm mới access token bằng refresh token
+- `POST /api/v1/auth/logout` - Đăng xuất và blacklist token
+- `GET /api/v1/auth/me` - Lấy thông tin cá nhân của người dùng đã đăng nhập
+
 
 ### User Management
 - `GET /api/users` - Lấy danh sách người dùng
