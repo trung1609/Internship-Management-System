@@ -7,9 +7,6 @@ import com.trung.dto.response.EvaluationCriteriaResponse;
 
 public class EvaluationCriteriaMapper {
     public static EvaluationCriteriaResponse toDTO(EvaluationCriteria entity) {
-        if (entity == null) {
-            return null;
-        }
         return EvaluationCriteriaResponse.builder()
                 .criterionName(entity.getCriterionName())
                 .description(entity.getDescription())
@@ -18,9 +15,6 @@ public class EvaluationCriteriaMapper {
     }
 
     public static EvaluationCriteria toEntity(EvaluationCriteriaCreateRequest dto) {
-        if (dto == null) {
-            return null;
-        }
         return EvaluationCriteria.builder()
                 .criterionName(dto.getCriterionName())
                 .description(dto.getDescription())

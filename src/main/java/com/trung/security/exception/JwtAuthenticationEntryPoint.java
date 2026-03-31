@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import tools.jackson.databind.ObjectMapper;
@@ -24,7 +25,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         String error = (String) request.getAttribute("error");
 
@@ -45,7 +46,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             case SIGNATURE -> new JwtErrorResponse("Unauthorized", "Invalid token signature");
             case UNSUPPORTED -> new JwtErrorResponse("Unauthorized", "Unsupported token type");
             case ILLEGAL -> new JwtErrorResponse("Unauthorized", "Illegal token");
-            default -> new JwtErrorResponse("Unauthorized", "Invalid token or missing token");
+            default -> new JwtErrorResponse("Unauthorized", "Uhm... Something went wrong");
         };
     }
 }

@@ -1,13 +1,10 @@
 package com.trung.dto.request;
 
-import com.fasterxml.jackson.annotation.JacksonInject;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.trung.validation.UniqueStudentCode;
-import jakarta.validation.constraints.Pattern;
+import com.trung.validation.Name;
+import com.trung.validation.PhoneNumber;
+import com.trung.validation.StudentCode;
+import jakarta.validation.constraints.Email;
 import lombok.*;
-
-import java.time.LocalDate;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -16,10 +13,16 @@ import java.util.Date;
 @Builder
 public class StudentUpdateRequest {
 
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Student code must contain only letters, numbers, and underscores")
+    @StudentCode
     private String studentCode;
+
+    @Name
     private String fullName;
+
+    @Email(message = "Email is not valid")
     private String email;
+
+    @PhoneNumber
     private String phoneNumber;
     private String major;
     private String classRoom;

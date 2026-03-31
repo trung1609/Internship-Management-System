@@ -19,6 +19,7 @@ import com.trung.repository.IUserRepository;
 import com.trung.service.IMentorService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
+import com.trung.util.ValidationErrorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -89,22 +90,18 @@ public class MentorServiceImpl implements IMentorService {
 
     @Override
     public ApiResponse<MentorResponse> createMentor(MentorCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException {
-        Map<String, String> errorList = new HashMap<>();
+        Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
 
         User user = iUserRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
 
         if (user.getRole() != Role.ROLE_MENTOR) {
             errorList.put("userId", "User with id " + request.getUserId() + " does not have the MENTOR role");
-        }
-        if (!errorList.isEmpty()) {
-            throw new ResourceBadRequestException("Invalid Data", errorList);
+            throw new ResourceBadRequestException("User role is not MENTOR", errorList);
         }
 
         if (mentorRepository.existsById(request.getUserId())) {
             errorList.put("userId", "Mentor with this user ID already exists");
-        }
-        if (!errorList.isEmpty()) {
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
@@ -124,7 +121,7 @@ public class MentorServiceImpl implements IMentorService {
 
     @Override
     public ApiResponse<MentorResponse> updateMentor(Long id, MentorUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException {
-        Map<String, String> errorList = new HashMap<>();
+        Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User currentUser = currentUserUtil.getCurrentUser();
 
         if (currentUser.getRole() == Role.ROLE_ADMIN){
@@ -133,9 +130,6 @@ public class MentorServiceImpl implements IMentorService {
 
             if (iUserRepository.existsByEmailAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(request.getEmail(), existingMentor.getUser().getUserId())) {
                 errorList.put("email", "Email already exists");
-            }
-
-            if (!errorList.isEmpty()) {
                 throw new ResourceConflictException("Validation failed", errorList);
             }
 
@@ -157,9 +151,6 @@ public class MentorServiceImpl implements IMentorService {
 
             if (iUserRepository.existsByEmailAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(request.getEmail(), existingMentor.getUser().getUserId())) {
                 errorList.put("email", "Email already exists");
-            }
-
-            if (!errorList.isEmpty()) {
                 throw new ResourceConflictException("Validation failed", errorList);
             }
 

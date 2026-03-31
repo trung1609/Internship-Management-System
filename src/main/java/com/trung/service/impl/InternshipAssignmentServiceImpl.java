@@ -14,7 +14,10 @@ import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceForbiddenException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.InternshipAssignmentMapper;
-import com.trung.repository.*;
+import com.trung.repository.IMentorRepository;
+import com.trung.repository.IStudentRepository;
+import com.trung.repository.InternshipAssignmentRepository;
+import com.trung.repository.InternshipPhaseRepository;
 import com.trung.service.InternshipAssignmentService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
@@ -23,8 +26,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -81,7 +82,8 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
         if (ValidationErrorUtil.hasErrors(errorList)) {
             throw new ResourceConflictException("Validation failed", errorList);
         }
-        return new ApiResponse<>(responseList,
+        return new ApiResponse<>(
+                responseList,
                 true,
                 "Internship assignments created successfully",
                 null,
@@ -150,14 +152,11 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         InternshipAssignment internshipAssignment = internshipAssignmentRepository.findById(internshipAssignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
-
-        if (request.getStatus() != null) {
-            try {
-                internshipAssignment.setStatus(AssignmentStatus.valueOf(request.getStatus().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                ValidationErrorUtil.addError(errorList, "status", "Invalid status value");
-                throw new ResourceBadRequestException("Validation failed", errorList);
-            }
+        try {
+            internshipAssignment.setStatus(AssignmentStatus.valueOf(request.getStatus().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            ValidationErrorUtil.addError(errorList, "status", "Invalid status value");
+            throw new ResourceBadRequestException("Validation failed", errorList);
         }
         internshipAssignmentRepository.save(internshipAssignment);
         return new ApiResponse<>(

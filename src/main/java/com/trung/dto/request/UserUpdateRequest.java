@@ -1,5 +1,9 @@
 package com.trung.dto.request;
 
+import com.trung.validation.Name;
+import com.trung.validation.PhoneNumber;
+import com.trung.validation.UniqueUsername;
+import com.trung.validation.Username;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
@@ -10,15 +14,16 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class UserUpdateRequest {
-
+    @Username
+    @UniqueUsername
     private String username;
 
-    @Pattern(regexp = "^[\\p{L}0-9]+(\\s[\\p{L}0-9]+)*$", message = "Full name must contain only letters and numbers, and cannot have leading or trailing spaces")
+    @Name
     private String fullName;
 
     @Email(message = "Email is not valid")
     private String email;
 
-    @Pattern(regexp = "^0[356789]\\d{8}$", message = "Phone number is not valid")
+    @PhoneNumber
     private String phoneNumber;
 }

@@ -1,11 +1,13 @@
 package com.trung.controller;
 
 import com.trung.dto.request.PageRequestDTO;
+import com.trung.dto.request.RoundCriteriaRequest;
 import com.trung.dto.request.RoundCriterionCreateRequest;
 import com.trung.dto.request.RoundCriterionUpdateRequest;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.RoundCriterionResponse;
+import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.service.IRoundCriteriaService;
@@ -23,9 +25,9 @@ public class RoundCriteriaController {
     private final IRoundCriteriaService roundCriteriaService;
 
     @GetMapping
-    public ResponseEntity<PageResponseDTO<RoundCriterionResponse>> getCriterionInRound(@RequestParam Long roundId,
-                                                                                       @ModelAttribute PageRequestDTO pageRequestDTO) throws ResourceNotFoundException {
-        return new ResponseEntity<>(roundCriteriaService.getAllCriteriaInRound(roundId, pageRequestDTO), HttpStatus.OK);
+    public ResponseEntity<PageResponseDTO<RoundCriterionResponse>> getCriterionInRound(@Valid @RequestBody RoundCriteriaRequest request,
+                                                                                       @ModelAttribute PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceBadRequestException {
+        return new ResponseEntity<>(roundCriteriaService.getAllCriteriaInRound(request, pageRequestDTO), HttpStatus.OK);
     }
 
     @GetMapping("/{roundCriteriaId}")

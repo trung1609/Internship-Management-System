@@ -47,10 +47,8 @@ public class UserServiceImpl implements IUserService {
                 roleEnum = Role.valueOf(role.toUpperCase());
             } catch (IllegalArgumentException e) {
                 ValidationErrorUtil.addError(errorList, "role", "Invalid role value");
+                throw new ResourceBadRequestException("BAD_REQUEST", errorList);
             }
-        }
-        if (ValidationErrorUtil.hasErrors(errorList)) {
-            throw new ResourceBadRequestException("BAD_REQUEST", errorList);
         }
 
         if (roleEnum != null) {

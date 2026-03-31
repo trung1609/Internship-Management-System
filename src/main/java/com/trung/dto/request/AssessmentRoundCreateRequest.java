@@ -1,5 +1,6 @@
 package com.trung.dto.request;
 
+import com.trung.validation.Name;
 import com.trung.validation.ValidDateRange;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +20,7 @@ import java.util.List;
 public class AssessmentRoundCreateRequest {
     private Long phaseId;
 
-    @Pattern(regexp = "^[\\p{L}0-9]+(\\s[\\p{L}0-9]+)*$", message = "Round name must contain only letters and numbers, and cannot have leading or trailing spaces.")
+    @Name(message = "Round name must contain only letters and numbers, and cannot have leading or trailing spaces")
     private String roundName;
 
     @NotBlank(message = "Start date is required.")

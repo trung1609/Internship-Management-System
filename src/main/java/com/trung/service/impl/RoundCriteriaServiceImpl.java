@@ -4,11 +4,13 @@ import com.trung.domain.entity.AssessmentRound;
 import com.trung.domain.entity.EvaluationCriteria;
 import com.trung.domain.entity.RoundCriteria;
 import com.trung.dto.request.PageRequestDTO;
+import com.trung.dto.request.RoundCriteriaRequest;
 import com.trung.dto.request.RoundCriterionCreateRequest;
 import com.trung.dto.request.RoundCriterionUpdateRequest;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.RoundCriterionResponse;
+import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.RoundCriteriaMapper;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -35,9 +38,9 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
 
 
     @Override
-    public PageResponseDTO<RoundCriterionResponse> getAllCriteriaInRound(Long roundId, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException {
+    public PageResponseDTO<RoundCriterionResponse> getAllCriteriaInRound(RoundCriteriaRequest request, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceBadRequestException {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
-        Page<RoundCriteria> roundCriteriaPage = roundCriteriaRepository.findAllByRound_RoundId(roundId, pageable);
+        Page<RoundCriteria> roundCriteriaPage = roundCriteriaRepository.findAllByRound_RoundId(request.getRoundId(), pageable);
 
         return PaginationUtil.toPageResponseDTO(roundCriteriaPage, RoundCriteriaMapper::toDto);
     }

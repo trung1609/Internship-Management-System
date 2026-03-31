@@ -1,6 +1,7 @@
 package com.trung.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.trung.validation.StudentCode;
 import com.trung.validation.UniqueStudentCode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +23,7 @@ public class StudentCreateRequest {
 
     @NotBlank(message = "Student code is required")
     @UniqueStudentCode
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Student code must contain only letters, numbers, and underscores")
+    @StudentCode
     public String studentCode;
 
     @NotBlank(message = "Major is required")

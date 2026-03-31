@@ -57,6 +57,8 @@ public class AuthServiceImpl implements IAuthService {
                 errorList.put("role", "Invalid role value");
                 throw new ResourceBadRequestException("Validation failed", errorList);
             }
+        }else {
+            users.setRole(Role.ROLE_STUDENT);
         }
 
         users.setUsername(request.getUsername());

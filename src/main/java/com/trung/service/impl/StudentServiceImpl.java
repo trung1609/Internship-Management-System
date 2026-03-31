@@ -78,9 +78,6 @@ public class StudentServiceImpl implements IStudentService {
         Page<Student> studentPage;
 
         if (currentUser.getRole() == Role.ROLE_ADMIN) {
-            if (pageRequestDTO.getSortBy() == null || pageRequestDTO.getSortBy().isEmpty()) {
-                pageRequestDTO.setSortBy("studentId");
-            }
             Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
             studentPage = studentRepository.findAll(pageable);
         } else if (currentUser.getRole() == Role.ROLE_MENTOR) {
