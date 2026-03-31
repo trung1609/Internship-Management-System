@@ -61,27 +61,23 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             throw new ResourceNotFoundException("One or more students not found with the provided IDs");
         }
 
+        for (Long studentId : request.getStudentIds()) {
+            if (internshipAssignmentRepository.existsByStudent_StudentIdAndPhase_PhaseId(studentId, request.getPhaseId())) {
+                errorList.put("studentId_" + studentId, "Student with id " + studentId + " is already assigned to this phase");
+            }
+        }
+        if (ValidationErrorUtil.hasErrors(errorList)) {
+            throw new ResourceConflictException("Validation failed", errorList);
+        }
 
         List<InternshipAssignmentResponse> responseList = new ArrayList<>();
 
-
-        for (Long studentId : request.getStudentIds()) {
-            Student student = iStudentRepository.findById(studentId).orElseThrow(
-                    () -> new ResourceNotFoundException("Student not found with id: " + studentId));
-
-            if (internshipAssignmentRepository.existsByStudent_StudentIdAndPhase_PhaseId(studentId, request.getPhaseId())) {
-                errorList.put("studentId_" + studentId, "Student with id " + studentId + " is already assigned to this phase");
-                continue;
-            }
-
+        for (Student student : studentList) {
             InternshipAssignment internshipAssignment = InternshipAssignmentMapper.toEntity(student, mentor, phase);
             internshipAssignmentRepository.save(internshipAssignment);
             responseList.add(InternshipAssignmentMapper.toDto(internshipAssignment));
         }
 
-        if (ValidationErrorUtil.hasErrors(errorList)) {
-            throw new ResourceConflictException("Validation failed", errorList);
-        }
         return new ApiResponse<>(
                 responseList,
                 true,
