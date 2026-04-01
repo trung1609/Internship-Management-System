@@ -45,7 +45,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
 
     @Override
     public PageResponseDTO<EvaluationCriteriaResponse> getAllCriteria(String search, PageRequestDTO pageRequestDTO) {
-        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "evaluationCriteria");
 
         Page<EvaluationCriteria> evaluationCriteriaPage;
 

@@ -83,7 +83,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
 
     @Override
     public PageResponseDTO<AssessmentRoundsResponse> getAllAssessmentRound(String search, Long phaseId, PageRequestDTO pageRequestDTO) {
-        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "assessmentRound");
 
         Page<AssessmentRound> assessmentRoundsPage;
 

@@ -44,17 +44,11 @@ public class MentorServiceImpl implements IMentorService {
 
         Page<Mentor> mentorPage;
         if (user.getRole() == Role.ROLE_ADMIN) {
-            if (pageRequestDTO.getSortBy() == null || pageRequestDTO.getSortBy().isEmpty()) {
-                pageRequestDTO.setSortBy("mentorId");
-            }
-            Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+            Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "mentor");
             mentorPage = mentorRepository.findAll(pageable);
             return PaginationUtil.toPageResponseDTO(mentorPage, MentorMapper::toDto);
         } else if (user.getRole() == Role.ROLE_STUDENT) {
-            if (pageRequestDTO.getSortBy() == null || pageRequestDTO.getSortBy().isEmpty()) {
-                pageRequestDTO.setSortBy("mentorId");
-            }
-            Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+            Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "mentor");
             mentorPage = mentorRepository.findAll(pageable);
             return PaginationUtil.toPageResponseDTO(mentorPage, MentorMapper::toPublicDto);
         } else {

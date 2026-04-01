@@ -90,7 +90,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     public PageResponseDTO<InternshipAssignmentResponse> getAllInternshipAssignment(String search, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
 
-        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "internshipAssignment");
 
         Page<InternshipAssignment> internshipAssignmentPage;
 

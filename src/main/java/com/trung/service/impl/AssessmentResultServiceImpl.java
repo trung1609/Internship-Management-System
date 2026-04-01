@@ -116,7 +116,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     @Override
     public PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(Long assignmentId, PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
 
-        Pageable pageable = PaginationUtil.createPageRequest(requestDTO);
+        Pageable pageable = PaginationUtil.createPageRequest(requestDTO, "assessmentResult");
         Page<AssessmentResult> assessmentResultPage;
 
         User user = currentUserUtil.getCurrentUser();

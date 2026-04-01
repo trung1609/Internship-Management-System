@@ -47,7 +47,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
 
     @Override
     public PageResponseDTO<InternshipPhaseResponse> getAllInternshipPhase(String search, PageRequestDTO pageRequestDTO) {
-        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "internshipPhase");
         Page<InternshipPhase> internshipPhasePage;
 
         if (search != null && !search.isBlank()) {

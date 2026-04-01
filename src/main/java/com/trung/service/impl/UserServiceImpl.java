@@ -38,7 +38,7 @@ public class UserServiceImpl implements IUserService {
     public PageResponseDTO<UserResponse> getAllProfile(String role, PageRequestDTO pageRequestDTO) throws ResourceBadRequestException {
 
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
-        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "user");
 
         Page<User> usersPage;
         Role roleEnum = null;

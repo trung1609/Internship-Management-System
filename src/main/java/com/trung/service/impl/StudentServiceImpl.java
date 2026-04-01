@@ -78,10 +78,10 @@ public class StudentServiceImpl implements IStudentService {
         Page<Student> studentPage;
 
         if (currentUser.getRole() == Role.ROLE_ADMIN) {
-            Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+            Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "student");
             studentPage = studentRepository.findAll(pageable);
         } else if (currentUser.getRole() == Role.ROLE_MENTOR) {
-            Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO);
+            Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "student");
             studentPage = internshipAssignmentRepository.findStudentsByMentorId(currentUser.getUserId(), pageable);
         } else {
             throw new ResourceForbiddenException("Current user does not have permission to view students");
