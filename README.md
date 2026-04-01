@@ -1,10 +1,10 @@
 # Intership Management System
 
-## 📋 Mô Tả Dự Án
+## Mô Tả Dự Án
 
 Intership Management System là một nền tảng quản lý thực tập toàn diện được xây dựng bằng Spring Boot. Hệ thống này giúp quản lý toàn bộ quy trình thực tập của sinh viên, từ giai đoạn phân công, đánh giá cho đến quản lý kết quả.
 
-## 🎯 Tính Năng Chính
+## Tính Năng Chính
 
 ### 1. **Quản Lý Người Dùng (User Management)**
    - Đăng ký tài khoản (sinh viên, cố vấn, quản trị viên)
@@ -37,7 +37,7 @@ Intership Management System là một nền tảng quản lý thực tập toàn
    - **Round Criteria**: Liên kết tiêu chí với các vòng đánh giá
    - **Assessment Result**: Lưu trữ kết quả đánh giá của sinh viên
 
-## 🏗️ Kiến Trúc Hệ Thống
+## Kiến Trúc Hệ Thống
 
 ```
 Intership-Management-System/
@@ -62,7 +62,7 @@ Intership-Management-System/
 └── gradle/                           # Gradle Wrapper
 ```
 
-## 🗄️ Cơ Sở Dữ Liệu
+## Cơ Sở Dữ Liệu
 
 ### Các Bảng Chính (Entities)
 
@@ -94,7 +94,7 @@ Intership-Management-System/
    - Liên kết Student, Mentor, RoundCriteria
    - Điểm số, nhận xét
 
-## 🛠️ Công Nghệ Sử Dụng
+## Công Nghệ Sử Dụng
 
 ### Framework & Libraries
 - **Spring Boot 4.0.4**: Framework chính
@@ -140,7 +140,7 @@ Intership-Management-System/
 - **Gradle**: Build tool
 - **Java 17**: Phiên bản Java
 
-## 🚀 Hướng Dẫn Cài Đặt
+## Hướng Dẫn Cài Đặt
 
 ### Yêu Cầu
 - Java 17 trở lên
@@ -277,7 +277,7 @@ spring.data.redis.password=your-redis-password
 ./gradlew.bat bootRun
 ```
 
-## 📚 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/v1/auth/register` - Đăng ký tài khoản mới
@@ -321,7 +321,7 @@ spring.data.redis.password=your-redis-password
 - `GET /api/internship-phases` - Danh sách giai đoạn
 - `POST /api/internship-phases` - Tạo giai đoạn mới
 
-## 🔐 Xác Thực & Phân Quyền
+## Xác Thực & Phân Quyền
 
 ### Vai Trò (Roles)
 - **ROLE_ADMIN** - Quản trị viên hệ thống
@@ -371,7 +371,7 @@ spring.data.redis.password=your-redis-password
 - Token không thể tái sử dụng ngay lập tức
 - Redis tự động cleanup khi TTL hết
 
-## 📝 Validation
+## Validation
 
 Hệ thống sử dụng Spring Validation để kiểm tra dữ liệu:
 - Kiểm tra tính duy nhất của username
@@ -379,7 +379,7 @@ Hệ thống sử dụng Spring Validation để kiểm tra dữ liệu:
 - Kiểm tra số điện thoại
 - Kiểm tra các trường bắt buộc
 
-## ⚠️ Exception Handling
+## Exception Handling
 
 Hệ thống cung cấp các exception tùy chỉnh:
 - `ResourceNotFoundException` - Tài nguyên không tìm thấy (404)
@@ -389,7 +389,7 @@ Hệ thống cung cấp các exception tùy chỉnh:
 - `InvalidCredentialsException` - Thông tin xác thực không hợp lệ
 - `InvalidDateFormatException` - Định dạng ngày không hợp lệ
 
-## 📦 Dependencies Chính
+## Dependencies Chính
 
 ```gradle
 // Spring Boot Starters
@@ -417,7 +417,7 @@ lombok
 spring-boot-devtools
 ```
 
-## 🔄 Quy Trình Thực Tập
+## Quy Trình Thực Tập
 
 1. **Đăng Ký & Đăng Nhập**: Người dùng tạo tài khoản và đăng nhập vào hệ thống
 2. **Phân Công**: Admin hoặc Mentor phân công sinh viên cho vị trí thực tập
@@ -425,13 +425,13 @@ spring-boot-devtools
 4. **Đánh Giá**: Mentor đánh giá sinh viên dựa trên các tiêu chí đã định sẵn
 5. **Kết Quả**: Lưu trữ và báo cáo kết quả đánh giá
 
-## 📊 Logging
+## Logging
 
 Cấu hình logging tại `application.properties`:
 - **Root Level**: INFO
 - **Application Level (com.trung)**: DEBUG
 
-## 🤝 Công Nghệ Phát Triển
+## Công Nghệ Phát Triển
 
 - **IDE**: JetBrains IntelliJ IDEA hoặc tương đương
 - **Version Control**: Git
