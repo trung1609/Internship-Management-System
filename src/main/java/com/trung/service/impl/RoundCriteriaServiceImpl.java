@@ -73,11 +73,8 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
-        RoundCriteria roundCriteria = RoundCriteria.builder()
-                .round(assessmentRound)
-                .criterion(evaluationCriteria)
-                .weight(request.getWeight())
-                .build();
+        RoundCriteria roundCriteria = RoundCriteriaMapper.toEntity(request, assessmentRound, evaluationCriteria);
+
         roundCriteriaRepository.save(roundCriteria);
         return new ApiResponse<>(
                 RoundCriteriaMapper.toDto(roundCriteria),

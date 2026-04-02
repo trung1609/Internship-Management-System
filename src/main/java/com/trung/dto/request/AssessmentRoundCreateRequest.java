@@ -18,8 +18,11 @@ import java.util.List;
 @Builder
 @ValidDateRange(startDateField = "startDate", endDateField = "endDate")
 public class AssessmentRoundCreateRequest {
+
+    @NotNull(message = "Phase ID is required.")
     private Long phaseId;
 
+    @NotBlank(message = "Round name is required.")
     @Name(message = "Round name must contain only letters and numbers, and cannot have leading or trailing spaces")
     private String roundName;
 

@@ -54,8 +54,6 @@ public class AssessmentRoundsMapper {
             LocalDate startDateFormat = ValidationErrorUtil.isValidDate(request.getStartDate(), dateFormat);
             if (startDateFormat.isAfter(assessmentRound.getEndDate())) {
                 errorList.put("startDate", "Start date cannot be after end date");
-            }
-            if (ValidationErrorUtil.hasErrors(errorList)) {
                 throw new ResourceBadRequestException("Validation failed", errorList);
             }
             assessmentRound.setStartDate(startDateFormat);
@@ -64,8 +62,6 @@ public class AssessmentRoundsMapper {
             LocalDate endDateFormat = ValidationErrorUtil.isValidDate(request.getEndDate(), dateFormat);
             if (endDateFormat.isBefore(assessmentRound.getStartDate())) {
                 errorList.put("endDate", "End date cannot be before start date");
-            }
-            if (ValidationErrorUtil.hasErrors(errorList)) {
                 throw new ResourceBadRequestException("Validation failed", errorList);
             }
             assessmentRound.setEndDate(endDateFormat);

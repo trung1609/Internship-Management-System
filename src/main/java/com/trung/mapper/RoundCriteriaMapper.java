@@ -1,6 +1,9 @@
 package com.trung.mapper;
 
+import com.trung.domain.entity.AssessmentRound;
+import com.trung.domain.entity.EvaluationCriteria;
 import com.trung.domain.entity.RoundCriteria;
+import com.trung.dto.request.RoundCriterionCreateRequest;
 import com.trung.dto.request.RoundCriterionUpdateRequest;
 import com.trung.dto.response.RoundCriterionResponse;
 
@@ -11,6 +14,14 @@ public class RoundCriteriaMapper {
                 .weight(rc.getWeight())
                 .maxScore(rc.getCriterion().getMaxScore())
                 .roundName(rc.getRound().getRoundName())
+                .build();
+    }
+
+    public static RoundCriteria toEntity(RoundCriterionCreateRequest request, AssessmentRound assessmentRound, EvaluationCriteria evaluationCriteria) {
+        return RoundCriteria.builder()
+                .round(assessmentRound)
+                .criterion(evaluationCriteria)
+                .weight(request.getWeight())
                 .build();
     }
 

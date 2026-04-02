@@ -74,9 +74,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
 
         if (internshipPhaseRepository.existsByPhaseNameIgnoreCaseAndIsDeletedFalseAndPhaseIdNot(request.getPhaseName(), id)) {
             ValidationErrorUtil.addError(errors, "phaseName", "Internship phase name already exists");
-        }
-        if (ValidationErrorUtil.hasErrors(errors)) {
-            throw new ResourceConflictException("Validation failed", errors);
+            throw new ResourceConflictException("CONFLICT", errors);
         }
 
         InternshipPhaseMapper.updateFromDto(existingPhase, request);

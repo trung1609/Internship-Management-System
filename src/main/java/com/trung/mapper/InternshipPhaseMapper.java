@@ -43,8 +43,6 @@ public class InternshipPhaseMapper {
             LocalDate startDate = ValidationErrorUtil.isValidDate(request.getStartDate(), dateFormat);
             if (startDate.isAfter(internshipPhase.getEndDate())) {
                 errorList.put("startDate", "Start date cannot be after end date");
-            }
-             if (ValidationErrorUtil.hasErrors(errorList)) {
                 throw new ResourceBadRequestException("Validation failed", errorList);
             }
             internshipPhase.setStartDate(startDate);
@@ -53,8 +51,6 @@ public class InternshipPhaseMapper {
             LocalDate endDate = ValidationErrorUtil.isValidDate(request.getEndDate(), dateFormat);
             if (endDate.isBefore(internshipPhase.getStartDate())) {
                 errorList.put("endDate", "End date cannot be before start date");
-            }
-            if (ValidationErrorUtil.hasErrors(errorList)) {
                 throw new ResourceBadRequestException("Validation failed", errorList);
             }
             internshipPhase.setEndDate(endDate);
