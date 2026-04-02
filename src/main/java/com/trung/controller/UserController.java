@@ -56,7 +56,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<ApiResponse<String>> deleteProfile(@PathVariable Long userId) throws ResourceConflictException, ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException {
+    public ResponseEntity<ApiResponse<String>> deleteProfile(@PathVariable Long userId) throws ResourceConflictException, ResourceNotFoundException {
         return new ResponseEntity<>(userService.deleteProfile(userId), HttpStatus.OK);
     }
 }

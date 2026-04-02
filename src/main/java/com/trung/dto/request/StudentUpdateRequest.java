@@ -4,6 +4,7 @@ import com.trung.validation.Name;
 import com.trung.validation.PhoneNumber;
 import com.trung.validation.StudentCode;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 @Getter
@@ -24,8 +25,15 @@ public class StudentUpdateRequest {
 
     @PhoneNumber
     private String phoneNumber;
-    private String major;
+
+
+    @Name(message = "Major must contain only letters and numbers separated by single spaces")
+    public String major;
+
+    @Name(message = "Class room must contain only letters and numbers separated by single spaces")
     private String classRoom;
+
+    @Name(message = "Address must contain only letters and numbers separated by single spaces")
     private String address;
 
     private String dateOfBirth;

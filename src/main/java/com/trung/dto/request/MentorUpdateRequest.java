@@ -13,9 +13,11 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class MentorUpdateRequest {
+
+    @Pattern(regexp = "^[\\p{L}]+( [\\p{L}]+)*$", message = "Department must contain only letters separated by single spaces")
     private String department;
 
-    @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Academic rank must contain only letters and spaces")
+    @Pattern(regexp = "^[\\p{L}]+( [\\p{L}]+)*$", message = "Academic rank must contain only letters separated by single spaces")
     private String academicRank;
 
     @Name

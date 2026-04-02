@@ -25,7 +25,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -71,14 +70,12 @@ public class UserServiceImpl implements IUserService {
     public ApiResponse<UserResponse> createProfile(UserCreateRequest userCreateRequest) throws ResourceBadRequestException {
         Role roleEnum = null;
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
-        
-        if (userCreateRequest.getRole() != null && !userCreateRequest.getRole().isBlank()) {
-            try {
-                roleEnum = Role.valueOf(userCreateRequest.getRole().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                ValidationErrorUtil.addError(errorList, "role", "Invalid role value");
-                throw new ResourceBadRequestException("BAD_REQUEST", errorList);
-            }
+
+        try {
+            roleEnum = Role.valueOf(userCreateRequest.getRole().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            ValidationErrorUtil.addError(errorList, "role", "Invalid role value");
+            throw new ResourceBadRequestException("BAD_REQUEST", errorList);
         }
 
         User users = new User();
@@ -88,10 +85,7 @@ public class UserServiceImpl implements IUserService {
         users.setFullName(userCreateRequest.getFullName());
         users.setEmail(userCreateRequest.getEmail());
         users.setPhoneNumber(userCreateRequest.getPhoneNumber());
-
-        if (roleEnum != null) {
-            users.setRole(roleEnum);
-        }
+        users.setRole(roleEnum);
 
         userRepository.save(users);
 
@@ -119,7 +113,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public ApiResponse<UserResponse> updateStatus(Long id) throws ResourceConflictException, ResourceNotFoundException {
+    public ApiResponse<UserResponse> updateStatus(Long id) throws ResourceNotFoundException {
         User users = userRepository.findByUserIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -129,7 +123,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public ApiResponse<UserResponse> updateRole(Long id, UpdateRoleRequest request) throws ResourceConflictException, ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException {
+    public ApiResponse<UserResponse> updateRole(Long id, UpdateRoleRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User users = userRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -137,20 +131,18 @@ public class UserServiceImpl implements IUserService {
         if (users.getRole() == Role.ROLE_ADMIN) {
             throw new ResourceForbiddenException("Cannot change role of an admin user");
         }
-        if (request.getRole() != null && !request.getRole().isBlank()) {
-            try {
-                users.setRole(Role.valueOf(request.getRole().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                errorList.put("role", "Invalid role value");
-                throw new ResourceBadRequestException("BAD_REQUEST", errorList);
-            }
+        try {
+            users.setRole(Role.valueOf(request.getRole().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            errorList.put("role", "Invalid role value");
+            throw new ResourceBadRequestException("BAD_REQUEST", errorList);
         }
         userRepository.save(users);
         return new ApiResponse<>(UserMapper.toDto(users), true, "SUCCESS", null, LocalDateTime.now());
     }
 
     @Override
-    public ApiResponse<String> deleteProfile(Long id) throws ResourceConflictException, ResourceNotFoundException {
+    public ApiResponse<String> deleteProfile(Long id) throws ResourceNotFoundException {
         User users = userRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 

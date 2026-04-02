@@ -83,15 +83,14 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
-    public ApiResponse<MentorResponse> createMentor(MentorCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException {
+    public ApiResponse<MentorResponse> createMentor(MentorCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
 
         User user = iUserRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
 
         if (user.getRole() != Role.ROLE_MENTOR) {
-            errorList.put("userId", "User with id " + request.getUserId() + " does not have the MENTOR role");
-            throw new ResourceBadRequestException("User role is not MENTOR", errorList);
+            throw new ResourceForbiddenException("User with id: " + request.getUserId() + " does not have the MENTOR role");
         }
 
         if (mentorRepository.existsById(request.getUserId())) {
@@ -99,11 +98,9 @@ public class MentorServiceImpl implements IMentorService {
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
-        Mentor mentor = Mentor.builder()
-                .user(user)
-                .academicRank(request.getAcademicRank())
-                .department(request.getDepartment())
-                .build();
+        Mentor mentor = MentorMapper.toEntity(request);
+        mentor.setUser(user);
+
         mentor = mentorRepository.save(mentor);
         return new ApiResponse<>(
                 MentorMapper.toDto(mentor),

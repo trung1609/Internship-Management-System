@@ -39,21 +39,18 @@ public class StudentServiceImpl implements IStudentService {
     private final CurrentUserUtil currentUserUtil;
 
     @Override
-    public ApiResponse<StudentResponse> createStudent(StudentCreateRequest request) throws ResourceNotFoundException, ResourceBadRequestException, InvalidDateFormatException {
+    public ApiResponse<StudentResponse> createStudent(StudentCreateRequest request) throws ResourceNotFoundException, ResourceBadRequestException, InvalidDateFormatException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User user = iUserRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
 
         if (user.getRole() != Role.ROLE_STUDENT) {
-            errorList.put("userId", "User is not a student");
+            throw new ResourceForbiddenException("User with id: " + request.getUserId() + " does not have STUDENT role");
         }
         
         if (studentRepository.existsById(request.getUserId())) {
             errorList.put("userId", "Student with this user ID already exists");
-        }
-        
-        if (ValidationErrorUtil.hasErrors(errorList)) {
-            throw new ResourceBadRequestException("Validation failed", errorList);
+            throw new ResourceConflictException("Validation failed", errorList);
         }
 
         Student student = new Student();

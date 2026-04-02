@@ -31,8 +31,6 @@ public class StudentMapper {
         LocalDate dob = ValidationErrorUtil.isValidDate(student.getDateOfBirth(), dateFormat);
         if (dob.isAfter(LocalDate.now())) {
             errorList.put("dateOfBirth", "Date of birth cannot be in the future");
-        }
-        if (ValidationErrorUtil.hasErrors(errorList)) {
             throw new ResourceBadRequestException("Validation failed", errorList);
         }
         entity.setStudentCode(student.getStudentCode());
@@ -62,8 +60,6 @@ public class StudentMapper {
             LocalDate dob = ValidationErrorUtil.isValidDate(request.getDateOfBirth(), dateFormat);
             if (dob.isAfter(LocalDate.now())) {
                 errorList.put("dateOfBirth", "Date of birth cannot be in the future");
-            }
-            if (ValidationErrorUtil.hasErrors(errorList)) {
                 throw new ResourceBadRequestException("Validation failed", errorList);
             }
             student.setDateOfBirth(dob);

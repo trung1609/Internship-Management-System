@@ -1,6 +1,7 @@
 package com.trung.mapper;
 
 import com.trung.domain.entity.Mentor;
+import com.trung.dto.request.MentorCreateRequest;
 import com.trung.dto.request.MentorUpdateRequest;
 import com.trung.dto.response.MentorPublicResponse;
 import com.trung.dto.response.MentorResponse;
@@ -21,6 +22,13 @@ public class MentorMapper {
                 .department(mentor.getDepartment())
                 .academicRank(mentor.getAcademicRank())
                 .fullName(mentor.getUser().getFullName())
+                .build();
+    }
+
+    public static Mentor toEntity(MentorCreateRequest request){
+        return Mentor.builder()
+                .department(request.getDepartment())
+                .academicRank(request.getAcademicRank())
                 .build();
     }
 

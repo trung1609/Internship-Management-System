@@ -9,6 +9,9 @@ public class StudentCodeValidator implements ConstraintValidator<StudentCode, St
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null || value.isBlank()) {
+            return true;
+        }
         return value.matches(STUDENT_CODE_PATTERN);
     }
 }

@@ -15,7 +15,6 @@ import lombok.*;
 @Builder
 public class UserUpdateRequest {
     @Username
-    @UniqueUsername
     private String username;
 
     @Name

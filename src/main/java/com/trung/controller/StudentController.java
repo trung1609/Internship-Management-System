@@ -23,7 +23,7 @@ public class StudentController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<StudentResponse>> createStudent(@Valid @RequestBody StudentCreateRequest request) throws ResourceConflictException, ResourceNotFoundException, ResourceBadRequestException, InvalidDateFormatException {
+    public ResponseEntity<ApiResponse<StudentResponse>> createStudent(@Valid @RequestBody StudentCreateRequest request) throws ResourceConflictException, ResourceNotFoundException, ResourceBadRequestException, InvalidDateFormatException, ResourceForbiddenException {
         return new ResponseEntity<>(studentService.createStudent(request), org.springframework.http.HttpStatus.CREATED);
     }
 
