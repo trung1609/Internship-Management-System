@@ -119,7 +119,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
                     true,
                     "Get internshipAssignment by id successfully",
                     null,
-                    null);
+                    LocalDateTime.now());
         } else if (user.getRole() == Role.ROLE_MENTOR) {
             InternshipAssignment internshipAssignment = internshipAssignmentRepository.findByAssignmentIdAndMentor_MentorId(internshipAssignmentId, user.getMentor().getMentorId())
                     .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
@@ -128,7 +128,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
                     true,
                     "Get internshipAssignment by id successfully",
                     null,
-                    null);
+                    LocalDateTime.now());
         } else if (user.getRole() == Role.ROLE_STUDENT) {
             InternshipAssignment internshipAssignment = internshipAssignmentRepository.findByAssignmentIdAndStudent_StudentId(internshipAssignmentId, user.getStudent().getStudentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
@@ -137,7 +137,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
                     true,
                     "Get internshipAssignment by id successfully",
                     null,
-                    null);
+                    LocalDateTime.now());
         } else {
             throw new ResourceForbiddenException("User does not have permission to access internship assignment");
         }

@@ -1,6 +1,7 @@
 package com.trung.repository;
 
 import com.trung.domain.entity.AssessmentRound;
+import com.trung.domain.entity.EvaluationCriteria;
 import com.trung.domain.entity.RoundCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,4 +28,10 @@ public interface IRoundCriteriaRepository extends JpaRepository<RoundCriteria, L
 
 
     Page<RoundCriteria> findAllByRound_RoundId(Long roundId, Pageable pageable);
+
+
+    @Query("select rc.criterion from RoundCriteria rc where " +
+            "rc.criterion.criterionId = :criterionId and " +
+            "rc.round.roundId = :roundId and rc.isDeleted = false")
+    Optional<EvaluationCriteria> findByCriterionId(@Param("criterionId") Long criterionId, @Param("roundId") Long roundId);
 }

@@ -37,6 +37,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     private final IAssessmentRoundsRepository iAssessmentRoundsRepository;
     private final IEvaluationCriteriaRepository iEvaluationCriteriaRepository;
     private final CurrentUserUtil currentUserUtil;
+    private final IRoundCriteriaRepository iRoundCriteriaRepository;
 
     @Override
     @Transactional
@@ -51,37 +52,32 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
 
         User user = currentUserUtil.getCurrentUser();
 
-        if (!internshipAssignmentRepository.existsByMentor_MentorIdAndAssignmentId(user.getMentor().getMentorId(), assignment.getAssignmentId())){
+        if (!internshipAssignmentRepository.existsByMentor_MentorIdAndAssignmentId(user.getMentor().getMentorId(), assignment.getAssignmentId())) {
             errorList.put("assignmentId", "Mentor does not have permission to evaluate this assignment");
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
-//        log.info("Assignment {} has phaseId {}", assignment.getAssignmentId(), assignment.getPhase().getPhaseId());
-//        log.info("Round {} has phaseId {}", round.getRoundId(), round.getPhase().getPhaseId());
-
-        if(!assignment.getPhase().getPhaseId().equals(round.getPhase().getPhaseId())){
+        if (!assignment.getPhase().getPhaseId().equals(round.getPhase().getPhaseId())) {
             errorList.put("roundId", "Round does not belong to the assignment's phase");
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
-
-
         Set<Long> uniqueCriteriaIds = new HashSet<>();
         List<AssessmentResult> assessmentResultList = new ArrayList<>();
 
-        for (CriterionScoreRequest req : request.getResults()){
-            EvaluationCriteria criteria = iEvaluationCriteriaRepository.findByCriterionIdAndIsDeletedFalse(req.getCriterionId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Evaluation criterion not found with id: " + req.getCriterionId()));
+        for (CriterionScoreRequest req : request.getResults()) {
+            EvaluationCriteria criteria = iRoundCriteriaRepository.findByCriterionId(req.getCriterionId(), round.getRoundId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Evaluation criteria not found with id: " + req.getCriterionId()));
 
-            if (!uniqueCriteriaIds.add(req.getCriterionId())){
+            if (!uniqueCriteriaIds.add(req.getCriterionId())) {
                 errorList.put("criterionIds", "Has duplicate criterion IDs in the request");
             }
 
-            if (assessmentResultRepository.existsByAssignmentAndRoundAndCriterion(assignment, round, criteria)){
-                errorList.put("criterionIds", "Assessment result already exists for criterion id: " + req.getCriterionId());
+            if (assessmentResultRepository.existsByAssignmentAndRoundAndCriterion(assignment, round, criteria)) {
+                errorList.put("criterionIds", "This criteria has id " + req.getCriterionId() + " already been evaluated for this assignment");
             }
 
-            if (ValidationErrorUtil.hasErrors(errorList)){
+            if (ValidationErrorUtil.hasErrors(errorList)) {
                 throw new ResourceConflictException("Validation failed", errorList);
             }
 
@@ -121,32 +117,32 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
 
         User user = currentUserUtil.getCurrentUser();
 
-        if (user.getRole() == Role.ROLE_ADMIN){
-            if (assignmentId != null){
+        if (user.getRole() == Role.ROLE_ADMIN) {
+            if (assignmentId != null) {
                 assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentId(assignmentId, pageable);
-            }else {
+            } else {
                 assessmentResultPage = assessmentResultRepository.findAll(pageable);
             }
         } else if (user.getRole() == Role.ROLE_MENTOR) {
-            if (assignmentId != null){
-                if (!internshipAssignmentRepository.existsByMentor_MentorIdAndAssignmentId(user.getMentor().getMentorId(), assignmentId)){
+            if (assignmentId != null) {
+                if (!internshipAssignmentRepository.existsByMentor_MentorIdAndAssignmentId(user.getMentor().getMentorId(), assignmentId)) {
                     throw new ResourceForbiddenException("Mentor does not have permission to view assessment results for this assignment");
                 }
                 assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentIdAndEvaluationId_UserId(assignmentId, user.getUserId(), pageable);
-            }else {
-                assessmentResultPage = assessmentResultRepository.findAllByEvaluationId_UserId(user.getUserId(), pageable);
+            } else {
+                assessmentResultPage = assessmentResultRepository.findAllByEvaluationId_UserId(user.getMentor().getMentorId(), pageable);
             }
 
         } else if (user.getRole() == Role.ROLE_STUDENT) {
-            if (assignmentId != null){
-                if (!internshipAssignmentRepository.existsByStudent_StudentIdAndAssignmentId(user.getStudent().getStudentId(), assignmentId)){
+            if (assignmentId != null) {
+                if (!internshipAssignmentRepository.existsByStudent_StudentIdAndAssignmentId(user.getStudent().getStudentId(), assignmentId)) {
                     throw new ResourceForbiddenException("Student does not have permission to view assessment results for this assignment");
                 }
                 assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentId(assignmentId, pageable);
-            }else {
-                assessmentResultPage = assessmentResultRepository.findAllByAssignment_Student_StudentId(user.getUserId(), pageable);
+            } else {
+                assessmentResultPage = assessmentResultRepository.findAllByAssignment_Student_StudentId(user.getStudent().getStudentId(), pageable);
             }
-        }else {
+        } else {
             throw new ResourceForbiddenException("User does not have permission to view assessment results");
         }
 
@@ -160,7 +156,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
 
         User user = currentUserUtil.getCurrentUser();
 
-        if (!assessmentResultRepository.existsByResultIdAndEvaluationId_UserId(id,user.getUserId())){
+        if (!assessmentResultRepository.existsByResultIdAndEvaluationId_UserId(id, user.getMentor().getMentorId())) {
             throw new ResourceForbiddenException("You do not have permission to update this assessment result");
         }
 
