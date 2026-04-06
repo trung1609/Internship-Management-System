@@ -18,12 +18,12 @@ import com.trung.service.IAssessmentResultService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
 import com.trung.util.ValidationErrorUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,7 +40,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     private final IRoundCriteriaRepository iRoundCriteriaRepository;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<List<AssessmentResultResponse>> createAssessmentResult(AssessmentResultCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         InternshipAssignment assignment = internshipAssignmentRepository.findById(request.getAssignmentId())
@@ -54,12 +54,10 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
 
         if (!internshipAssignmentRepository.existsByMentor_MentorIdAndAssignmentId(user.getMentor().getMentorId(), assignment.getAssignmentId())) {
             errorList.put("assignmentId", "Mentor does not have permission to evaluate this assignment");
-            throw new ResourceConflictException("Validation failed", errorList);
         }
 
         if (!assignment.getPhase().getPhaseId().equals(round.getPhase().getPhaseId())) {
             errorList.put("roundId", "Round does not belong to the assignment's phase");
-            throw new ResourceConflictException("Validation failed", errorList);
         }
 
         Set<Long> uniqueCriteriaIds = new HashSet<>();
@@ -77,10 +75,6 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                 errorList.put("criterionIds", "This criteria has id " + req.getCriterionId() + " already been evaluated for this assignment");
             }
 
-            if (ValidationErrorUtil.hasErrors(errorList)) {
-                throw new ResourceConflictException("Validation failed", errorList);
-            }
-
             AssessmentResult assessmentResult = AssessmentResult.builder()
                     .assignment(assignment)
                     .round(round)
@@ -92,6 +86,10 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                     .build();
 
             assessmentResultList.add(assessmentResult);
+        }
+
+        if (ValidationErrorUtil.hasErrors(errorList)) {
+            throw new ResourceConflictException("Validation failed", errorList);
         }
 
         assessmentResultRepository.saveAll(assessmentResultList);
