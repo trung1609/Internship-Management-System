@@ -28,23 +28,33 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/api/v1/auth/**"
+    };
 
+    private static final String[] ADMIN_ENDPOINTS = {
+            "/api/v1/users/**"
+    };
+
+    private static final String[] COMMON_ENDPOINTS = {
+            "/api/v1/students/**",
+            "/api/v1/mentors/**",
+            "/api/v1/internship-phases/**",
+            "/api/v1/evaluation-criterias/**",
+            "/api/v1/assessment-rounds/**",
+            "/api/v1/round-criterias/**",
+            "/api/v1/internship-assignments/**",
+            "/api/v1/assessment-results/**"
+    };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/users/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/v1/students/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
-                        .requestMatchers("/api/v1/mentors/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
-                        .requestMatchers("/api/v1/internship-phases/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
-                        .requestMatchers("/api/v1/evaluation-criterias/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
-                        .requestMatchers("/api/v1/assessment-rounds/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
-                        .requestMatchers("/api/v1/round-criterias/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
-                        .requestMatchers("/api/v1/internship-assignments/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
-                        .requestMatchers("/api/v1/assessment-results/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(ADMIN_ENDPOINTS).hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(COMMON_ENDPOINTS).hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
