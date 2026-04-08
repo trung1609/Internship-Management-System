@@ -1,6 +1,7 @@
 package com.trung.security.jwt;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -20,6 +22,10 @@ public class RefreshTokenService {
 
     @Value("${jwt_secret}")
     private String secretKey;
+
+    private Key key(){
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));// chuyen doi chuoi thanh key
+    }
 
     public void saveRefreshToken(String refreshToken) {
         long ttl = getExpireFromToken(refreshToken);
@@ -39,15 +45,12 @@ public class RefreshTokenService {
     }
 
     public void deleteRefreshToken(String refreshToken) {
-        String key = REFRESH_TOKEN_PREFIX + refreshToken;
-        log.info("Deleting refresh token: {}", key);
         redisTemplate.delete(REFRESH_TOKEN_PREFIX + refreshToken);
-        log.info("Delete result: {}", redisTemplate.hasKey(key));
     }
 
     private long getExpireFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
+                .setSigningKey(key())
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration()

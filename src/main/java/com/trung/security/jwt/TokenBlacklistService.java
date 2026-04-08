@@ -27,7 +27,7 @@ public class TokenBlacklistService {
     public void addTokenToBlacklist(String token, String tokenType) {
         try {
             long expirationTime = getExpireFromToken(token);
-            long ttl = (expirationTime - System.currentTimeMillis()) / 1000; // Convert to seconds
+            long ttl = (expirationTime - System.currentTimeMillis()) / 1000; // Chuyen sang giay
 
             if (ttl > 0) {
                 String blacklistKey = BLACKLIST_PREFIX + tokenType + ":" + token;
