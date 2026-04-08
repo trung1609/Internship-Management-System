@@ -22,11 +22,11 @@ import com.trung.service.InternshipAssignmentService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
 import com.trung.util.ValidationErrorUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -41,7 +41,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     private final CurrentUserUtil currentUserUtil;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<List<InternshipAssignmentResponse>> createInternshipAssignment(InternshipAssignmentCreateRequest request) throws ResourceNotFoundException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         InternshipPhase phase = internshipPhaseRepository.findByPhaseIdAndIsDeletedFalse(request.getPhaseId())
@@ -70,13 +70,14 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
-        List<InternshipAssignmentResponse> responseList = new ArrayList<>();
+        List<InternshipAssignment> internshipAssignmentList = studentList.stream()
+                .map(student -> InternshipAssignmentMapper.toEntity(student, mentor, phase))
+                .toList();
+        internshipAssignmentRepository.saveAll(internshipAssignmentList);
 
-        for (Student student : studentList) {
-            InternshipAssignment internshipAssignment = InternshipAssignmentMapper.toEntity(student, mentor, phase);
-            internshipAssignmentRepository.save(internshipAssignment);
-            responseList.add(InternshipAssignmentMapper.toDto(internshipAssignment));
-        }
+        List<InternshipAssignmentResponse> responseList = internshipAssignmentList.stream()
+                .map(InternshipAssignmentMapper::toDto)
+                .toList();
 
         return new ApiResponse<>(
                 responseList,
