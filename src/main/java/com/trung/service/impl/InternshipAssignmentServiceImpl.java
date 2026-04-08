@@ -47,7 +47,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
         InternshipPhase phase = internshipPhaseRepository.findByPhaseIdAndIsDeletedFalse(request.getPhaseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Internship phase not found with id: " + request.getPhaseId()));
 
-        Mentor mentor = iMentorRepository.findById(request.getMentorId())
+        Mentor mentor = iMentorRepository.findByMentorId(request.getMentorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor not found with id: " + request.getMentorId()));
 
         Set<Long> uniqueStudentIds = new HashSet<>(request.getStudentIds());
@@ -56,7 +56,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
-        List<Student> studentList = iStudentRepository.findAllById(request.getStudentIds());
+        List<Student> studentList = iStudentRepository.findAllByStudentId(request.getStudentIds());
         if (studentList.size() != request.getStudentIds().size()) {
             throw new ResourceNotFoundException("One or more students not found with the provided IDs");
         }

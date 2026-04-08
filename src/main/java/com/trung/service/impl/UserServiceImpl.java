@@ -71,7 +71,7 @@ public class UserServiceImpl implements IUserService {
         Role roleEnum = null;
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
 
-        if (userRepository.existsByUsername(userCreateRequest.getUsername())) {
+        if (userRepository.existsByUsernameAndIsDeletedFalseAndIsActiveTrue(userCreateRequest.getUsername())) {
             ValidationErrorUtil.addError(errorList, "username", "Username already exists");
         }
 
@@ -109,7 +109,7 @@ public class UserServiceImpl implements IUserService {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User existingUser = userRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        if (userRepository.existsByUsernameAndUserIdNot(userUpdateRequest.getUsername(), id)) {
+        if (userRepository.existsByUsernameAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(userUpdateRequest.getUsername(), id)) {
             errorList.put("username", "Username already exists");
         }
 

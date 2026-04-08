@@ -47,7 +47,7 @@ public class AuthServiceImpl implements IAuthService {
     public ApiResponse<RegisterResponse> register(FormRegisterRequest request) throws ResourceBadRequestException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
 
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsernameAndIsDeletedFalseAndIsActiveTrue(request.getUsername())) {
             errorList.put("username", "Username already exists");
         }
 

@@ -76,7 +76,7 @@ public class StudentServiceImpl implements IStudentService {
 
         if (currentUser.getRole() == Role.ROLE_ADMIN) {
             Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "student");
-            studentPage = studentRepository.findAll(pageable);
+            studentPage = studentRepository.findAllStudents(pageable);
         } else if (currentUser.getRole() == Role.ROLE_MENTOR) {
             Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "student");
             studentPage = internshipAssignmentRepository.findStudentsByMentorId(currentUser.getUserId(), pageable);
@@ -91,11 +91,11 @@ public class StudentServiceImpl implements IStudentService {
         User user = currentUserUtil.getCurrentUser();
 
         if (user.getRole() == Role.ROLE_ADMIN || user.getRole() == Role.ROLE_MENTOR) {
-            Student student = studentRepository.findById(id)
+            Student student = studentRepository.findByStudentId(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
             return new ApiResponse<>(StudentMapper.toDto(student), true, "Student found", null, LocalDateTime.now());
         }else if (user.getRole() == Role.ROLE_STUDENT) {
-            Student student = studentRepository.findById(id)
+            Student student = studentRepository.findByStudentId(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
             if (!student.getUser().getUserId().equals(user.getUserId())) {
                 throw new ResourceForbiddenException("You cannot view other student's information");
@@ -112,7 +112,7 @@ public class StudentServiceImpl implements IStudentService {
         User currentUser = currentUserUtil.getCurrentUser();
 
         if (currentUser.getRole() == Role.ROLE_ADMIN){
-            Student existingStudent = studentRepository.findById(id)
+            Student existingStudent = studentRepository.findByStudentId(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
             if (iUserRepository.existsByEmailAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(request.getEmail(), existingStudent.getUser().getUserId())) {
                 ValidationErrorUtil.addError(errorList, "email", "Email already exists");

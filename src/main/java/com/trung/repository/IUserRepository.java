@@ -2,6 +2,7 @@ package com.trung.repository;
 
 import com.trung.entity.User;
 import com.trung.util.enums.Role;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,12 +15,7 @@ import java.util.Optional;
 public interface IUserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsernameAndIsDeletedFalseAndIsActiveTrue(String username);
 
-    @Query("select case when count(u) > 0 then true else false end " +
-            "from User u " +
-            "where lower(u.username) = lower(:username) " +
-            "and u.isDeleted = false " +
-            "and u.isActive = true")
-    boolean existsByUsername(String username);
+    boolean existsByUsernameAndIsDeletedFalseAndIsActiveTrue(String username);
 
     boolean existsByEmailAndIsDeletedFalseAndIsActiveTrue(String email);
 
@@ -31,13 +27,7 @@ public interface IUserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByRoleAndIsDeletedFalseAndIsActiveTrue(Role role, Pageable pageable);
 
-    @Query("select case when count(u) > 0 then true else false end " +
-            "from User u " +
-            "where lower( replace(u.username, ' ', '')) = lower( replace(:username, ' ', '')) " +
-            "and u.isDeleted = false " +
-            "and u.isActive = true "
-            + "and u.userId <> :id")
-    boolean existsByUsernameAndUserIdNot(String username, Long id);
+    boolean existsByUsernameAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(String username, Long id);
 
     boolean existsByEmailAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(String email, Long id);
 
