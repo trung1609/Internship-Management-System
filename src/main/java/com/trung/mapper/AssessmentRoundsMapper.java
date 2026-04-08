@@ -25,6 +25,7 @@ public class AssessmentRoundsMapper {
                 .roundCriteria(assessmentRounds.getRoundCriteriaList().stream()
                         .map(RoundCriteriaMapper::toDto)
                         .toList())
+                .isDeleted(assessmentRounds.isDeleted())
                 .build();
     }
 

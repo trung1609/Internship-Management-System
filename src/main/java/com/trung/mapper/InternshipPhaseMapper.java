@@ -16,6 +16,7 @@ public class InternshipPhaseMapper {
                 .startDate(internshipPhase.getStartDate())
                 .endDate(internshipPhase.getEndDate())
                 .description(internshipPhase.getDescription())
+                .isDeleted(internshipPhase.isDeleted())
                 .build();
     }
 

@@ -14,4 +14,5 @@ public class RoundCriterionResponse {
     private String criterionName;
     private BigDecimal weight;
     private BigDecimal maxScore;
+    private boolean isDeleted;
 }

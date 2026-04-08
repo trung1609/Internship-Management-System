@@ -53,7 +53,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
         User user = currentUserUtil.getCurrentUser();
 
         if (!internshipAssignmentRepository.existsByMentor_MentorIdAndAssignmentId(user.getMentor().getMentorId(), assignment.getAssignmentId())) {
-            errorList.put("assignmentId", "Mentor does not have permission to evaluate this assignment");
+            throw new ResourceForbiddenException("You do not have permission to create assessment results for this assignment");
         }
 
         if (!assignment.getPhase().getPhaseId().equals(round.getPhase().getPhaseId())) {
@@ -61,21 +61,28 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
         }
 
         Set<Long> uniqueCriteriaIds = new HashSet<>();
-        List<AssessmentResult> assessmentResultList = new ArrayList<>();
 
-        for (CriterionScoreRequest req : request.getResults()) {
-            EvaluationCriteria criteria = iRoundCriteriaRepository.findByCriterionId(req.getCriterionId(), round.getRoundId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Evaluation criteria not found with id: " + req.getCriterionId()));
+        List<AssessmentResult> assessmentResultList = request.getResults().stream()
+                .map(req -> {
+                    EvaluationCriteria criteria = null;
+                    try {
+                        criteria = iRoundCriteriaRepository.findByCriterionId(req.getCriterionId(), round.getRoundId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Evaluation criteria not found with id: " + req.getCriterionId()));
+                    } catch (ResourceNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
 
-            if (!uniqueCriteriaIds.add(req.getCriterionId())) {
-                errorList.put("criterionIds", "Has duplicate criterion IDs in the request");
-            }
+                    if (!uniqueCriteriaIds.add(req.getCriterionId())) {
+                        ValidationErrorUtil.addError(errorList, "criterionIds", "Has duplicate criterion IDs in the request");
+                        throw new RuntimeException(new ResourceConflictException("Validation failed", errorList));
+                    }
 
-            if (assessmentResultRepository.existsByAssignmentAndRoundAndCriterion(assignment, round, criteria)) {
-                errorList.put("criterionIds", "This criteria has id " + req.getCriterionId() + " already been evaluated for this assignment");
-            }
+                    if (assessmentResultRepository.existsByAssignmentAndRoundAndCriterion(assignment, round, criteria)) {
+                        ValidationErrorUtil.addError(errorList, "criterionIds", "This criteria has id " + req.getCriterionId() + " already been evaluated for this assignment");
+                        throw new RuntimeException(new ResourceConflictException("Validation failed", errorList));
+                    }
 
-            AssessmentResult assessmentResult = AssessmentResult.builder()
+                    return AssessmentResult.builder()
                     .assignment(assignment)
                     .round(round)
                     .criterion(criteria)
@@ -84,9 +91,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                     .evaluationId(user)
                     .evaluationDate(LocalDateTime.now())
                     .build();
-
-            assessmentResultList.add(assessmentResult);
-        }
+                }).toList();
 
         if (ValidationErrorUtil.hasErrors(errorList)) {
             throw new ResourceConflictException("Validation failed", errorList);

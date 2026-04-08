@@ -23,4 +23,6 @@ public class AssessmentRoundsResponse {
     private String description;
 
     private List<RoundCriterionResponse> roundCriteria;
+
+    private boolean isDeleted;
 }

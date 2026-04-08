@@ -1,13 +1,15 @@
 package com.trung.service.impl;
 
+import com.trung.dto.request.AssessmentRoundCreateRequest;
+import com.trung.dto.request.AssessmentRoundUpdateRequest;
+import com.trung.dto.request.PageRequestDTO;
+import com.trung.dto.response.ApiResponse;
+import com.trung.dto.response.AssessmentRoundsResponse;
+import com.trung.dto.response.PageResponseDTO;
 import com.trung.entity.AssessmentRound;
 import com.trung.entity.EvaluationCriteria;
 import com.trung.entity.InternshipPhase;
 import com.trung.entity.RoundCriteria;
-import com.trung.dto.request.*;
-import com.trung.dto.response.ApiResponse;
-import com.trung.dto.response.AssessmentRoundsResponse;
-import com.trung.dto.response.PageResponseDTO;
 import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceNotFoundException;
@@ -18,11 +20,11 @@ import com.trung.repository.InternshipPhaseRepository;
 import com.trung.service.IAssessmentRoundsService;
 import com.trung.util.PaginationUtil;
 import com.trung.util.ValidationErrorUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -37,7 +39,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<AssessmentRoundsResponse> createAssessmentRound(AssessmentRoundCreateRequest request) throws ResourceNotFoundException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         InternshipPhase phase = internshipPhaseRepository.findByPhaseIdAndIsDeletedFalse(request.getPhaseId())
@@ -45,30 +47,33 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
 
         AssessmentRound assessmentRounds = AssessmentRoundsMapper.toEntity(request, phase);
 
-        List<RoundCriteria> list = new ArrayList<>();
         Set<Long> uniqueCriterionIds = new HashSet<>();
 
-        for (RoundCriterionCreateRequest req : request.getRoundCriteria()) {
-            EvaluationCriteria criteria = iEvaluationCriteriaRepository.findByCriterionIdAndIsDeletedFalse(req.getCriterionId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Evaluation criterion not found with id: " + req.getCriterionId()));
+        List<RoundCriteria> roundCriteriaList = request.getRoundCriteria().stream()
+                .map(req -> {
+                    EvaluationCriteria criteria = null;
+                    try {
+                        criteria = iEvaluationCriteriaRepository
+                                .findByCriterionIdAndIsDeletedFalse(req.getCriterionId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                        "Evaluation criterion not found with id: " + req.getCriterionId()));
+                    } catch (ResourceNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
 
-            if (!uniqueCriterionIds.add(req.getCriterionId())) {
-                ValidationErrorUtil.addError(errorList, "roundCriteria", "Duplicate criterion ID");
-                throw new ResourceConflictException("Validation failed", errorList);
-            }
-
-            RoundCriteria roundCriteria = RoundCriteria.builder()
-                    .round(assessmentRounds)
-                    .criterion(criteria)
-                    .weight(req.getWeight())
-                    .build();
-            list.add(roundCriteria);
-        }
-
-        assessmentRounds.setRoundCriteriaList(list);
+                    if (!uniqueCriterionIds.add(req.getCriterionId())) {
+                        ValidationErrorUtil.addError(errorList, "roundCriteria", "Duplicate criterion ID");
+                        throw new RuntimeException(new ResourceConflictException("Validation failed", errorList));
+                    }
+                    return RoundCriteria.builder()
+                            .round(assessmentRounds)
+                            .criterion(criteria)
+                            .weight(req.getWeight())
+                            .build();
+                })
+                .toList();
+        assessmentRounds.setRoundCriteriaList(roundCriteriaList);
         assessmentRoundsRepository.save(assessmentRounds);
-
-
         return new ApiResponse<>(
                 AssessmentRoundsMapper.toDto(assessmentRounds),
                 true,

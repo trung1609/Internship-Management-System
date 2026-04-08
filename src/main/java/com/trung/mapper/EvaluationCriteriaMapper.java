@@ -11,6 +11,7 @@ public class EvaluationCriteriaMapper {
                 .criterionName(entity.getCriterionName())
                 .description(entity.getDescription())
                 .maxScore(entity.getMaxScore())
+                .isDeleted(entity.isDeleted())
                 .build();
     }
 
