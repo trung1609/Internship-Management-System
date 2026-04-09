@@ -77,7 +77,10 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                         throw new RuntimeException(new ResourceConflictException("Validation failed", errorList));
                     }
 
-                    if (assessmentResultRepository.existsByAssignmentAndRoundAndCriterion(assignment, round, criteria)) {
+                    if (assessmentResultRepository.existsByAssignmentAndRoundAndCriterion(
+                            assignment.getAssignmentId(),
+                            round.getRoundId(),
+                            criteria.getCriterionId())) {
                         ValidationErrorUtil.addError(errorList, "criterionIds", "This criteria has id " + req.getCriterionId() + " already been evaluated for this assignment");
                         throw new RuntimeException(new ResourceConflictException("Validation failed", errorList));
                     }

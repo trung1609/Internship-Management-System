@@ -63,4 +63,6 @@ public interface InternshipAssignmentRepository extends JpaRepository<Internship
     Optional<InternshipAssignment> findByAssignmentIdAndStudent_StudentId(Long assignmentId, Long studentId);
 
     boolean existsByStudent_StudentIdAndAssignmentId(Long studentId, Long assignmentId);
+
+
 }
