@@ -1,0 +1,57 @@
+import { createContext, useState, useEffect } from 'react';
+import { authApi } from '../api/authApi';
+
+export const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const initializeAuth = async () => {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                try {
+                    const userData = await authApi.getMe();
+                    setUser(userData);
+                } catch (error) {
+                    console.error("Lỗi lấy thông tin phiên đăng nhập:", error);
+                    localStorage.removeItem('accessToken');
+                }
+            }
+            setLoading(false);
+        };
+        
+        initializeAuth();
+    }, []);
+
+    const login = async (username, password) => {
+        const response = await authApi.login({ username, password });
+        
+        const accessToken = response.data.accessToken;
+        const userData = response.data.user; 
+        
+        localStorage.setItem('accessToken', accessToken);
+        
+        setUser(userData);
+        
+        return userData; 
+    };
+
+    const logout = async () => {
+        try {
+            await authApi.logout();
+        } catch (error) {
+            console.error("Lỗi khi gọi API logout backend:", error);
+        } finally {
+            localStorage.removeItem('accessToken');
+            setUser(null);
+        }
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, login, logout, loading }}>
+            {!loading && children} 
+        </AuthContext.Provider>
+    );
+};
