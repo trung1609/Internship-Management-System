@@ -1,15 +1,24 @@
 package com.trung.service.impl;
 
-import com.trung.entity.Student;
-import com.trung.entity.User;
-import com.trung.util.enums.Role;
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.request.StudentCreateRequest;
 import com.trung.dto.request.StudentUpdateRequest;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.StudentResponse;
-import com.trung.exception.*;
+import com.trung.entity.Student;
+import com.trung.entity.User;
+import com.trung.exception.ResourceBadRequestException;
+import com.trung.exception.ResourceConflictException;
+import com.trung.exception.ResourceForbiddenException;
+import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.StudentMapper;
 import com.trung.repository.IStudentRepository;
 import com.trung.repository.IUserRepository;
@@ -18,13 +27,9 @@ import com.trung.service.IStudentService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
 import com.trung.util.ValidationErrorUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
+import com.trung.util.enums.Role;
 
-import java.time.LocalDateTime;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +89,25 @@ public class StudentServiceImpl implements IStudentService {
             throw new ResourceForbiddenException("Current user does not have permission to view students");
         }
         return PaginationUtil.toPageResponseDTO(studentPage, StudentMapper::toDto);
+    }
+
+    @Override
+    public ApiResponse<StudentResponse> getCurrentStudentInfo() throws ResourceNotFoundException, ResourceForbiddenException {
+        User currentUser = currentUserUtil.getCurrentUser();
+        if (currentUser.getRole() != Role.ROLE_STUDENT) {
+            throw new ResourceForbiddenException("Only students can access this endpoint");
+        }
+
+        Student student = studentRepository.findByUser_UserId(currentUser.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for current user"));
+
+        return new ApiResponse<>(
+                StudentMapper.toDto(student),
+                true,
+                "Current student info retrieved successfully",
+                null,
+                LocalDateTime.now()
+        );
     }
 
     @Override

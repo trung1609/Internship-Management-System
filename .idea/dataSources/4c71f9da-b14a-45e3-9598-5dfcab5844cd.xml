@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="0@localhost">
+  <database-model serializer="dbm" dbms="REDIS" family-id="REDIS" format-version="4.55">
+    <root id="1">
+      <ServerVersion>7.4.8</ServerVersion>
+    </root>
+    <schema id="2" parent="1" name="0">
+      <Current>1</Current>
+    </schema>
+    <schema id="3" parent="1" name="1"/>
+    <schema id="4" parent="1" name="10"/>
+    <schema id="5" parent="1" name="11"/>
+    <schema id="6" parent="1" name="12"/>
+    <schema id="7" parent="1" name="13"/>
+    <schema id="8" parent="1" name="14"/>
+    <schema id="9" parent="1" name="15"/>
+    <schema id="10" parent="1" name="2"/>
+    <schema id="11" parent="1" name="3"/>
+    <schema id="12" parent="1" name="4"/>
+    <schema id="13" parent="1" name="5"/>
+    <schema id="14" parent="1" name="6"/>
+    <schema id="15" parent="1" name="7"/>
+    <schema id="16" parent="1" name="8"/>
+    <schema id="17" parent="1" name="9"/>
+    <redis-key id="18" parent="2" name="blacklist-token:access:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0cnVuZzE2MDkiLCJpYXQiOjE3NzkxNTkxNTYsImV4cCI6MTc3OTI0NTU1Niwicm9sZSI6IlJPTEVfU1RVREVOVCIsInR5cGUiOiJhY2Nlc3MiLCJlbWFpbCI6InRydW5nN2QyMDA1QGdtYWlsLmNvbSJ9.N1_MZEXQ72ESNdNGiGRdTeik08sPUotW-ZWlyDl5oNiq-PL5E5YWi8dcKQrkM4o2u4CB9xplydcZ06X2XTPwnQ">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="19" parent="2" name="blacklist-token:access:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0cnVuZzE2MDkiLCJpYXQiOjE3NzkxNjA4NjcsImV4cCI6MTc3OTI0NzI2Nywicm9sZSI6IlJPTEVfU1RVREVOVCIsInR5cGUiOiJhY2Nlc3MiLCJlbWFpbCI6InRydW5nN2QyMDA1QGdtYWlsLmNvbSJ9.GYqQzFfzZfBzgkkC6Wm6IM6HUmXBo4Yg87VUU3Wl5HhxyWdiuy-lVBU6Jq7PCtdoUwBo-zq7bvRCl9UqLlnmKA">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="20" parent="2" name="blacklist-token:access:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0cnVuZzE2MDkiLCJpYXQiOjE3NzkxNjAyNDcsImV4cCI6MTc3OTI0NjY0Nywicm9sZSI6IlJPTEVfU1RVREVOVCIsInR5cGUiOiJhY2Nlc3MiLCJlbWFpbCI6InRydW5nN2QyMDA1QGdtYWlsLmNvbSJ9.FB0owCuV6TMZIDxu0Us3gkZYHrf6aa6Ke3yfaBiK2wIQBT29Ww0GuDw84iaRgYZ9KjM6vsn8EgpSh3VpZ6fpTg">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="21" parent="2" name="blacklist-token:access:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3OTE2MDI3NiwiZXhwIjoxNzc5MjQ2Njc2LCJyb2xlIjoiUk9MRV9BRE1JTiIsInR5cGUiOiJhY2Nlc3MiLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSJ9.VciI8FIa_2lkyYc0qS3UPqs6sbMUCg29Uttb9ZuV9hoe1jclcEiJot8NKUyJ-7_hNtNnkEDRJgrNC9WaTbmpjQ">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="22" parent="2" name="blacklist-token:access:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3OTE2MDgwMCwiZXhwIjoxNzc5MjQ3MjAwLCJyb2xlIjoiUk9MRV9BRE1JTiIsInR5cGUiOiJhY2Nlc3MiLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSJ9.u1_D6Ryg_P449bHUUA7gIhG7RlypytI5toUGhufgS4Jw0mKgG2d0hDteG6wVlVTc0Xx0flpdcVCjlXeBb1zAPQ">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="23" parent="2" name="blacklist-token:access:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZW50b3IyIiwiaWF0IjoxNzc5MTYwMzA0LCJleHAiOjE3NzkyNDY3MDQsInJvbGUiOiJST0xFX01FTlRPUiIsInR5cGUiOiJhY2Nlc3MiLCJlbWFpbCI6Im1lbnRvcjJAZ21haWwuY29tIn0.NKD9aNKD7-MzTTOs2ph7tEPzS0DgmYiz0uY14ICD1zSi3d0VjgftXbnPphgYV40WVsCqGFE57PXdv6weknnhgw">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="24" parent="2" name="blacklist-token:access:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZW50b3IyIiwiaWF0IjoxNzc5MTYwODM3LCJleHAiOjE3NzkyNDcyMzcsInJvbGUiOiJST0xFX01FTlRPUiIsInR5cGUiOiJhY2Nlc3MiLCJlbWFpbCI6Im1lbnRvcjJAZ21haWwuY29tIn0.iVgbTj7blu7roGIUHvVpHCgRSR0SfDCQzGoN_zGJwx_ch1IFpRSHZ6JQDfW1ksvkndpVnndsAYZj3c3kOSOceA">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="25" parent="2" name="blacklist-token:access:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZW50b3IzIiwiaWF0IjoxNzc5MTYwODUzLCJleHAiOjE3NzkyNDcyNTMsInJvbGUiOiJST0xFX01FTlRPUiIsInR5cGUiOiJhY2Nlc3MiLCJlbWFpbCI6Im1lbnRvcjNAZ21haWwuY29tIn0.Pvu2D8V_-kptVO3C6JXUt0ZiAzpEdRkmXYVFf7XHHy3c9BpHzqa4kn1wjHej751o1gxj5TvCWW2FI7dTuvPr-w">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="26" parent="2" name="refresh_token:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0cnVuZzE2MDkiLCJpYXQiOjE3NzkxNjEwNzUsImV4cCI6MTc3OTc2NTg3NSwicm9sZSI6IlJPTEVfU1RVREVOVCIsInR5cGUiOiJyZWZyZXNoIiwiZW1haWwiOiJ0cnVuZzdkMjAwNUBnbWFpbC5jb20ifQ.q6_5CogQy_Cn_XE4u9Lsdsu6xe2JlWapCus-TFaPlhBOw1pAvCPtFgJ2-J5DdSr5TV4jW9DPRg2ki6R6CuZ9Hg">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="27" parent="2" name="refresh_token:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0cnVuZzIwMDUiLCJpYXQiOjE3NzkxNTc0MjAsImV4cCI6MTc3OTc2MjIyMCwicm9sZSI6IlJPTEVfU1RVREVOVCIsInR5cGUiOiJyZWZyZXNoIiwiZW1haWwiOiJ0cnVuZzhkMjAwNUBnbWFpbC5jb20ifQ.UNp6nvXNA38sykJwMODzxBB0HmRr9I0eGLllETQ0bkqKR-ULrb4Lfr60S1NM-3JrYmL_GCUxxi7BbUvxeZZOnw">
+      <Type>string</Type>
+    </redis-key>
+    <redis-key id="28" parent="2" name="refresh_token:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3OTE1NTY3NSwiZXhwIjoxNzc5NzYwNDc1LCJyb2xlIjoiUk9MRV9BRE1JTiIsInR5cGUiOiJyZWZyZXNoIiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20ifQ.O14k0BUBzr4OwgKeE_Og2bhf2dFHj4thMH1p9T9Aq0h3blZgym-t_JPBrFCxAPwvvxrx3n-OJVsJIYJKDOuxbg">
+      <Type>string</Type>
+    </redis-key>
+  </database-model>
+</dataSource>

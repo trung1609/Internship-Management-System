@@ -1,16 +1,21 @@
 package com.trung.mapper;
 
-import com.trung.entity.User;
 import com.trung.dto.request.UserUpdateRequest;
 import com.trung.dto.response.UserResponse;
+import com.trung.entity.User;
 
 public class UserMapper {
     public static UserResponse toDto(User users){
         return UserResponse.builder()
+                .userId(users.getUserId())
                 .username(users.getUsername())
                 .fullName(users.getFullName())
                 .email(users.getEmail())
                 .role(users.getRole().name())
+                .phoneNumber(users.getPhoneNumber())
+                .isActive(users.isActive())
+                .createdAt(users.getCreatedAt())
+                .updatedAt(users.getUpdatedAt())
                 .build();
     }
 

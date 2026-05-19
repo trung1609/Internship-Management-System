@@ -1,16 +1,17 @@
 import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { AuthContext } from '../context/AuthContext';
-import { 
-  Container, 
-  Box, 
-  Typography, 
-  TextField, 
-  Button, 
-  Paper, 
-  Alert, 
-  CircularProgress 
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Alert,
+  CircularProgress,
+  Grid
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Avatar from '@mui/material/Avatar';
@@ -28,20 +29,20 @@ const LoginPage = () => {
     setErrorMsg('');
     try {
       const userData = await login(data.username, data.password);
-      
+
       if (userData.role === 'ROLE_ADMIN') {
         navigate('/admin-dashboard');
       } else if (userData.role === 'ROLE_MENTOR') {
-        navigate('/mentor-dashboard'); 
+        navigate('/mentor-dashboard');
       } else {
-        navigate('/dashboard'); 
+        navigate('/dashboard');
       }
-      
+
     } catch (error) {
       if (error.response && error.response.status === 401) {
-         setErrorMsg('Sai tên đăng nhập hoặc mật khẩu!');
+        setErrorMsg('Invalid username or password!');
       } else {
-         setErrorMsg('Có lỗi xảy ra, vui lòng thử lại sau.');
+        setErrorMsg('An error occurred, please try again later.');
       }
     } finally {
       setIsLoading(false);
@@ -63,7 +64,7 @@ const LoginPage = () => {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Đăng nhập hệ thống
+            Login to System
           </Typography>
 
           {errorMsg && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{errorMsg}</Alert>}
@@ -74,10 +75,10 @@ const LoginPage = () => {
               required
               fullWidth
               id="username"
-              label="Tên đăng nhập"
+              label="Username"
               autoComplete="username"
               autoFocus
-              {...register('username', { required: 'Vui lòng nhập tên đăng nhập' })}
+              {...register('username', { required: 'Please enter username' })}
               error={!!errors.username}
               helperText={errors.username ? errors.username.message : ''}
             />
@@ -85,15 +86,34 @@ const LoginPage = () => {
               margin="normal"
               required
               fullWidth
-              label="Mật khẩu"
+              label="Password"
               type="password"
               id="password"
               autoComplete="current-password"
-              {...register('password', { required: 'Vui lòng nhập mật khẩu' })}
+              {...register('password', { required: 'Please enter password' })}
               error={!!errors.password}
               helperText={errors.password ? errors.password.message : ''}
             />
-            
+
+            <Box sx={{ textAlign: 'right', mt: 2 }}>
+              <Typography variant="body1">
+                Don't have an account?{' '}
+                <Link
+                  to="/register"
+                  style={{
+                    textDecoration: 'none',
+                    color: '#1976d2',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                >
+                  Register now
+                </Link>
+              </Typography>
+            </Box>
+
             <Button
               type="submit"
               fullWidth
@@ -101,7 +121,7 @@ const LoginPage = () => {
               disabled={isLoading}
               sx={{ mt: 3, mb: 2, py: 1.5 }}
             >
-              {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Đăng nhập'}
+              {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
             </Button>
           </Box>
         </Paper>
