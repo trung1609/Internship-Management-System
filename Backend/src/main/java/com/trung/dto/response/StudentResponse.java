@@ -13,6 +13,8 @@ import java.util.Date;
 @Builder
 public class StudentResponse {
 
+    private Long studentId;
+
     private String fullName;
 
     private String email;

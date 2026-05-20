@@ -9,6 +9,7 @@ import com.trung.exception.ResourceBadRequestException;
 public class StudentMapper {
     public static StudentResponse toDto(Student student) {
         return StudentResponse.builder()
+                .studentId(student.getStudentId())
                 .studentCode(student.getStudentCode())
                 .major(student.getMajor())
                 .classRoom(student.getClassRoom())

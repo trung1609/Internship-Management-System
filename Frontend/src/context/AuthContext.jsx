@@ -15,34 +15,34 @@ export const AuthProvider = ({ children }) => {
                     const userData = await authApi.getMe();
                     setUser(userData);
                 } catch (error) {
-                    console.error("Lỗi lấy thông tin phiên đăng nhập:", error);
+                    console.error("Error fetching session information:", error);
                     localStorage.removeItem('accessToken');
                 }
             }
             setLoading(false);
         };
-        
+
         initializeAuth();
     }, []);
 
     const login = async (username, password) => {
         const response = await authApi.login({ username, password });
-        
+
         const accessToken = response.data.accessToken;
-        const userData = response.data.user; 
-        
+        const userData = response.data.user;
+
         localStorage.setItem('accessToken', accessToken);
-        
+
         setUser(userData);
-        
-        return userData; 
+
+        return userData;
     };
 
     const logout = async () => {
         try {
             await authApi.logout();
         } catch (error) {
-            console.error("Lỗi khi gọi API logout backend:", error);
+            console.error("Error calling API logout:", error);
         } finally {
             localStorage.removeItem('accessToken');
             setUser(null);
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, login, logout, loading }}>
-            {!loading && children} 
+            {!loading && children}
         </AuthContext.Provider>
     );
 };
