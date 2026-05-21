@@ -18,6 +18,7 @@ const MentorsManagement = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [search, setSearch] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [editingMentor, setEditingMentor] = useState(null);
   const [formData, setFormData] = useState({
@@ -36,8 +37,8 @@ const MentorsManagement = () => {
       setLoading(true);
       setError(null);
       const response = await mentorApi.getAllMentors(page, rowsPerPage, search);
-      setData(response?.data?.content || []);
-      setTotalCount(response?.data?.totalElements || 0);
+      setData(response?.content || []);
+      setTotalCount(response?.totalElements || 0);
     } catch (err) {
       console.error("Error fetching mentors:", err);
       setError("Error loading data: " + (err.message || "Unknown error"));
@@ -53,15 +54,15 @@ const MentorsManagement = () => {
         email: mentor.email || "",
         fullName: mentor.fullName || "",
         phoneNumber: mentor.phoneNumber || "",
-        specialization: mentor.specialization || "",
+        department: mentor.department || "",
+        academicRank: mentor.academicRank || "",
       });
     } else {
       setEditingMentor(null);
       setFormData({
-        email: "",
-        fullName: "",
-        phoneNumber: "",
-        specialization: "",
+        userId: "",
+        department: "",
+        academicRank: "",
       });
     }
     setOpenDialog(true);
@@ -94,7 +95,8 @@ const MentorsManagement = () => {
     { field: "email", label: "Email" },
     { field: "fullName", label: "Full Name" },
     { field: "phoneNumber", label: "Phone Number" },
-    { field: "specialization", label: "Specialization" },
+    { field: "department", label: "Department" },
+    { field: "academicRank", label: "Academic Rank" },
   ];
 
   return (
@@ -128,39 +130,65 @@ const MentorsManagement = () => {
           {editingMentor ? "Update Mentor" : "Add New Mentor"}
         </DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
+          {!editingMentor && (
+            <TextField
+              fullWidth
+              label="User ID"
+              value={formData.userId}
+              onChange={(e) =>
+                setFormData({ ...formData, userId: e.target.value })
+              }
+              margin="normal"
+            />
+          )}
+          {editingMentor && (
+            <TextField
+              fullWidth
+              label="Email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              margin="normal"
+            />
+          )}
+          {editingMentor && (
+            <TextField
+              fullWidth
+              label="Họ và tên"
+              value={formData.fullName}
+              onChange={(e) =>
+                setFormData({ ...formData, fullName: e.target.value })
+              }
+              margin="normal"
+            />
+          )}
+          {editingMentor && (
+            <TextField
+              fullWidth
+              label="Số điện thoại"
+              value={formData.phoneNumber}
+              onChange={(e) =>
+                setFormData({ ...formData, phoneNumber: e.target.value })
+              }
+              margin="normal"
+            />
+          )}
           <TextField
             fullWidth
-            label="Email"
-            value={formData.email}
+            label="Phòng ban"
+            value={formData.department}
             onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
+              setFormData({ ...formData, department: e.target.value })
             }
             margin="normal"
           />
           <TextField
             fullWidth
-            label="Họ và tên"
-            value={formData.fullName}
+            label="Học hàm/Học vị"
+            value={formData.academicRank}
             onChange={(e) =>
-              setFormData({ ...formData, fullName: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Số điện thoại"
-            value={formData.phoneNumber}
-            onChange={(e) =>
-              setFormData({ ...formData, phoneNumber: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Chuyên môn"
-            value={formData.specialization}
-            onChange={(e) =>
-              setFormData({ ...formData, specialization: e.target.value })
+              setFormData({ ...formData, academicRank: e.target.value })
             }
             margin="normal"
           />

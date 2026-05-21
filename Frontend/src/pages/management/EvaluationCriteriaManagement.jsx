@@ -40,8 +40,8 @@ const EvaluationCriteriaManagement = () => {
         page,
         rowsPerPage,
       );
-      setData(response?.data?.content || []);
-      setTotalCount(response?.data?.totalElements || 0);
+      setData(response?.content || []);
+      setTotalCount(response?.totalElements || 0);
     } catch (err) {
       setError("Error loading data: " + (err.message || "Unknown error"));
     } finally {
@@ -107,7 +107,7 @@ const EvaluationCriteriaManagement = () => {
 
   const columns = [
     { field: "id", label: "ID" },
-    { field: "criteriaName", label: "Criteria Name" },
+    { field: "criterionName", label: "Criteria Name" },
     { field: "description", label: "Description" },
     { field: "maxScore", label: "Max Score" },
   ];

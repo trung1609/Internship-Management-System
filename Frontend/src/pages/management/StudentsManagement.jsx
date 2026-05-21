@@ -18,6 +18,7 @@ const StudentsManagement = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [search, setSearch] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [formData, setFormData] = useState({
@@ -41,10 +42,10 @@ const StudentsManagement = () => {
         search,
       );
       console.log("Students API Response:", response);
-      console.log("Students data content:", response?.data?.content);
-      console.log("Total count:", response?.data?.totalElements);
-      setData(response?.data?.content || []);
-      setTotalCount(response?.data?.totalElements || 0);
+      console.log("Students data content:", response?.content);
+      console.log("Total count:", response?.totalElements);
+      setData(response?.content || []);
+      setTotalCount(response?.totalElements || 0);
     } catch (err) {
       console.error("Error fetching students:", err);
       console.error("Error status:", err?.response?.status);
@@ -62,15 +63,21 @@ const StudentsManagement = () => {
         email: student.email || "",
         fullName: student.fullName || "",
         phoneNumber: student.phoneNumber || "",
-        studentId: student.studentId || "",
+        studentCode: student.studentCode || "",
+        major: student.major || "",
+        classRoom: student.classRoom || "",
+        address: student.address || "",
+        dateOfBirth: student.dateOfBirth || "",
       });
     } else {
       setEditingStudent(null);
       setFormData({
-        email: "",
-        fullName: "",
-        phoneNumber: "",
-        studentId: "",
+        userId: "",
+        studentCode: "",
+        major: "",
+        classRoom: "",
+        dateOfBirth: "",
+        address: "",
       });
     }
     setOpenDialog(true);
@@ -85,7 +92,7 @@ const StudentsManagement = () => {
     try {
       setLoading(true);
       if (editingStudent) {
-        await studentApi.updateStudent(editingStudent.id, formData);
+        await studentApi.updateStudent(editingStudent.studentId, formData);
       } else {
         await studentApi.createStudent(formData);
       }
@@ -99,11 +106,15 @@ const StudentsManagement = () => {
   };
 
   const columns = [
-    { field: "id", label: "ID" },
-    { field: "studentId", label: "Student ID" },
+    { field: "studentId", label: "ID" },
+    { field: "studentCode", label: "Student Code" },
     { field: "email", label: "Email" },
     { field: "fullName", label: "Full Name" },
     { field: "phoneNumber", label: "Phone Number" },
+    { field: "major", label: "Major" },
+    { field: "classRoom", label: "Classroom" },
+    { field: "dateOfBirth", label: "Date of Birth" },
+    { field: "address", label: "Address" },
   ];
 
   return (
@@ -137,40 +148,95 @@ const StudentsManagement = () => {
           {editingStudent ? "Update Student" : "Add New Student"}
         </DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
+          {!editingStudent && (
+            <TextField
+              fullWidth
+              label="User ID"
+              value={formData.userId}
+              onChange={(e) =>
+                setFormData({ ...formData, userId: e.target.value })
+              }
+              disabled={editingStudent !== null}
+              margin="normal"
+            />
+          )}
           <TextField
             fullWidth
-            label="Student ID"
-            value={formData.studentId}
+            label="Student Code"
+            value={formData.studentCode}
             onChange={(e) =>
-              setFormData({ ...formData, studentId: e.target.value })
+              setFormData({ ...formData, studentCode: e.target.value })
             }
             disabled={editingStudent !== null}
             margin="normal"
           />
+          {editingStudent && (
+            <TextField
+              fullWidth
+              label="Email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              margin="normal"
+            />
+          )}
+          {editingStudent && (
+            <TextField
+              fullWidth
+              label="Full Name"
+              value={formData.fullName}
+              onChange={(e) =>
+                setFormData({ ...formData, fullName: e.target.value })
+              }
+              margin="normal"
+            />
+          )}
+          {editingStudent && (
+            <TextField
+              fullWidth
+              label="Phone Number"
+              value={formData.phoneNumber}
+              onChange={(e) =>
+                setFormData({ ...formData, phoneNumber: e.target.value })
+              }
+              margin="normal"
+            />
+          )}
           <TextField
             fullWidth
-            label="Email"
-            value={formData.email}
+            label="Major"
+            value={formData.major}
             onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
+              setFormData({ ...formData, major: e.target.value })
             }
             margin="normal"
           />
           <TextField
             fullWidth
-            label="Full Name"
-            value={formData.fullName}
+            label="Classroom"
+            value={formData.classRoom}
             onChange={(e) =>
-              setFormData({ ...formData, fullName: e.target.value })
+              setFormData({ ...formData, classRoom: e.target.value })
             }
             margin="normal"
           />
           <TextField
             fullWidth
-            label="Phone Number"
-            value={formData.phoneNumber}
+            label="Address"
+            value={formData.address}
             onChange={(e) =>
-              setFormData({ ...formData, phoneNumber: e.target.value })
+              setFormData({ ...formData, address: e.target.value })
+            }
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="Date of Birth"
+            type="date"
+            value={formData.dateOfBirth}
+            onChange={(e) =>
+              setFormData({ ...formData, dateOfBirth: e.target.value })
             }
             margin="normal"
           />

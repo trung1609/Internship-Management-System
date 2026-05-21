@@ -25,9 +25,9 @@ const MainDashboard = () => {
               Role
             </Typography>
             <Typography variant="h5">
-              {user?.role === "ADMIN"
+              {user?.role === "ADMIN" || user?.role === "ROLE_ADMIN"
                 ? "Administrator"
-                : user?.role === "MENTOR"
+                : user?.role === "MENTOR" || user?.role === "ROLE_MENTOR"
                   ? "Mentor"
                   : "Student"}
             </Typography>

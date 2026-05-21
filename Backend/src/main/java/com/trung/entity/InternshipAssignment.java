@@ -21,6 +21,10 @@ public class InternshipAssignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long assignmentId;
 
+    private String assignmentTitle;
+
+    private String assignmentDescription;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private Student student;

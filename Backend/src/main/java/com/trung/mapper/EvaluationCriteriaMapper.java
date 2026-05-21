@@ -7,8 +7,7 @@ import com.trung.dto.response.EvaluationCriteriaResponse;
 
 public class EvaluationCriteriaMapper {
     public static EvaluationCriteriaResponse toDTO(EvaluationCriteria entity) {
-        return EvaluationCriteriaResponse.builder()
-                .criterionName(entity.getCriterionName())
+        return EvaluationCriteriaResponse.builder().id(entity.getCriterionId()).criterionName(entity.getCriterionName())
                 .description(entity.getDescription())
                 .maxScore(entity.getMaxScore())
                 .isDeleted(entity.isDeleted())

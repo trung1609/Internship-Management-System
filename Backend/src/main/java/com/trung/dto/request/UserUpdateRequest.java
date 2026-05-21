@@ -21,4 +21,6 @@ public class UserUpdateRequest {
 
     @Pattern(regexp = "^(|0[356789]\\d{8})$", message = "Phone number must be 10 digits and start with '0'")
     private String phoneNumber;
+
+    private String role;
 }

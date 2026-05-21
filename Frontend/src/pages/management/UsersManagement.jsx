@@ -32,6 +32,7 @@ const UsersManagement = () => {
     fullName: "",
     phoneNumber: "",
     role: "ROLE_STUDENT",
+    password: "",
   });
 
   useEffect(() => {
@@ -50,10 +51,10 @@ const UsersManagement = () => {
         search,
       );
       console.log("Users API Response:", response);
-      console.log("Users data content:", response?.data?.content);
-      console.log("Total count:", response?.data?.totalElements);
-      setData(response?.data?.content || []);
-      setTotalCount(response?.data?.totalElements || 0);
+      console.log("Users data content:", response?.content);
+      console.log("Total count:", response?.totalElements);
+      setData(response?.content || []);
+      setTotalCount(response?.totalElements || 0);
     } catch (err) {
       console.error("Error fetching users:", err);
       console.error("Error status:", err?.response?.status);
@@ -82,6 +83,7 @@ const UsersManagement = () => {
         fullName: "",
         phoneNumber: "",
         role: "ROLE_STUDENT",
+        password: "",
       });
     }
     setOpenDialog(true);
@@ -96,7 +98,10 @@ const UsersManagement = () => {
     try {
       setLoading(true);
       if (editingUser) {
-        await userApi.updateUser(editingUser.id, formData);
+        const payload = { ...formData };
+        delete payload.password; 
+
+        await userApi.updateUser(editingUser.userId, payload);
       } else {
         await userApi.createUser(formData);
       }
@@ -122,12 +127,11 @@ const UsersManagement = () => {
   };
 
   const columns = [
-    { field: "id", label: "ID" },
+    { field: "userId", label: "ID" },
     { field: "username", label: "Username" },
     { field: "email", label: "Email" },
     { field: "fullName", label: "Full Name" },
     { field: "phoneNumber", label: "Phone Number" },
-    { field: "password", label: "Password" },
     {
       field: "role",
       label: "Role",
@@ -172,7 +176,7 @@ const UsersManagement = () => {
         data={data}
         loading={loading}
         error={error}
-        onEdit={() => handleOpenDialog()}
+        onEdit={(user) => handleOpenDialog(user)}
         onDelete={handleDelete}
         onAdd={() => handleOpenDialog()}
         totalCount={totalCount}
@@ -224,16 +228,18 @@ const UsersManagement = () => {
             }
             margin="normal"
           />
-          <TextField
-            fullWidth
-            label="Mật khẩu"
-            type="password"
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-            margin="normal"
-          />
+          {!editingUser && (
+            <TextField
+              fullWidth
+              label="Mật khẩu"
+              type="password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              margin="normal"
+            />
+          )}
           <TextField
             fullWidth
             label="Số điện thoại"

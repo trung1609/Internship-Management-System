@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class InternshipPhaseResponse {
+    private Long id;
     private String phaseName;
 
     @JsonFormat(pattern = "dd/MM/yyyy")

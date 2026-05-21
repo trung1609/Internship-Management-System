@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class AssessmentRoundsResponse {
+    private Long id;
     private String phaseName;
     private String roundName;
 

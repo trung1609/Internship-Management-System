@@ -10,8 +10,9 @@ import com.trung.util.ValidationErrorUtil;
 import java.util.Map;
 
 public class InternshipPhaseMapper {
-    public static InternshipPhaseResponse toDto(InternshipPhase internshipPhase){
+    public static InternshipPhaseResponse toDto(InternshipPhase internshipPhase) {
         return InternshipPhaseResponse.builder()
+                .id(internshipPhase.getPhaseId())
                 .phaseName(internshipPhase.getPhaseName())
                 .startDate(internshipPhase.getStartDate())
                 .endDate(internshipPhase.getEndDate())
@@ -29,7 +30,8 @@ public class InternshipPhaseMapper {
                 .build();
     }
 
-    public static void updateFromDto(InternshipPhase internshipPhase, InternshipPhaseUpdateRequest request) throws ResourceBadRequestException {
+    public static void updateFromDto(InternshipPhase internshipPhase, InternshipPhaseUpdateRequest request)
+            throws ResourceBadRequestException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         if (request.getPhaseName() != null) {
             internshipPhase.setPhaseName(request.getPhaseName());

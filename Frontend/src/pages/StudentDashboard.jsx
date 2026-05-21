@@ -168,7 +168,7 @@ const StudentDashboard = () => {
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: "600", mt: 0.5 }}>
                 <Chip
-                  label={user?.isActive ? "Active" : "Inactive"}}
+                  label={user?.isActive ? "Active" : "Inactive"}
                   size="small"
                   color={user?.isActive ? "success" : "default"}
                 />

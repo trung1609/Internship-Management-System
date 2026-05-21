@@ -32,7 +32,7 @@ public class StudentCreateRequest {
     public String classRoom;
 
     @NotNull(message = "Date of birth is required")
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Past(message = "Date of birth must be in the past")
     public LocalDate dateOfBirth;
 

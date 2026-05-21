@@ -10,8 +10,11 @@ import com.trung.dto.response.InternshipAssignmentResponse;
 import java.time.LocalDateTime;
 
 public class InternshipAssignmentMapper {
-    public static InternshipAssignmentResponse toDto(InternshipAssignment entity){
+    public static InternshipAssignmentResponse toDto(InternshipAssignment entity) {
         return InternshipAssignmentResponse.builder()
+                .id(entity.getAssignmentId())
+                .assignmentTitle(entity.getAssignmentTitle())
+                .assignmentDescription(entity.getAssignmentDescription())
                 .studentId(entity.getStudent().getStudentId())
                 .studentName(entity.getStudent().getUser().getFullName())
                 .mentorId(entity.getMentor().getMentorId())
@@ -23,7 +26,7 @@ public class InternshipAssignmentMapper {
                 .build();
     }
 
-    public static InternshipAssignment toEntity(Student student, Mentor mentor, InternshipPhase phase){
+    public static InternshipAssignment toEntity(Student student, Mentor mentor, InternshipPhase phase) {
         return InternshipAssignment.builder()
                 .student(student)
                 .mentor(mentor)

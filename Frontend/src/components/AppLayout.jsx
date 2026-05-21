@@ -39,12 +39,19 @@ const allMenuItems = [
     label: "Dashboard",
     icon: <DashboardIcon />,
     path: "/dashboard",
-    roles: ["ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT"],
+    roles: [
+      "ADMIN",
+      "ROLE_ADMIN",
+      "MENTOR",
+      "ROLE_MENTOR",
+      "STUDENT",
+      "ROLE_STUDENT",
+    ],
   },
   {
     label: "User Management",
     icon: <PeopleIcon />,
-    roles: ["ROLE_ADMIN"],
+    roles: ["ADMIN", "ROLE_ADMIN"],
     children: [
       { label: "All Users", path: "/management/users" },
       { label: "All Students", path: "/management/students" },
@@ -54,7 +61,7 @@ const allMenuItems = [
   {
     label: "Internship Management",
     icon: <SchoolIcon />,
-    roles: ["ROLE_ADMIN", "ROLE_MENTOR"],
+    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR"],
     children: [
       { label: "Internship Phases", path: "/management/phases" },
       { label: "Internship Assignments", path: "/management/assignments" },
@@ -63,7 +70,7 @@ const allMenuItems = [
   {
     label: "Assessment Management",
     icon: <RateReviewIcon />,
-    roles: ["ROLE_ADMIN", "ROLE_MENTOR"],
+    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR"],
     children: [
       { label: "Evaluation Criteria", path: "/management/evaluation-criteria" },
       { label: "Assessment Rounds", path: "/management/assessment-rounds" },
@@ -113,10 +120,13 @@ export const AppLayout = ({ children }) => {
 
   const getRoleColor = (role) => {
     switch (role) {
+      case "ADMIN":
       case "ROLE_ADMIN":
         return "#d32f2f";
+      case "MENTOR":
       case "ROLE_MENTOR":
         return "#1976d2";
+      case "STUDENT":
       case "ROLE_STUDENT":
         return "#388e3c";
       default:
@@ -173,16 +183,7 @@ export const AppLayout = ({ children }) => {
                   <ListItemIcon sx={{ color: "#1976d2", minWidth: 40 }}>
                     {item.icon}
                   </ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    primaryTypographyProps={{
-                      sx: {
-                        fontSize: "0.95rem",
-                        fontWeight: "600",
-                        color: "#333",
-                      },
-                    }}
-                  />
+                  <ListItemText primary={item.label} />
                   {expandedItems[index] ? (
                     <ExpandLess sx={{ color: "#1976d2" }} />
                   ) : (
@@ -214,16 +215,7 @@ export const AppLayout = ({ children }) => {
                           },
                         }}
                       >
-                        <ListItemText
-                          primary={child.label}
-                          primaryTypographyProps={{
-                            sx: {
-                              fontSize: "0.9rem",
-                              color: isActive(child.path) ? "#1976d2" : "#666",
-                              fontWeight: isActive(child.path) ? "600" : "500",
-                            },
-                          }}
-                        />
+                        <ListItemText primary={child.label} />
                       </ListItem>
                     ))}
                   </List>
@@ -252,16 +244,7 @@ export const AppLayout = ({ children }) => {
                 <ListItemIcon sx={{ color: "#1976d2", minWidth: 40 }}>
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    sx: {
-                      fontSize: "0.95rem",
-                      color: isActive(item.path) ? "#1976d2" : "#333",
-                      fontWeight: isActive(item.path) ? "600" : "500",
-                    },
-                  }}
-                />
+                <ListItemText primary={item.label} />
               </ListItem>
             )}
           </Box>
@@ -303,9 +286,9 @@ export const AppLayout = ({ children }) => {
           </Typography>
           <Chip
             label={
-              user?.role === "ROLE_ADMIN"
+              user?.role === "ADMIN" || user?.role === "ROLE_ADMIN"
                 ? "Administrator"
-                : user?.role === "ROLE_MENTOR"
+                : user?.role === "MENTOR" || user?.role === "ROLE_MENTOR"
                   ? "Mentor"
                   : "Student"
             }
@@ -334,12 +317,7 @@ export const AppLayout = ({ children }) => {
           <ListItemIcon sx={{ color: "#d32f2f", minWidth: 40 }}>
             <LogoutIcon />
           </ListItemIcon>
-          <ListItemText
-            primary="Logout"
-            primaryTypographyProps={{
-              sx: { fontSize: "0.95rem", fontWeight: "600" },
-            }}
-          />
+          <ListItemText primary="Logout" />
         </ListItem>
       </Box>
     </Box>

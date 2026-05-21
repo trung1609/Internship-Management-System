@@ -145,25 +145,25 @@ export const assessmentRoundsApi = {
 export const evaluationCriteriaApi = {
   // Get all criteria
   getAllCriteria: (search = "", page = 0, size = 10) =>
-    axiosClient.get("/api/v1/evaluation-criteria", {
+    axiosClient.get("/api/v1/evaluation-criterias", {
       params: { search, page, size },
     }),
 
   // Get criteria by ID
   getCriteriaById: (criteriaId) =>
-    axiosClient.get(`/api/v1/evaluation-criteria/${criteriaId}`),
+    axiosClient.get(`/api/v1/evaluation-criterias/${criteriaId}`),
 
   // Create criteria
   createCriteria: (data) =>
-    axiosClient.post("/api/v1/evaluation-criteria", data),
+    axiosClient.post("/api/v1/evaluation-criterias", data),
 
   // Update criteria
   updateCriteria: (criteriaId, data) =>
-    axiosClient.put(`/api/v1/evaluation-criteria/${criteriaId}`, data),
+    axiosClient.put(`/api/v1/evaluation-criterias/${criteriaId}`, data),
 
   // Delete criteria
   deleteCriteria: (criteriaId) =>
-    axiosClient.delete(`/api/v1/evaluation-criteria/${criteriaId}`),
+    axiosClient.delete(`/api/v1/evaluation-criterias/${criteriaId}`),
 };
 
 export const assessmentResultApi = {

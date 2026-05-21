@@ -41,8 +41,8 @@ const InternshipPhasesManagement = () => {
         page,
         rowsPerPage,
       );
-      setData(response?.data?.content || []);
-      setTotalCount(response?.data?.totalElements || 0);
+      setData(response?.content || []);
+      setTotalCount(response?.totalElements || 0);
     } catch (err) {
       setError("Error loading data: " + (err.message || "Unknown error"));
     } finally {

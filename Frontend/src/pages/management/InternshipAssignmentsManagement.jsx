@@ -26,12 +26,10 @@ const InternshipAssignmentsManagement = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
   const [formData, setFormData] = useState({
-    assignmentTitle: "",
-    description: "",
     studentId: "",
     mentorId: "",
     phaseId: "",
-    status: "ACTIVE",
+    status: "PENDING",
   });
 
   useEffect(() => {
@@ -47,8 +45,8 @@ const InternshipAssignmentsManagement = () => {
         page,
         rowsPerPage,
       );
-      setData(response?.data?.content || []);
-      setTotalCount(response?.data?.totalElements || 0);
+      setData(response?.content || []);
+      setTotalCount(response?.totalElements || 0);
     } catch (err) {
       setError("Error loading data: " + (err.message || "Unknown error"));
     } finally {
@@ -60,22 +58,18 @@ const InternshipAssignmentsManagement = () => {
     if (assignment) {
       setEditingAssignment(assignment);
       setFormData({
-        assignmentTitle: assignment.assignmentTitle || "",
-        description: assignment.description || "",
         studentId: assignment.studentId || "",
         mentorId: assignment.mentorId || "",
         phaseId: assignment.phaseId || "",
-        status: assignment.status || "ACTIVE",
+        status: assignment.status || "PENDING",
       });
     } else {
       setEditingAssignment(null);
       setFormData({
-        assignmentTitle: "",
-        description: "",
         studentId: "",
         mentorId: "",
         phaseId: "",
-        status: "ACTIVE",
+        status: "PENDING",
       });
     }
     setOpenDialog(true);
@@ -109,7 +103,7 @@ const InternshipAssignmentsManagement = () => {
   const columns = [
     { field: "id", label: "ID" },
     { field: "assignmentTitle", label: "Assignment Title" },
-    { field: "description", label: "Description" },
+    { field: "assignmentDescription", label: "Description" },
     { field: "studentId", label: "Student ID" },
     { field: "mentorId", label: "Mentor ID" },
     { field: "status", label: "Status" },

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class AssessmentResultResponse {
+    private Long id;
     private Long assignmentId;
     private String assignmentName;
 

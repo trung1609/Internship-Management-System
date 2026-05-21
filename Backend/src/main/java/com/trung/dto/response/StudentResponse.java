@@ -27,7 +27,7 @@ public class StudentResponse {
 
     public String classRoom;
 
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     public LocalDate dateOfBirth;
 
     public String address;
