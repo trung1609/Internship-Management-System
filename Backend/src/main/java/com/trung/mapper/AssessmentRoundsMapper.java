@@ -17,6 +17,7 @@ import java.util.*;
 public class AssessmentRoundsMapper {
     public static AssessmentRoundsResponse toDto(AssessmentRound assessmentRounds) {
         return AssessmentRoundsResponse.builder()
+                .id(assessmentRounds.getRoundId())
                 .roundName(assessmentRounds.getRoundName())
                 .startDate(assessmentRounds.getStartDate())
                 .endDate(assessmentRounds.getEndDate())

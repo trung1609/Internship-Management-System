@@ -7,6 +7,7 @@ import com.trung.dto.response.AssessmentResultResponse;
 public class AssessmentResultMapper {
     public static AssessmentResultResponse toDTO(AssessmentResult entity) {
         return AssessmentResultResponse.builder()
+                .id(entity.getResultId())
                 .assignmentId(entity.getAssignment().getAssignmentId())
                 .assignmentName(entity.getAssignment().getPhase().getPhaseName())
                 .roundId(entity.getRound().getRoundId())

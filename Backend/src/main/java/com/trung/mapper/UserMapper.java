@@ -3,6 +3,7 @@ package com.trung.mapper;
 import com.trung.dto.request.UserUpdateRequest;
 import com.trung.dto.response.UserResponse;
 import com.trung.entity.User;
+import com.trung.util.enums.Role;
 
 public class UserMapper {
     public static UserResponse toDto(User users){
@@ -31,6 +32,9 @@ public class UserMapper {
         }
         if (userUpdateRequest.getPhoneNumber() != null && !userUpdateRequest.getPhoneNumber().isBlank()) {
             users.setPhoneNumber(userUpdateRequest.getPhoneNumber());
+        }
+        if (userUpdateRequest.getRole() != null && !userUpdateRequest.getRole().isBlank()){
+            users.setRole(Role.valueOf(userUpdateRequest.getRole()));
         }
     }
 }

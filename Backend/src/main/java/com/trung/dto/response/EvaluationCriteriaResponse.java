@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class EvaluationCriteriaResponse {
+    private Long id;
     private String criterionName;
     private String description;
     private BigDecimal maxScore;

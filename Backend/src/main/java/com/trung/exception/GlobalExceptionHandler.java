@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
         Throwable rootCause = getRootCause(ex);
         if (rootCause instanceof DateTimeParseException){
             message = "Validation failed";
-            errors.put("dateOfBirth", "Invalid date format, please use dd/MM/yyyy");
+            errors.put("dateOfBirth", "Invalid date format, please use ISO format (yyyy-MM-dd)");
         }else {
             errors.put("error", message);
         }

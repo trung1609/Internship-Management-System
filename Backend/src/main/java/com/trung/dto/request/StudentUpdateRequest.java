@@ -38,7 +38,7 @@ public class StudentUpdateRequest {
     @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Address must contain only letters and numbers separated by single spaces")
     private String address;
 
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Past(message = "Date of birth must be in the past")
     public LocalDate dateOfBirth;
 }
