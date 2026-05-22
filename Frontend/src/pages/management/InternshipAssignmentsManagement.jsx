@@ -104,8 +104,10 @@ const InternshipAssignmentsManagement = () => {
     { field: "id", label: "ID" },
     { field: "assignmentTitle", label: "Assignment Title" },
     { field: "assignmentDescription", label: "Description" },
-    { field: "studentId", label: "Student ID" },
-    { field: "mentorId", label: "Mentor ID" },
+    { field: "studentName", label: "Student Name" },
+    { field: "mentorName", label: "Mentor Name" },
+    { field: "phaseName", label: "Phase Name" },
+    { field: "assignedDate", label: "Assign Date" },
     { field: "status", label: "Status" },
   ];
 

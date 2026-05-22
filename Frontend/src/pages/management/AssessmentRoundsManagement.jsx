@@ -115,7 +115,7 @@ const AssessmentRoundsManagement = () => {
     { field: "description", label: "Description" },
     { field: "startDate", label: "Start Date" },
     { field: "endDate", label: "End Date" },
-    { field: "phaseId", label: "Phase ID" },
+    { field: "phaseName", label: "Phase Name" },
   ];
 
   return (

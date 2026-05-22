@@ -31,7 +31,7 @@ public class InternshipAssignmentMapper {
                 .student(student)
                 .mentor(mentor)
                 .phase(phase)
-                .assignedDate(LocalDateTime.now())
+                .assignedDate(LocalDateTime.now().toLocalDate())
                 .status(AssignmentStatus.PENDING)
                 .build();
     }

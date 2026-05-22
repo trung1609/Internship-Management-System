@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,7 +38,7 @@ public class InternshipAssignment {
     @JoinColumn(name = "phase_id")
     private InternshipPhase phase;
 
-    private LocalDateTime assignedDate;
+    private LocalDate assignedDate;
 
     @Enumerated(EnumType.STRING)
     private AssignmentStatus status;
