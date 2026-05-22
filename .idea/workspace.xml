@@ -5,20 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e5b70bf-e1f4-466b-831e-0d53d59d8f2d" name="Changes" comment="Refactor transaction management in AssessmentResultServiceImpl and InternshipAssignmentServiceImpl to use rollback for exceptions, streamline error handling, and improve code consistency.">
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/controller/StudentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/controller/StudentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/dto/response/StudentResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/dto/response/StudentResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/dto/response/UserResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/dto/response/UserResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/mapper/StudentMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/mapper/StudentMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/mapper/UserMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/mapper/UserMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/repository/IStudentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/repository/IStudentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/security/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/security/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/service/IStudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/service/IStudentService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/service/impl/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/service/impl/StudentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/api/authApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/api/authApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/context/AuthContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/context/AuthContext.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/LoginPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/data_sources_history.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/data_sources_history.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,6 +110,7 @@
     "Gradle.Build Intership-Management-System.executor": "Run",
     "Gradle.Download Sources.executor": "Run",
     "Gradle.Intership-Management-System [:com.trung.IntershipManagementSystemApplication.main()].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
@@ -221,7 +210,8 @@
       <workItem from="1775743690895" duration="53000" />
       <workItem from="1775744950787" duration="103000" />
       <workItem from="1775826193333" duration="14000" />
-      <workItem from="1779154877626" duration="5092000" />
+      <workItem from="1779154877626" duration="5154000" />
+      <workItem from="1779195924878" duration="80000" />
     </task>
     <servers />
   </component>
