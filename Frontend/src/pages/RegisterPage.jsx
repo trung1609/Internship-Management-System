@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { authApi } from '../api/authApi';
 import {
   Container, Box, Typography, TextField, Button,
-  Paper, Alert, CircularProgress, Avatar, Grid
+  Paper, Alert, CircularProgress, Avatar, Stack
 } from '@mui/material';
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
 
@@ -49,7 +49,7 @@ const RegisterPage = () => {
     <Container component="main" maxWidth="sm">
       <Box sx={{ marginTop: 6, display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
         <Paper elevation={3} sx={{
-          padding: { xs: 3, sm: 5 }, // Tăng nhẹ padding cho cân đối với form to
+          padding: { xs: 3, sm: 5 },
           width: '100%',
           borderRadius: 2,
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
@@ -79,156 +79,141 @@ const RegisterPage = () => {
           {backendErrors.general && <Alert severity="error" sx={{ mb: 2 }}>{backendErrors.general}</Alert>}
 
           <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 2, width: '100%' }}>
-            <Grid container spacing={2.5}>
-              {/* Full Name */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Full Name"
-                  placeholder="Enter your full name"
-                  {...register('fullName', {
-                    required: 'Full name is required',
-                    pattern: {
-                      value: /^[\p{L}0-9]+( [\p{L}0-9]+)*$/u,
-                      message: 'Full name must contain only letters, numbers, and spaces'
-                    }
-                  })}
-                  error={!!errors.fullName || !!backendErrors.fullName}
-                  helperText={backendErrors.fullName || errors.fullName?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
+            
+            <Stack direction="column" spacing={2.5}>
+              
+              <TextField
+                fullWidth
+                required
+                variant="outlined"
+                label="Full Name"
+                placeholder="Enter your full name"
+                {...register('fullName', {
+                  required: 'Full name is required',
+                  pattern: {
+                    value: /^[\p{L}0-9]+( [\p{L}0-9]+)*$/u,
+                    message: 'Full name must contain only letters, numbers, and spaces'
+                  }
+                })}
+                error={!!errors.fullName || !!backendErrors.fullName}
+                helperText={backendErrors.fullName || errors.fullName?.message}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': { borderColor: '#9c27b0' },
+                    '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
+                  }
+                }}
+              />
 
-              {/* Username */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Username"
-                  placeholder="Minimum 3 characters"
-                  {...register('username', {
-                    required: 'Username is required',
-                    minLength: { value: 3, message: 'Minimum 3 characters' }
-                  })}
-                  error={!!errors.username || !!backendErrors.username}
-                  helperText={backendErrors.username || errors.username?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                required
+                variant="outlined"
+                label="Username"
+                placeholder="Minimum 3 characters"
+                {...register('username', {
+                  required: 'Username is required',
+                  minLength: { value: 3, message: 'Minimum 3 characters' }
+                })}
+                error={!!errors.username || !!backendErrors.username}
+                helperText={backendErrors.username || errors.username?.message}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': { borderColor: '#9c27b0' },
+                    '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
+                  }
+                }}
+              />
 
-              {/* Email */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^\S+@\S+\.\S+$/i,
-                      message: 'Invalid email address'
-                    }
-                  })}
-                  error={!!errors.email || !!backendErrors.email}
-                  helperText={backendErrors.email || errors.email?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                required
+                variant="outlined"
+                label="Email"
+                type="email"
+                placeholder="your.email@example.com"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^\S+@\S+\.\S+$/i,
+                    message: 'Invalid email address'
+                  }
+                })}
+                error={!!errors.email || !!backendErrors.email}
+                helperText={backendErrors.email || errors.email?.message}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': { borderColor: '#9c27b0' },
+                    '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
+                  }
+                }}
+              />
 
-              {/* Phone Number */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Phone Number"
-                  placeholder="0xxxxxxxxx"
-                  {...register('phoneNumber', {
-                    required: 'Phone number is required',
-                    pattern: {
-                      value: /^0[356789]\d{8}$/,
-                      message: 'Phone number must start with 0 and have 10 digits'
-                    }
-                  })}
-                  error={!!errors.phoneNumber || !!backendErrors.phoneNumber}
-                  helperText={backendErrors.phoneNumber || errors.phoneNumber?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                required
+                variant="outlined"
+                label="Phone Number"
+                placeholder="0xxxxxxxxx"
+                {...register('phoneNumber', {
+                  required: 'Phone number is required',
+                  pattern: {
+                    value: /^0[356789]\d{8}$/,
+                    message: 'Phone number must start with 0 and have 10 digits'
+                  }
+                })}
+                error={!!errors.phoneNumber || !!backendErrors.phoneNumber}
+                helperText={backendErrors.phoneNumber || errors.phoneNumber?.message}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': { borderColor: '#9c27b0' },
+                    '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
+                  }
+                }}
+              />
 
-              {/* Password */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Password"
-                  type="password"
-                  placeholder="Min 8 characters, uppercase, lowercase, number, special character"
-                  {...register('password', {
-                    required: 'Password is required'
-                  })}
-                  error={!!errors.password || !!backendErrors.password}
-                  helperText={backendErrors.password || errors.password?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                required
+                variant="outlined"
+                label="Password"
+                type="password"
+                placeholder="Min 8 characters, uppercase, lowercase, number, special character"
+                {...register('password', {
+                  required: 'Password is required'
+                })}
+                error={!!errors.password || !!backendErrors.password}
+                helperText={backendErrors.password || errors.password?.message}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': { borderColor: '#9c27b0' },
+                    '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
+                  }
+                }}
+              />
 
-              {/* Confirm Password */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Confirm Password"
-                  type="password"
-                  placeholder="Re-enter your password"
-                  {...register('confirmPassword', {
-                    required: 'Please confirm your password',
-                    validate: (value) => value === watch('password') || 'Passwords do not match'
-                  })}
-                  error={!!errors.confirmPassword || !!backendErrors.confirmPassword}
-                  helperText={backendErrors.confirmPassword || errors.confirmPassword?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
-            </Grid>
+              <TextField
+                fullWidth
+                required
+                variant="outlined"
+                label="Confirm Password"
+                type="password"
+                placeholder="Re-enter your password"
+                {...register('confirmPassword', {
+                  required: 'Please confirm your password',
+                  validate: (value) => value === watch('password') || 'Passwords do not match'
+                })}
+                error={!!errors.confirmPassword || !!backendErrors.confirmPassword}
+                helperText={backendErrors.confirmPassword || errors.confirmPassword?.message}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': { borderColor: '#9c27b0' },
+                    '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
+                  }
+                }}
+              />
+
+            </Stack>
 
             {/* Submit Button */}
             <Button

@@ -18,7 +18,6 @@ import {
 const InternshipAssignmentsManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -39,7 +38,6 @@ const InternshipAssignmentsManagement = () => {
   const fetchAssignments = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await internshipAssignmentApi.getAllAssignments(
         search,
         page,
@@ -48,7 +46,8 @@ const InternshipAssignmentsManagement = () => {
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
-      setError("Error loading data: " + (err.message || "Unknown error"));
+      console.error("Error status:", err?.response?.status);
+      console.error("Error data:", err?.response?.data);
     } finally {
       setLoading(false);
     }
@@ -94,7 +93,7 @@ const InternshipAssignmentsManagement = () => {
       handleCloseDialog();
       fetchAssignments();
     } catch (err) {
-      setError("Error saving data: " + err.message);
+      console.error("Error saving assignment:", err);
     } finally {
       setLoading(false);
     }
@@ -118,7 +117,6 @@ const InternshipAssignmentsManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        error={error}
         onEdit={(assignment) => handleOpenDialog(assignment)}
         onAdd={() => handleOpenDialog()}
         totalCount={totalCount}

@@ -18,133 +18,57 @@ import InternshipAssignmentsManagement from "./pages/management/InternshipAssign
 import AssessmentRoundsManagement from "./pages/management/AssessmentRoundsManagement";
 import EvaluationCriteriaManagement from "./pages/management/EvaluationCriteriaManagement";
 import AssessmentResultsManagement from "./pages/management/AssessmentResultsManagement";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        theme="colored"
+      />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-      {/* Dashboard Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <AppLayout>
-            <MainDashboard />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/admin-dashboard"
-        element={
-          <AppLayout>
-            <AdminDashboard />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/mentor-dashboard"
-        element={
-          <AppLayout>
-            <MentorDashboard />
-          </AppLayout>
-        }
-      />
+        {/* Dashboard Routes */}
+        <Route element={<ProtectedRoute />}>
+          {/* Route này thường dành cho Student, hoặc làm trang chuyển tiếp */}
+          <Route path="/dashboard" element={<AppLayout><MainDashboard /></AppLayout>} />
 
-      {/* Management Routes */}
-      <Route
-        path="/management/users"
-        element={
-          <AppLayout>
-            <UsersManagement />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/management/students"
-        element={
-          <AppLayout>
-            <StudentsManagement />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/management/mentors"
-        element={
-          <AppLayout>
-            <MentorsManagement />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/management/phases"
-        element={
-          <AppLayout>
-            <InternshipPhasesManagement />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/management/assignments"
-        element={
-          <AppLayout>
-            <InternshipAssignmentsManagement />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/management/assessment-rounds"
-        element={
-          <AppLayout>
-            <AssessmentRoundsManagement />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/management/evaluation-criteria"
-        element={
-          <AppLayout>
-            <EvaluationCriteriaManagement />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/management/assessment-results"
-        element={
-          <AppLayout>
-            <AssessmentResultsManagement />
-          </AppLayout>
-        }
-      />
+          {/* Bất kỳ ai cũng có thể xem chi tiết profile user (nếu cần) */}
+          <Route path="/user/:userId" element={<AppLayout><UserDetailPage /></AppLayout>} />
 
-      {/* Detail Routes */}
-      <Route
-        path="/student/:studentId"
-        element={
-          <AppLayout>
-            <StudentDetailPage />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/mentor/:mentorId"
-        element={
-          <AppLayout>
-            <MentorDetailPage />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/user/:userId"
-        element={
-          <AppLayout>
-            <UserDetailPage />
-          </AppLayout>
-        }
-      />
-    </Routes>
+          <Route path="/admin-dashboard" element={<AppLayout><AdminDashboard /></AppLayout>} />
+
+          {/* Toàn bộ các trang Quản lý (Management) đặt trong này */}
+          <Route path="/management/users" element={<AppLayout><UsersManagement /></AppLayout>} />
+          <Route path="/management/students" element={<AppLayout><StudentsManagement /></AppLayout>} />
+          <Route path="/management/mentors" element={<AppLayout><MentorsManagement /></AppLayout>} />
+          <Route path="/management/phases" element={<AppLayout><InternshipPhasesManagement /></AppLayout>} />
+          <Route path="/management/assignments" element={<AppLayout><InternshipAssignmentsManagement /></AppLayout>} />
+          <Route path="/management/assessment-rounds" element={<AppLayout><AssessmentRoundsManagement /></AppLayout>} />
+          <Route path="/management/evaluation-criteria" element={<AppLayout><EvaluationCriteriaManagement /></AppLayout>} />
+          <Route path="/management/assessment-results" element={<AppLayout><AssessmentResultsManagement /></AppLayout>} />
+
+          <Route path="/mentor-dashboard" element={<AppLayout><MentorDashboard /></AppLayout>} />
+          <Route path="/mentor/:mentorId" element={<AppLayout><MentorDetailPage /></AppLayout>} />
+          {/* Ví dụ: Chi tiết sinh viên thì cả Admin và Mentor phụ trách đều xem được */}
+          <Route path="/student/:studentId" element={<AppLayout><StudentDetailPage /></AppLayout>} />
+
+        </Route>
+        {/* Bắt các đường dẫn không tồn tại -> Đẩy về login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </>
   );
 }
 

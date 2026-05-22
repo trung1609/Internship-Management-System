@@ -4,13 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9e5b70bf-e1f4-466b-831e-0d53d59d8f2d" name="Changes" comment="Refactor transaction management in AssessmentResultServiceImpl and InternshipAssignmentServiceImpl to use rollback for exceptions, streamline error handling, and improve code consistency.">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="9e5b70bf-e1f4-466b-831e-0d53d59d8f2d" name="Changes" comment="refactor: update phaseId to phaseName in AssessmentRoundsManagement; change assignedDate type to LocalDate in InternshipAssignment; adjust date format in StudentResponse and InternshipAssignmentResponse">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/dto/response/AssessmentResultResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/dto/response/AssessmentResultResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/entity/AssessmentResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/entity/AssessmentResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/service/impl/AssessmentResultServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/service/impl/AssessmentResultServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/api/axiosClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/api/axiosClient.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/RegisterPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/AssessmentResultsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/AssessmentResultsManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/AssessmentRoundsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/AssessmentRoundsManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/EvaluationCriteriaManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/EvaluationCriteriaManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/InternshipAssignmentsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/InternshipAssignmentsManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/InternshipPhasesManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/InternshipPhasesManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/MentorsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/MentorsManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/StudentsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/StudentsManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/UsersManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/UsersManagement.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,7 +34,7 @@
   <component name="CopilotChats">
     <option name="panelChat">
       <chat>
-        <option name="activeSessionId" value="818cb7b5-0c99-4f0e-8895-081b39600ab7" />
+        <option name="activeSessionId" value="79316ec3-3cfc-40ff-849e-27a72a1f7a7f" />
         <option name="sessions">
           <session>
             <option name="chatType" value="PANEL" />
@@ -41,6 +52,14 @@
             <option name="modelValue" value="claude-haiku-4.5" />
             <option name="targetType" value="LOCAL" />
           </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="79316ec3-3cfc-40ff-849e-27a72a1f7a7f" />
+            <option name="modeId" value="Ask" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="targetType" value="LOCAL" />
+          </session>
         </option>
         <option name="type" value="PANEL" />
       </chat>
@@ -49,6 +68,7 @@
   <component name="CopilotPersistence">
     <persistenceIdMap>
       <entry key="_D:/Trung/RikkeiEdu/Spring Web/Intership-Management-System" value="3BLcUWNvmFjawsmNXjmyBGzlyuW" />
+      <entry key="_D:/Trung/RikkeiEdu/Spring Web/Intership-Management-System/Backend" value="3E51MyEujR3F3KsnWXpDzvS0UYZ" />
     </persistenceIdMap>
   </component>
   <component name="CopilotUserSelectedModel">
@@ -58,6 +78,7 @@
     </selectedModels>
   </component>
   <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="133" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="ExternalProjectsData">
@@ -290,7 +311,9 @@
       <workItem from="1779154877626" duration="5154000" />
       <workItem from="1779195924878" duration="80000" />
       <workItem from="1779446868298" duration="259000" />
-      <workItem from="1779447174559" duration="1265000" />
+      <workItem from="1779447174559" duration="1545000" />
+      <workItem from="1779453583043" duration="352000" />
+      <workItem from="1779454001016" duration="3346000" />
     </task>
     <servers />
   </component>

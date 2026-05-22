@@ -14,7 +14,6 @@ import {
 const InternshipPhasesManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -35,7 +34,6 @@ const InternshipPhasesManagement = () => {
   const fetchPhases = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await internshipPhaseApi.getAllPhases(
         search,
         page,
@@ -44,7 +42,8 @@ const InternshipPhasesManagement = () => {
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
-      setError("Error loading data: " + (err.message || "Unknown error"));
+      console.error("Error status:", err?.response?.status);
+      console.error("Error data:", err?.response?.data);
     } finally {
       setLoading(false);
     }
@@ -87,7 +86,7 @@ const InternshipPhasesManagement = () => {
       handleCloseDialog();
       fetchPhases();
     } catch (err) {
-      setError("Error saving data: " + err.message);
+      console.error("Error saving phase:", err);
     } finally {
       setLoading(false);
     }
@@ -99,7 +98,7 @@ const InternshipPhasesManagement = () => {
       await internshipPhaseApi.deletePhase(phaseId);
       fetchPhases();
     } catch (err) {
-      setError("Error deleting data: " + err.message);
+      console.error("Error deleting phase:", err);
     } finally {
       setLoading(false);
     }
@@ -120,7 +119,6 @@ const InternshipPhasesManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        error={error}
         onEdit={(phase) => handleOpenDialog(phase)}
         onDelete={handleDelete}
         onAdd={() => handleOpenDialog()}

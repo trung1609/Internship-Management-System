@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,7 +42,7 @@ public class AssessmentResult {
     @JoinColumn(name = "evaluation_id", nullable = false)
     private User evaluationId;
 
-    private LocalDateTime evaluationDate;
+    private LocalDate evaluationDate;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

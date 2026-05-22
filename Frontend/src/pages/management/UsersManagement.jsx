@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { DataTable } from "../../components/DataTable";
 import { userApi } from "../../api/resourceApi";
+import { toast } from "react-toastify"; // IMPORT TOAST ĐỂ BÁO THÀNH CÔNG
 import {
   Box,
   Button,
@@ -18,7 +19,7 @@ import {
 const UsersManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -42,24 +43,13 @@ const UsersManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      setError(null);
       console.log("Fetching users with role:", role);
-      const response = await userApi.getAllUsers(
-        role,
-        page,
-        rowsPerPage,
-        search,
-      );
-      console.log("Users API Response:", response);
-      console.log("Users data content:", response?.content);
-      console.log("Total count:", response?.totalElements);
+      const response = await userApi.getAllUsers(role, page, rowsPerPage, search);
+      
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
       console.error("Error fetching users:", err);
-      console.error("Error status:", err?.response?.status);
-      console.error("Error data:", err?.response?.data);
-      setError("Error loading data: " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -99,28 +89,36 @@ const UsersManagement = () => {
       setLoading(true);
       if (editingUser) {
         const payload = { ...formData };
-        delete payload.password; 
+        delete payload.password;
 
         await userApi.updateUser(editingUser.userId, payload);
+        toast.success("Cập nhật người dùng thành công!"); // Báo thành công
       } else {
         await userApi.createUser(formData);
+        toast.success("Thêm mới người dùng thành công!"); // Báo thành công
       }
       handleCloseDialog();
       fetchUsers();
     } catch (err) {
-      setError("Error saving data: " + err.message);
+      // ĐÃ BỎ setError ở đây. Lỗi 400 (validation) sẽ do axiosClient bắt và báo Toast
+      console.error("Error saving data:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (userId) => {
+    // Thêm hàm confirm trước khi xóa cho an toàn
+    if (!window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) return;
+    
     try {
       setLoading(true);
       await userApi.deleteUser(userId);
+      toast.success("Xóa người dùng thành công!"); // Báo thành công
       fetchUsers();
     } catch (err) {
-      setError("Error deleting data: " + err.message);
+      // Lỗi sẽ tự động popup
+      console.error("Error deleting data:", err);
     } finally {
       setLoading(false);
     }
@@ -175,7 +173,6 @@ const UsersManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        error={error}
         onEdit={(user) => handleOpenDialog(user)}
         onDelete={handleDelete}
         onAdd={() => handleOpenDialog()}
@@ -275,4 +272,4 @@ const UsersManagement = () => {
   );
 };
 
-export default UsersManagement;
+export default UsersManagement; 

@@ -14,7 +14,6 @@ import {
 const StudentsManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -35,7 +34,6 @@ const StudentsManagement = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await studentApi.getAllStudents(
         page,
         rowsPerPage,
@@ -50,7 +48,6 @@ const StudentsManagement = () => {
       console.error("Error fetching students:", err);
       console.error("Error status:", err?.response?.status);
       console.error("Error data:", err?.response?.data);
-      setError("Error loading data: " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -99,7 +96,7 @@ const StudentsManagement = () => {
       handleCloseDialog();
       fetchStudents();
     } catch (err) {
-      setError("Error saving data: " + err.message);
+      console.error("Error saving student:", err);
     } finally {
       setLoading(false);
     }
@@ -124,7 +121,6 @@ const StudentsManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        error={error}
         onEdit={(student) => handleOpenDialog(student)}
         onAdd={() => handleOpenDialog()}
         totalCount={totalCount}

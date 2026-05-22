@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify'; // Import thư viện thông báo
 
 const BASE_URL = 'http://localhost:8080';
 
@@ -9,6 +10,8 @@ const axiosClient = axios.create({
     },
     withCredentials: true, 
 });
+
+// 1. REQUEST INTERCEPTOR
 axiosClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('accessToken');
@@ -36,12 +39,17 @@ const processQueue = (error, token = null) => {
     failedQueue = [];
 };
 
+// 2. RESPONSE INTERCEPTOR
 axiosClient.interceptors.response.use(
     (response) => {
         return response.data;
     },
     async (error) => {
         const originalRequest = error.config;
+        
+        // ==============================================================
+        // A. XỬ LÝ TOKEN HẾT HẠN (LỖI 401)
+        // ==============================================================
         if (error.response?.status === 401 && !originalRequest._retry) {
             
             if (isRefreshing) {
@@ -77,6 +85,67 @@ axiosClient.interceptors.response.use(
             } finally {
                 isRefreshing = false;
             }
+        }
+
+        // ==============================================================
+        // B. XỬ LÝ THÔNG BÁO LỖI TOÀN CỤC (Áp dụng cấu trúc ApiResponse)
+        // ==============================================================
+        if (error.response) {
+            const status = error.response.status;
+            const errorData = error.response.data; // Đây là object ApiResponse từ backend
+            
+            const serverMessage = errorData?.message || 'Đã có lỗi xảy ra!';
+            const serverError = errorData?.error;
+
+            switch (status) {
+                case 400: // Bad Request
+                    // Nếu backend trả về Object chứa danh sách lỗi (như ảnh bạn chụp)
+                    if (serverError && typeof serverError === 'object' && !Array.isArray(serverError)) {
+                        // Trích xuất tất cả các câu thông báo lỗi ra thành một mảng
+                        const errorMessages = Object.values(serverError);
+                        
+                        if (errorMessages.length > 0) {
+                            // Lấy câu lỗi đầu tiên tìm được để bật Toast
+                            toast.error(errorMessages[0]); 
+                        } else {
+                            toast.error(serverMessage || 'Dữ liệu không hợp lệ!');
+                        }
+                    } 
+                    // Nếu backend trả về một chuỗi string bình thường
+                    else if (typeof serverError === 'string') {
+                        toast.error(serverError);
+                    } 
+                    // Nếu không có error, dùng đỡ message ("VALIDATION_ERROR")
+                    else {
+                        toast.warning(serverMessage);
+                    }
+                    break;
+
+                case 403: // Forbidden
+                    toast.error('Bạn không có quyền thực hiện hành động này!');
+                    break;
+
+                case 404: // Not Found
+                    toast.error(serverMessage !== 'SUCCESS' ? serverMessage : 'Không tìm thấy dữ liệu yêu cầu!');
+                    break;
+
+                case 409: // Conflict
+                    toast.error(serverMessage);
+                    break;
+
+                case 500: // Internal Server Error
+                    toast.error(serverMessage !== 'SUCCESS' ? serverMessage : 'Lỗi hệ thống từ máy chủ (500)!');
+                    break;
+
+                default:
+                    if (status !== 401) {
+                        toast.error(`Lỗi ${status}: ${serverMessage}`);
+                    }
+                    break;
+            }
+        } else if (error.request) {
+            // Trường hợp Server bị tắt hoặc mất kết nối mạng
+            toast.error('Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại!');
         }
 
         return Promise.reject(error);

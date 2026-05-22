@@ -92,7 +92,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                     .score(req.getScore())
                     .comment(req.getComment())
                     .evaluationId(user)
-                    .evaluationDate(LocalDateTime.now())
+                    .evaluationDate(LocalDateTime.now().toLocalDate())
                     .build();
                 }).toList();
 

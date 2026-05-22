@@ -14,7 +14,6 @@ import {
 const AssessmentRoundsManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -36,7 +35,6 @@ const AssessmentRoundsManagement = () => {
   const fetchRounds = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await assessmentRoundsApi.getAllRounds(
         search,
         null,
@@ -46,7 +44,7 @@ const AssessmentRoundsManagement = () => {
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
-      setError("Error loading data: " + (err.message || "Unknown error"));
+      console.error("Error loading assessment rounds:", err);
     } finally {
       setLoading(false);
     }
@@ -91,7 +89,7 @@ const AssessmentRoundsManagement = () => {
       handleCloseDialog();
       fetchRounds();
     } catch (err) {
-      setError("Error saving data: " + err.message);
+      console.error("Error saving assessment round:", err);
     } finally {
       setLoading(false);
     }
@@ -103,7 +101,7 @@ const AssessmentRoundsManagement = () => {
       await assessmentRoundsApi.deleteRound(roundId);
       fetchRounds();
     } catch (err) {
-      setError("Error deleting data: " + err.message);
+      console.error("Error deleting assessment round:", err);
     } finally {
       setLoading(false);
     }
@@ -125,7 +123,6 @@ const AssessmentRoundsManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        error={error}
         onEdit={(round) => handleOpenDialog(round)}
         onDelete={handleDelete}
         onAdd={() => handleOpenDialog()}

@@ -14,7 +14,6 @@ import {
 const EvaluationCriteriaManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -22,7 +21,7 @@ const EvaluationCriteriaManagement = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingCriteria, setEditingCriteria] = useState(null);
   const [formData, setFormData] = useState({
-    criteriaName: "",
+    criterionName: "",
     description: "",
     maxScore: "",
   });
@@ -34,7 +33,6 @@ const EvaluationCriteriaManagement = () => {
   const fetchCriteria = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await evaluationCriteriaApi.getAllCriteria(
         search,
         page,
@@ -43,7 +41,7 @@ const EvaluationCriteriaManagement = () => {
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
-      setError("Error loading data: " + (err.message || "Unknown error"));
+      console.error("Error loading criteria:", err);
     } finally {
       setLoading(false);
     }
@@ -53,14 +51,14 @@ const EvaluationCriteriaManagement = () => {
     if (criteria) {
       setEditingCriteria(criteria);
       setFormData({
-        criteriaName: criteria.criteriaName || "",
+        criterionName: criteria.criterionName || "",
         description: criteria.description || "",
         maxScore: criteria.maxScore || "",
       });
     } else {
       setEditingCriteria(null);
       setFormData({
-        criteriaName: "",
+        criterionName: "",
         description: "",
         maxScore: "",
       });
@@ -87,7 +85,7 @@ const EvaluationCriteriaManagement = () => {
       handleCloseDialog();
       fetchCriteria();
     } catch (err) {
-      setError("Error saving data: " + err.message);
+      console.error("Error saving criteria:", err);
     } finally {
       setLoading(false);
     }
@@ -99,7 +97,7 @@ const EvaluationCriteriaManagement = () => {
       await evaluationCriteriaApi.deleteCriteria(criteriaId);
       fetchCriteria();
     } catch (err) {
-      setError("Error deleting data: " + err.message);
+      console.error("Error deleting criteria:", err);
     } finally {
       setLoading(false);
     }
@@ -119,7 +117,6 @@ const EvaluationCriteriaManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        error={error}
         onEdit={(criteria) => handleOpenDialog(criteria)}
         onDelete={handleDelete}
         onAdd={() => handleOpenDialog()}
@@ -152,9 +149,9 @@ const EvaluationCriteriaManagement = () => {
           <TextField
             fullWidth
             label="Tên tiêu chí"
-            value={formData.criteriaName}
+            value={formData.criterionName}
             onChange={(e) =>
-              setFormData({ ...formData, criteriaName: e.target.value })
+              setFormData({ ...formData, criterionName: e.target.value })
             }
             margin="normal"
           />
