@@ -4,25 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9e5b70bf-e1f4-466b-831e-0d53d59d8f2d" name="Changes" comment="refactor: update phaseId to phaseName in AssessmentRoundsManagement; change assignedDate type to LocalDate in InternshipAssignment; adjust date format in StudentResponse and InternshipAssignmentResponse">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/dto/response/AssessmentResultResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/dto/response/AssessmentResultResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/entity/AssessmentResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/entity/AssessmentResult.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/com/trung/service/impl/AssessmentResultServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/com/trung/service/impl/AssessmentResultServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/api/axiosClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/api/axiosClient.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/RegisterPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/AssessmentResultsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/AssessmentResultsManagement.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/AssessmentRoundsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/AssessmentRoundsManagement.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/EvaluationCriteriaManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/EvaluationCriteriaManagement.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/InternshipAssignmentsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/InternshipAssignmentsManagement.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/InternshipPhasesManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/InternshipPhasesManagement.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/MentorsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/MentorsManagement.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/StudentsManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/StudentsManagement.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/src/pages/management/UsersManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/src/pages/management/UsersManagement.jsx" afterDir="false" />
-    </list>
+    <list default="true" id="9e5b70bf-e1f4-466b-831e-0d53d59d8f2d" name="Changes" comment="feat: integrate react-toastify for notifications; refactor routing in App component to include ProtectedRoute; update AssessmentResult to use LocalDate for evaluationDate; enhance AssessmentResultsManagement with detailed result handling" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -313,7 +295,7 @@
       <workItem from="1779446868298" duration="259000" />
       <workItem from="1779447174559" duration="1545000" />
       <workItem from="1779453583043" duration="352000" />
-      <workItem from="1779454001016" duration="3346000" />
+      <workItem from="1779454001016" duration="3511000" />
     </task>
     <servers />
   </component>
