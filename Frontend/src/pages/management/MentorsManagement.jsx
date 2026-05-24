@@ -9,7 +9,10 @@ import {
   DialogActions,
   TextField,
   Button,
+  Typography,
+  Paper,
 } from "@mui/material";
+import { toast } from "react-toastify";
 
 const MentorsManagement = () => {
   const [data, setData] = useState([]);
@@ -77,8 +80,10 @@ const MentorsManagement = () => {
       setLoading(true);
       if (editingMentor) {
         await mentorApi.updateMentor(editingMentor.id, formData);
+        toast.success("Cập nhật mentor thành công!");
       } else {
         await mentorApi.createMentor(formData);
+        toast.success("Thêm mentor thành công!");
       }
       handleCloseDialog();
       fetchMentors();
@@ -99,103 +104,79 @@ const MentorsManagement = () => {
   ];
 
   return (
-    <Box>
-      <DataTable
-        title="Mentor Management"
-        columns={columns}
-        data={data}
-        loading={loading}
-        onEdit={(mentor) => handleOpenDialog(mentor)}
-        onAdd={() => handleOpenDialog()}
-        totalCount={totalCount}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(newPage) => setPage(newPage)}
-        onRowsPerPageChange={(newRowsPerPage) => {
-          setRowsPerPage(newRowsPerPage);
-          setPage(0);
-        }}
-      />
+    <Box sx={{ p: 3 }}>
+      {/* 1. Header trang chuyên nghiệp */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: "#1a237e" }}>Quản lý Cố vấn</Typography>
+          <Typography variant="body2" color="text.secondary">Danh sách các cố vấn trong hệ thống</Typography>
+        </Box>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={() => handleOpenDialog()}
+          sx={{ borderRadius: 2, px: 3, boxShadow: 3 }}
+        >
+          Thêm mentor
+        </Button>
+      </Box>
 
-      {/* Add/Edit Dialog */}
+      {/* 2. Bảng dữ liệu trong Paper có đổ bóng */}
+      <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 2, overflow: "hidden" }}>
+        <DataTable
+          title="Mentor Management"
+          columns={columns}
+          data={data}
+          loading={loading}
+          onEdit={(mentor) => handleOpenDialog(mentor)}
+          totalCount={totalCount}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(newPage) => setPage(newPage)}
+          onRowsPerPageChange={(newRowsPerPage) => {
+            setRowsPerPage(newRowsPerPage);
+            setPage(0);
+          }}
+        />
+      </Paper>
+
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
         maxWidth="sm"
         fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
       >
-        <DialogTitle>
-          {editingMentor ? "Update Mentor" : "Add New Mentor"}
+        <DialogTitle sx={{ fontWeight: 'bold', borderBottom: '1px solid #eee', mb: 1 }}>
+          {editingMentor ? "Cập nhật Mentor" : "Thêm mới Mentor"}
         </DialogTitle>
+
+        {/* Giữ nguyên DialogContent */}
         <DialogContent sx={{ pt: 2 }}>
           {!editingMentor && (
-            <TextField
-              fullWidth
-              label="User ID"
-              value={formData.userId}
-              onChange={(e) =>
-                setFormData({ ...formData, userId: e.target.value })
-              }
-              margin="normal"
-            />
+            <TextField fullWidth label="User ID" value={formData.userId}
+              onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+              disabled={!!editingMentor} margin="normal" />
           )}
           {editingMentor && (
-            <TextField
-              fullWidth
-              label="Email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              margin="normal"
-            />
+            <>
+              <TextField fullWidth label="Email" value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })} margin="normal" />
+              <TextField fullWidth label="Họ và tên" value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} margin="normal" />
+              <TextField fullWidth label="Số điện thoại" value={formData.phoneNumber}
+                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} margin="normal" />
+            </>
           )}
-          {editingMentor && (
-            <TextField
-              fullWidth
-              label="Họ và tên"
-              value={formData.fullName}
-              onChange={(e) =>
-                setFormData({ ...formData, fullName: e.target.value })
-              }
-              margin="normal"
-            />
-          )}
-          {editingMentor && (
-            <TextField
-              fullWidth
-              label="Số điện thoại"
-              value={formData.phoneNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, phoneNumber: e.target.value })
-              }
-              margin="normal"
-            />
-          )}
-          <TextField
-            fullWidth
-            label="Phòng ban"
-            value={formData.department}
-            onChange={(e) =>
-              setFormData({ ...formData, department: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Học hàm/Học vị"
-            value={formData.academicRank}
-            onChange={(e) =>
-              setFormData({ ...formData, academicRank: e.target.value })
-            }
-            margin="normal"
-          />
+          <TextField fullWidth label="Phòng ban" value={formData.department}
+            onChange={(e) => setFormData({ ...formData, department: e.target.value })} margin="normal" />
+          <TextField fullWidth label="Học hàm/Học vị" value={formData.academicRank}
+            onChange={(e) => setFormData({ ...formData, academicRank: e.target.value })} margin="normal" />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button onClick={handleSave} variant="contained">
-            Lưu
-          </Button>
+
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={handleCloseDialog} color="inherit">Hủy</Button>
+          <Button onClick={handleSave} variant="contained" sx={{ px: 4, borderRadius: 2 }}>Lưu</Button>
         </DialogActions>
       </Dialog>
     </Box>

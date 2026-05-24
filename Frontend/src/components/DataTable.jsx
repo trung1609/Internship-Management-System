@@ -22,8 +22,9 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
+  Visibility as DetailIcon,
 } from "@mui/icons-material";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const DataTable = ({
   columns,
@@ -41,21 +42,26 @@ export const DataTable = ({
   searchValue = "",
   onSearchChange = null,
   title = "Data",
+  onDetail = null,
+
+  // 2 PROPS MỚI GIÚP COMPONENT NÀY DÙNG ĐƯỢC CHO MỌI BẢNG TRONG DỰ ÁN
+  idField = "id",
+  nameField = "",
 }) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
 
-  const handleDeleteClick = (id) => {
-    setSelectedId(id);
+  const handleDeleteClick = (row) => {
+    setSelectedRow(row);
     setOpenDeleteDialog(true);
   };
 
   const handleConfirmDelete = () => {
-    if (onDelete && selectedId) {
-      onDelete(selectedId);
+    if (onDelete && selectedRow) {
+      onDelete(selectedRow); // Vẫn truyền nguyên cả row ra ngoài
     }
     setOpenDeleteDialog(false);
-    setSelectedId(null);
+    setSelectedRow(null);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -68,14 +74,7 @@ export const DataTable = ({
 
   return (
     <Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <h2>{title}</h2>
         {onAdd && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={onAdd}>
@@ -96,26 +95,18 @@ export const DataTable = ({
         </Box>
       )}
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <TableContainer component={Paper}>
         {loading ? (
-          <Box sx={{ p: 3, textAlign: "center" }}>
-            <CircularProgress />
-          </Box>
+          <Box sx={{ p: 3, textAlign: "center" }}><CircularProgress /></Box>
         ) : (
           <>
             <Table>
               <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableCell key={column.field} sx={{ fontWeight: "bold" }}>
-                      {column.label}
-                    </TableCell>
+                    <TableCell key={column.field} sx={{ fontWeight: "bold" }}>{column.label}</TableCell>
                   ))}
                   {(onEdit || onDelete) && (
                     <TableCell sx={{ fontWeight: "bold" }}>Hành động</TableCell>
@@ -125,42 +116,36 @@ export const DataTable = ({
               <TableBody>
                 {data.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={columns.length + (onEdit || onDelete ? 1 : 0)}
-                      sx={{ textAlign: "center", py: 3 }}
-                    >
+                    <TableCell colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} sx={{ textAlign: "center", py: 3 }}>
                       Không có dữ liệu
                     </TableCell>
                   </TableRow>
                 ) : (
-                  data.map((row) => (
-                    <TableRow key={row.id} hover>
+                  data.map((row, index) => (
+                    // SỬ DỤNG idField ĐỂ ĐỌC KHÓA CHÍNH TỰ ĐỘNG
+                    <TableRow key={row[idField] || index} hover>
                       {columns.map((column) => (
-                        <TableCell key={`${row.id}-${column.field}`}>
-                          {column.render
-                            ? column.render(row[column.field], row)
-                            : row[column.field]}
+                        <TableCell key={`${index}-${column.field}`}>
+                          {column.render ? column.render(row[column.field], row) : row[column.field]}
                         </TableCell>
                       ))}
-                      {(onEdit || onDelete) && (
+                      {(onEdit || onDelete || onDetail) && ( // Sửa điều kiện hiển thị cột Action
                         <TableCell>
                           <Box sx={{ display: "flex", gap: 1 }}>
                             {onEdit && (
-                              <IconButton
-                                size="small"
-                                color="primary"
-                                onClick={() => onEdit(row)}
-                              >
+                              <IconButton size="small" color="primary" onClick={() => onEdit(row)}>
                                 <EditIcon />
                               </IconButton>
                             )}
                             {onDelete && (
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleDeleteClick(row.id)}
-                              >
+                              <IconButton size="small" color="error" onClick={() => handleDeleteClick(row)}>
                                 <DeleteIcon />
+                              </IconButton>
+                            )}
+                            {/* THÊM ĐOẠN NÀY ĐỂ HIỂN THỊ NÚT CHI TIẾT */}
+                            {onDetail && (
+                              <IconButton size="small" color="info" onClick={() => onDetail(row)}>
+                                <DetailIcon />
                               </IconButton>
                             )}
                           </Box>
@@ -186,26 +171,18 @@ export const DataTable = ({
         )}
       </TableContainer>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-      >
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
         <DialogTitle>Xác nhận xóa</DialogTitle>
         <DialogContent>
-          <p>Bạn có chắc chắn muốn xóa mục này?</p>
+          {/* ĐỌC TÊN TỰ ĐỘNG DỰA VÀO nameField (NẾU CÓ) */}
+          <p>Bạn có chắc chắn muốn xóa {nameField && selectedRow ? <b>{selectedRow[nameField]}</b> : "mục này"} không?</p>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialog(false)}>Hủy</Button>
-          <Button
-            onClick={handleConfirmDelete}
-            color="error"
-            variant="contained"
-          >
-            Xóa
-          </Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">Xóa</Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
+
 };

@@ -54,4 +54,5 @@ public class InternshipPhaseController {
     public ResponseEntity<ApiResponse<String>> deleteInternshipPhase(@PathVariable Long phaseId) throws ResourceNotFoundException {
         return new ResponseEntity<>(internshipPhaseService.deleteInternshipPhase(phaseId), HttpStatus.OK);
     }
+
 }

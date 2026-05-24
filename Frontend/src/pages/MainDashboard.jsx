@@ -1,83 +1,58 @@
 import { useContext } from "react";
-import { Box, Typography, Card, CardContent } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import { AuthContext } from "../context/AuthContext";
 
+// Import 3 trang Dashboard riêng biệt của bạn vào đây
+import AdminDashboard from "./AdminDashboard";
+import MentorDashboard from "./MentorDashboard";
+import StudentDashboard from "./StudentDashboard";
+
 const MainDashboard = () => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
 
-  return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Welcome, {user?.fullName || user?.username}!
-      </Typography>
-
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: 3,
-          mb: 3,
-        }}
-      >
-        <Card>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Role
-            </Typography>
-            <Typography variant="h5">
-              {user?.role === "ADMIN" || user?.role === "ROLE_ADMIN"
-                ? "Administrator"
-                : user?.role === "MENTOR" || user?.role === "ROLE_MENTOR"
-                  ? "Mentor"
-                  : "Student"}
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Email
-            </Typography>
-            <Typography variant="h6">{user?.email}</Typography>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Status
-            </Typography>
-            <Typography variant="h6">
-              {user?.isActive ? "Active" : "Inactive"}
-            </Typography>
-          </CardContent>
-        </Card>
+  // 1. Hiển thị loading trong lúc đợi context check token
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+        <CircularProgress />
       </Box>
+    );
+  }
 
-      <Card>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            User Guide
-          </Typography>
-          <Typography sx={{ mb: 1 }}>
-            Use the left menu to navigate to different features of the system.
-            Depending on your role, you will have access to different functions.
-          </Typography>
-          <Typography>
-            • <strong>Admin:</strong> Manage the entire system
-          </Typography>
-          <Typography>
-            • <strong>Mentor:</strong> Manage students and assess results
-          </Typography>
-          <Typography>
-            • <strong>Student:</strong> View personal information and assessment
-            results
-          </Typography>
-        </CardContent>
-      </Card>
-    </Box>
-  );
+  // 2. Dự phòng nếu không có thông tin user
+  if (!user) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Typography color="error">Không tìm thấy thông tin tài khoản!</Typography>
+      </Box>
+    );
+  }
+
+  // 3. ĐIỀU HƯỚNG COMPONENT DỰA TRÊN ROLE
+  const role = user.role;
+
+  if (role === "ROLE_ADMIN" || role === "ADMIN") {
+    // Trả về nguyên trang AdminDashboard
+    return <AdminDashboard />;
+  } 
+  else if (role === "ROLE_MENTOR" || role === "MENTOR") {
+    // Trả về nguyên trang MentorDashboard
+    return <MentorDashboard />;
+  } 
+  else if (role === "ROLE_STUDENT" || role === "STUDENT") {
+    // Trả về nguyên trang StudentDashboard
+    return <StudentDashboard />;
+  } 
+  else {
+    // Nếu role không khớp với 3 role trên
+    return (
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h5" color="error">
+          Vai trò (Role) của bạn không hợp lệ hoặc chưa được cấp quyền truy cập bảng điều khiển.
+        </Typography>
+      </Box>
+    );
+  }
 };
 
 export default MainDashboard;

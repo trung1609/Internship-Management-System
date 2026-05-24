@@ -49,4 +49,5 @@ public class AssessmentResult {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
 }

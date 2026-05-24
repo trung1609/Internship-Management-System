@@ -20,6 +20,8 @@ import EvaluationCriteriaManagement from "./pages/management/EvaluationCriteriaM
 import AssessmentResultsManagement from "./pages/management/AssessmentResultsManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
+import AssessmentRoundDetail from "./pages/management/AssessmentRoundDetail";
+import AssessmentResultDetail from "./pages/management/AssessmentResultDetail";
 
 function App() {
   return (
@@ -63,7 +65,8 @@ function App() {
           <Route path="/mentor/:mentorId" element={<AppLayout><MentorDetailPage /></AppLayout>} />
           {/* Ví dụ: Chi tiết sinh viên thì cả Admin và Mentor phụ trách đều xem được */}
           <Route path="/student/:studentId" element={<AppLayout><StudentDetailPage /></AppLayout>} />
-
+          <Route path="/admin/assessment-rounds/:id" element={<AppLayout><AssessmentRoundDetail /></AppLayout>} />
+          <Route path="/admin/assessment-results/:id" element={<AppLayout><AssessmentResultDetail /></AppLayout>} />
         </Route>
         {/* Bắt các đường dẫn không tồn tại -> Đẩy về login */}
         <Route path="*" element={<Navigate to="/login" replace />} />

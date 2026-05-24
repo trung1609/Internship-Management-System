@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DataTable } from "../../components/DataTable";
-import { assessmentRoundsApi } from "../../api/resourceApi";
+import { assessmentRoundsApi, evaluationCriteriaApi } from "../../api/resourceApi";
 import {
   Box,
   Dialog,
@@ -9,7 +9,17 @@ import {
   DialogActions,
   TextField,
   Button,
+  FormControlLabel,
+  Switch,
+  Autocomplete,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
 } from "@mui/material";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const AssessmentRoundsManagement = () => {
   const [data, setData] = useState([]);
@@ -20,17 +30,29 @@ const AssessmentRoundsManagement = () => {
   const [search, setSearch] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [editingRound, setEditingRound] = useState(null);
+  const [allCriteria, setAllCriteria] = useState([]);
   const [formData, setFormData] = useState({
     roundName: "",
     description: "",
     startDate: "",
     endDate: "",
     phaseId: "",
+    isDeleted: false,
+    roundCriteria: []
   });
 
+
+  const navigate = useNavigate();
+
   useEffect(() => {
+    fetchAllCriteria();
     fetchRounds();
   }, [page, rowsPerPage, search]);
+
+  const fetchAllCriteria = async () => {
+    const res = await evaluationCriteriaApi.getAllCriteria();
+    setAllCriteria(res?.content || []);
+  };
 
   const fetchRounds = async () => {
     try {
@@ -52,13 +74,29 @@ const AssessmentRoundsManagement = () => {
 
   const handleOpenDialog = (round = null) => {
     if (round) {
+      const formatToISO = (dateStr) => {
+        if (!dateStr) return "";
+        if (dateStr.includes("-")) return dateStr;
+        if (dateStr.includes("/")) {
+          const [day, month, year] = dateStr.split("/");
+          return `${year}-${month}-${day}`;
+        }
+        return dateStr;
+      };
       setEditingRound(round);
       setFormData({
         roundName: round.roundName || "",
         description: round.description || "",
-        startDate: round.startDate || "",
-        endDate: round.endDate || "",
+        startDate: formatToISO(round.startDate) || "",
+        endDate: formatToISO(round.endDate) || "",
         phaseId: round.phaseId || "",
+        isDeleted: round.isDeleted || false,
+        roundCriteria: round.roundCriteria ? round.roundCriteria.map(rc => ({
+          criterionId: rc.criterionId, // Giả sử backend trả về criterionId
+          criterionName: rc.criterionName,
+          weight: rc.weight,
+          maxScore: rc.maxScore
+        })) : []
       });
     } else {
       setEditingRound(null);
@@ -68,6 +106,8 @@ const AssessmentRoundsManagement = () => {
         startDate: "",
         endDate: "",
         phaseId: "",
+        isDeleted: false,
+        roundCriteria: []
       });
     }
     setOpenDialog(true);
@@ -81,10 +121,21 @@ const AssessmentRoundsManagement = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
+      console.log("Payload Criteria:", formData.roundCriteria);
+      const payload = {
+        ...formData,
+        roundCriteria: formData.roundCriteria.map(c => ({
+          criterionId: c.criterionId,
+          weight: parseFloat(c.weight),
+          maxScore: c.maxScore
+        }))
+      };
       if (editingRound) {
-        await assessmentRoundsApi.updateRound(editingRound.id, formData);
+        await assessmentRoundsApi.updateRound(editingRound.id, payload);
+        toast.success("Assessment round updated successfully");
       } else {
-        await assessmentRoundsApi.createRound(formData);
+        await assessmentRoundsApi.createRound(payload);
+        toast.success("Assessment round created successfully");
       }
       handleCloseDialog();
       fetchRounds();
@@ -95,10 +146,12 @@ const AssessmentRoundsManagement = () => {
     }
   };
 
-  const handleDelete = async (roundId) => {
+  const handleDelete = async (dataFormTable) => {
+    const targetId = dataFormTable.id;
     try {
       setLoading(true);
-      await assessmentRoundsApi.deleteRound(roundId);
+      await assessmentRoundsApi.deleteRound(targetId);
+      toast.success("Assessment round deleted successfully");
       fetchRounds();
     } catch (err) {
       console.error("Error deleting assessment round:", err);
@@ -114,6 +167,18 @@ const AssessmentRoundsManagement = () => {
     { field: "startDate", label: "Start Date" },
     { field: "endDate", label: "End Date" },
     { field: "phaseName", label: "Phase Name" },
+    {
+      field: "isDeleted",
+      label: "Active",
+      render: (isDeleted) => (
+        <span style={{
+          color: isDeleted ? "red" : "green",
+          fontWeight: "bold"
+        }}>
+          {isDeleted ? "Đã khóa" : "Hoạt động"}
+        </span>
+      ),
+    },
   ];
 
   return (
@@ -139,6 +204,7 @@ const AssessmentRoundsManagement = () => {
           setSearch(value);
           setPage(0);
         }}
+        onDetail={(round) => navigate(`/admin/assessment-rounds/${round.id}`)}
       />
 
       {/* Add/Edit Dialog */}
@@ -204,6 +270,79 @@ const AssessmentRoundsManagement = () => {
               setFormData({ ...formData, phaseId: e.target.value })
             }
             margin="normal"
+          />
+          <Autocomplete
+            multiple
+            options={allCriteria}
+            getOptionLabel={(o) => o.criterionName}
+            isOptionEqualToValue={(option, value) => option.criterionId === value.criterionId}
+            value={formData.roundCriteria}
+            onChange={(event, newValue) => {
+              const updated = newValue.map((item) => {
+                const currentId = item.id || item.criterionId;
+
+                const existing = formData.roundCriteria.find((old) => (old.id || old.criterionId) === currentId);
+
+                return {
+                  criterionId: currentId, 
+                  criterionName: item.criterionName,
+                  maxScore: item.maxScore,
+                  weight: existing ? existing.weight : 0 
+                };
+              });
+              setFormData({ ...formData, roundCriteria: updated });
+            }}
+            renderInput={(params) => <TextField {...params} label="Chọn tiêu chí" margin="normal" />}
+          />
+          {formData.roundCriteria.length > 0 && (
+            <Table size="small" sx={{ mt: 2 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Tiêu chí</TableCell>
+                  <TableCell>Trọng số</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {formData.roundCriteria.map((item, index) => (
+                  <TableRow key={item.criterionId}>
+                    <TableCell>{item.criterionName}</TableCell>
+                    <TableCell>
+                      <TextField
+                        type="number"
+                        size="small"
+                        value={item.weight ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+
+                          setFormData(prev => {
+                            const nextCriteria = [...prev.roundCriteria];
+                            nextCriteria[index] = {
+                              ...nextCriteria[index],
+                              weight: val
+                            };
+                            return {
+                              ...prev,
+                              roundCriteria: nextCriteria
+                            };
+                          });
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!formData.isDeleted}
+                onChange={(e) => setFormData({ ...formData, isDeleted: !e.target.checked })}
+                color="primary"
+              />
+            }
+            label={formData.isDeleted ? "Trạng thái: Đã khóa" : "Trạng thái: Hoạt động"}
+            sx={{ mt: 2 }}
           />
         </DialogContent>
         <DialogActions>

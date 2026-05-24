@@ -27,6 +27,7 @@ public class AssessmentRoundsMapper {
                         .map(RoundCriteriaMapper::toDto)
                         .toList())
                 .isDeleted(assessmentRounds.isDeleted())
+                .phaseId(assessmentRounds.getPhase().getPhaseId())
                 .build();
     }
 
@@ -65,9 +66,9 @@ public class AssessmentRoundsMapper {
         if (request.getIsActive() != null) {
             assessmentRound.setIsActive(request.getIsActive());
         }
-        if (request.getCriteria() != null) {
+        if (request.getRoundCriteria() != null) {
             Set<Long> uniqueCriterionIds = new HashSet<>();
-            for (RoundCriterionUpdateRequest req : request.getCriteria()) {
+            for (RoundCriterionUpdateRequest req : request.getRoundCriteria()) {
                 if (!uniqueCriterionIds.add(req.getCriterionId())) {
                     ValidationErrorUtil.addError(errorList, "roundCriteria", "Duplicate criterion ID");
                     throw new ResourceConflictException("Validation failed", errorList);
@@ -81,6 +82,9 @@ public class AssessmentRoundsMapper {
                         .orElseThrow(() -> new ResourceNotFoundException("Round criteria not found with id: " + req.getCriterionId()));
                 roundCriteria.setWeight(req.getWeight());
             }
+        }
+        if (request.getIsDeleted() != null) {
+            assessmentRound.setDeleted(request.getIsDeleted());
         }
     }
 

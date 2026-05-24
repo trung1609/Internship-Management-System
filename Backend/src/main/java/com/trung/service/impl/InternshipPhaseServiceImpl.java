@@ -73,7 +73,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
     @Override
     public ApiResponse<InternshipPhaseResponse> updateInternshipPhase(Long id, InternshipPhaseUpdateRequest request) throws ResourceNotFoundException, ResourceConflictException, ResourceBadRequestException {
         Map<String, String> errors = ValidationErrorUtil.createErrorMap();
-        InternshipPhase existingPhase = internshipPhaseRepository.findByPhaseIdAndIsDeletedFalse(id)
+        InternshipPhase existingPhase = internshipPhaseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Internship phase not found with id: " + id));
 
         if (internshipPhaseRepository.existsByPhaseNameIgnoreCaseAndIsDeletedFalseAndPhaseIdNot(request.getPhaseName(), id)) {
@@ -103,4 +103,5 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
                 null,
                 LocalDateTime.now());
     }
+
 }

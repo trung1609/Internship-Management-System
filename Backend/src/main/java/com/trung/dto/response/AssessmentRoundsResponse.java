@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class AssessmentRoundsResponse {
     private Long id;
+    private Long phaseId;
     private String phaseName;
     private String roundName;
 
@@ -25,5 +26,5 @@ public class AssessmentRoundsResponse {
 
     private List<RoundCriterionResponse> roundCriteria;
 
-    private boolean isDeleted;
+    private Boolean isDeleted;
 }

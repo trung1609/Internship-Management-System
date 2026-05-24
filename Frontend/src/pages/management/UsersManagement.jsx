@@ -14,12 +14,15 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Grid,
+  Paper,
+  Typography,
 } from "@mui/material";
 
 const UsersManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -45,7 +48,7 @@ const UsersManagement = () => {
       setLoading(true);
       console.log("Fetching users with role:", role);
       const response = await userApi.getAllUsers(role, page, rowsPerPage, search);
-      
+
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
@@ -107,18 +110,17 @@ const UsersManagement = () => {
     }
   };
 
-  const handleDelete = async (userId) => {
-    // Thêm hàm confirm trước khi xóa cho an toàn
-    if (!window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) return;
-    
+  const handleDelete = async (dataFromTable) => {
+    // Tự động tìm ID: hỗ trợ cả bảng User (userId), Bảng khác (id)
+    const targetId = dataFromTable.userId || dataFromTable.id;
+
     try {
       setLoading(true);
-      await userApi.deleteUser(userId);
-      toast.success("Xóa người dùng thành công!"); // Báo thành công
+      await userApi.deleteUser(targetId);
+      toast.success("Xóa thành công!");
       fetchUsers();
     } catch (err) {
-      // Lỗi sẽ tự động popup
-      console.error("Error deleting data:", err);
+      console.error("Lỗi khi xóa dữ liệu:", err);
     } finally {
       setLoading(false);
     }
@@ -147,129 +149,196 @@ const UsersManagement = () => {
     },
   ];
 
+  // Thay thế đoạn return trong file UsersManagement của bạn bằng code này:
   return (
-    <Box>
-      <Box sx={{ mb: 2, display: "flex", gap: 2 }}>
-        <FormControl sx={{ width: "200px" }}>
+    <Box sx={{ p: 3 }}>
+      {/* Header trang */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: "#1a237e" }}>Quản lý người dùng</Typography>
+          <Typography variant="body2" color="text.secondary">Quản lý và theo dõi thông tin tài khoản hệ thống</Typography>
+        </Box>
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<span role="img" aria-label="add">➕</span>}
+          onClick={() => handleOpenDialog()}
+          sx={{ borderRadius: 2, px: 3, boxShadow: 3 }}
+        >
+          Thêm người dùng
+        </Button>
+      </Box>
+
+      {/* Filter Card */}
+      <Paper sx={{ p: 2, mb: 3, borderRadius: 2, display: "flex", alignItems: "center", gap: 2 }}>
+        <FormControl sx={{ minWidth: 200 }} size="small">
           <InputLabel>Lọc theo vai trò</InputLabel>
-          <Select
-            value={role}
-            label="Lọc theo vai trò"
-            onChange={(e) => {
-              setRole(e.target.value);
-              setPage(0);
-            }}
-          >
+          <Select value={role} label="Lọc theo vai trò" onChange={(e) => { setRole(e.target.value); setPage(0); }}>
             <MenuItem value="">Tất cả</MenuItem>
             <MenuItem value="ROLE_ADMIN">Admin</MenuItem>
             <MenuItem value="ROLE_MENTOR">Cố vấn</MenuItem>
             <MenuItem value="ROLE_STUDENT">Học sinh</MenuItem>
           </Select>
         </FormControl>
-      </Box>
+      </Paper>
 
-      <DataTable
-        title="User Management"
-        columns={columns}
-        data={data}
-        loading={loading}
-        onEdit={(user) => handleOpenDialog(user)}
-        onDelete={handleDelete}
-        onAdd={() => handleOpenDialog()}
-        totalCount={totalCount}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(newPage) => setPage(newPage)}
-        onRowsPerPageChange={(newRowsPerPage) => {
-          setRowsPerPage(newRowsPerPage);
-          setPage(0);
-        }}
-      />
+      {/* Table Container */}
+      <Paper sx={{ p: 3, borderRadius: 3, overflow: "hidden", boxShadow: 2 }}>
+        <DataTable
+          columns={columns}
+          data={data}
+          loading={loading}
+          onEdit={(user) => handleOpenDialog(user)}
+          onDelete={(user) => handleDelete(user)}
+          totalCount={totalCount}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(newPage) => setPage(newPage)}
+          onRowsPerPageChange={(newRowsPerPage) => { setRowsPerPage(newRowsPerPage); setPage(0); }}
+        />
+      </Paper>
 
-      {/* Add/Edit Dialog */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          {editingUser ? "Update User" : "Add New User"}
+      {/* Dialog tối ưu giao diện */}
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        <DialogTitle sx={{ fontWeight: 'bold', pb: 0 }}>
+          {editingUser ? "Cập nhật thông tin" : "Thêm người dùng mới"}
         </DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
+
           <TextField
+
             fullWidth
+
             label="Tên đăng nhập"
+
             value={formData.username}
+
             onChange={(e) =>
+
               setFormData({ ...formData, username: e.target.value })
+
             }
+
             disabled={editingUser !== null}
+
             margin="normal"
+
           />
+
           <TextField
+
             fullWidth
+
             label="Email"
+
             value={formData.email}
+
             onChange={(e) =>
+
               setFormData({ ...formData, email: e.target.value })
+
             }
+
             margin="normal"
+
           />
+
           <TextField
+
             fullWidth
+
             label="Họ và tên"
+
             value={formData.fullName}
+
             onChange={(e) =>
+
               setFormData({ ...formData, fullName: e.target.value })
+
             }
+
             margin="normal"
+
           />
+
           {!editingUser && (
+
             <TextField
+
               fullWidth
+
               label="Mật khẩu"
+
               type="password"
+
               value={formData.password}
+
               onChange={(e) =>
+
                 setFormData({ ...formData, password: e.target.value })
+
               }
+
               margin="normal"
+
             />
+
           )}
+
           <TextField
+
             fullWidth
+
             label="Số điện thoại"
+
             value={formData.phoneNumber}
+
             onChange={(e) =>
+
               setFormData({ ...formData, phoneNumber: e.target.value })
+
             }
+
             margin="normal"
+
           />
+
           <FormControl fullWidth margin="normal">
+
             <InputLabel>Vai trò</InputLabel>
+
             <Select
+
               value={formData.role}
+
               label="Vai trò"
+
               onChange={(e) =>
+
                 setFormData({ ...formData, role: e.target.value })
+
               }
+
             >
+
               <MenuItem value="ROLE_STUDENT">Học sinh</MenuItem>
+
               <MenuItem value="ROLE_MENTOR">Cố vấn</MenuItem>
+
               <MenuItem value="ROLE_ADMIN">Admin</MenuItem>
+
             </Select>
+
           </FormControl>
+
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button onClick={handleSave} variant="contained">
-            Lưu
-          </Button>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={handleCloseDialog} color="inherit" sx={{ fontWeight: 600 }}>Hủy</Button>
+          <Button onClick={handleSave} variant="contained" sx={{ fontWeight: 600, borderRadius: 2, px: 4 }}>Lưu thông tin</Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
-};
+}
 
 export default UsersManagement; 

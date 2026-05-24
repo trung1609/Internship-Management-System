@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DataTable } from "../../components/DataTable";
-import { assessmentResultApi } from "../../api/resourceApi";
+import { assessmentResultApi, assessmentRoundsApi } from "../../api/resourceApi";
 import { toast } from "react-toastify";
 import {
   Box,
@@ -12,7 +12,9 @@ import {
   Button,
   Grid,
   Typography,
+  Autocomplete,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const AssessmentResultsManagement = () => {
   const [data, setData] = useState([]);
@@ -24,14 +26,20 @@ const AssessmentResultsManagement = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingResult, setEditingResult] = useState(null);
 
+  // Khởi tạo
   const [formData, setFormData] = useState({
+    id: null,
     assignmentId: "",
     roundId: "",
-    results: [{ criterionId: "", score: "", comment: "" }],
+    results: [], // Luôn là mảng
   });
+
+  const [suggestedCriteria, setSuggestedCriteria] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchResults();
+    fetchCriteriaForRound(formData.roundId);
   }, [page, rowsPerPage, search]);
 
   const fetchResults = async () => {
@@ -43,6 +51,7 @@ const AssessmentResultsManagement = () => {
         rowsPerPage,
         search,
       );
+      console.log("Fetched assessment results:", response);
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
@@ -52,22 +61,52 @@ const AssessmentResultsManagement = () => {
     }
   };
 
-  const handleOpenDialog = (result = null) => {
+  const fetchCriteriaForRound = async (roundId) => {
+    if (!roundId) {
+      setSuggestedCriteria([]);
+      return;
+    }
+    try {
+      const round = await assessmentRoundsApi.getRoundById(roundId);
+      const criteria = round?.data?.roundCriteria || [];
+      setSuggestedCriteria(criteria);
+
+      const initializedResults = criteria.map(c => ({
+        criterionId: c.criterionId,
+        score: "",
+        comments: ""
+      }));
+
+      if (!editingResult) {
+        setFormData(prev => ({ ...prev, results: initializedResults }));
+      }
+    } catch (err) {
+      console.error("Lỗi lấy tiêu chí:", err);
+    }
+  };
+
+  const handleOpenDialog = async (result = null) => {
     if (result) {
       setEditingResult(result);
+      await fetchCriteriaForRound(result.roundId);
       setFormData({
+        id: result.id,
         assignmentId: result.assignmentId || "",
         roundId: result.roundId || "",
-        results: result.results && result.results.length > 0 
-            ? result.results 
-            : [{ criterionId: "", score: "", comment: "" }],
+        // Map về đúng cấu trúc chuẩn, đảm bảo có id
+        results: [{
+          criterionId: result.criterionId,
+          score: result.score,
+          comments: result.comments
+        }]
       });
     } else {
       setEditingResult(null);
       setFormData({
+        id: null,
         assignmentId: "",
         roundId: "",
-        results: [{ criterionId: "", score: "", comment: "" }],
+        results: [{ criterionId: "", score: "", comments: "" }]
       });
     }
     setOpenDialog(true);
@@ -76,6 +115,13 @@ const AssessmentResultsManagement = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setEditingResult(null);
+    setFormData({
+      id: null,
+      assignmentId: "",
+      roundId: "",
+      results: [{ criterionId: "", score: "", comments: "" }],
+    });
+    setSuggestedCriteria([]);
   };
 
   const handleResultChange = (index, field, value) => {
@@ -87,7 +133,7 @@ const AssessmentResultsManagement = () => {
   const handleAddResultRow = () => {
     setFormData({
       ...formData,
-      results: [...formData.results, { criterionId: "", score: "", comment: "" }]
+      results: [...formData.results, { criterionId: "", score: "", comments: "" }]
     });
   };
 
@@ -99,17 +145,34 @@ const AssessmentResultsManagement = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
+
       if (editingResult) {
-        await assessmentResultApi.updateResult(editingResult.id, formData);
-        toast.success("Cập nhật kết quả thành công!");
+        // UPDATE: Dùng ID ở cấp cao nhất (formData.id)
+        const currentRow = formData.results[0];
+        await assessmentResultApi.updateResult(formData.id, {
+          score: parseFloat(currentRow.score) || 0,
+          comments: currentRow.comments || ""
+        });
+        toast.success("Cập nhật thành công!");
       } else {
-        await assessmentResultApi.createResult(formData);
-        toast.success("Tạo kết quả đánh giá thành công!");
+        // CREATE: Vẫn gửi mảng như cũ
+        const payload = {
+          assignmentId: parseInt(formData.assignmentId),
+          roundId: parseInt(formData.roundId),
+          results: formData.results.map(r => ({
+            criterionId: parseInt(r.criterionId),
+            score: parseFloat(r.score) || 0,
+            comments: r.comments || ""
+          }))
+        };
+        await assessmentResultApi.createResult(payload);
+        toast.success("Tạo thành công!");
       }
+
       handleCloseDialog();
       fetchResults();
     } catch (err) {
-      console.error("Error saving assessment result:", err);
+      toast.error("Lỗi khi lưu!");
     } finally {
       setLoading(false);
     }
@@ -119,11 +182,6 @@ const AssessmentResultsManagement = () => {
     { field: "id", label: "ID" },
     { field: "assignmentName", label: "Tên Phân công" },
     { field: "roundName", label: "Vòng Đánh giá" },
-    { field: "score", label: "Tổng điểm" },
-    {
-      field: "comments",
-      label: "Nhận xét tóm tắt",
-    },
     { field: "evaluatorName", label: "Người đánh giá" },
     { field: "evaluationDate", label: "Ngày đánh giá" },
   ];
@@ -150,6 +208,7 @@ const AssessmentResultsManagement = () => {
           setSearch(value);
           setPage(0);
         }}
+        onDetail={(result) => navigate(`/admin/assessment-results/${result.id}`)}
       />
 
       <Dialog
@@ -162,7 +221,7 @@ const AssessmentResultsManagement = () => {
           {editingResult ? "Cập nhật kết quả đánh giá" : "Thêm kết quả đánh giá mới"}
         </DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
-          
+
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -179,7 +238,11 @@ const AssessmentResultsManagement = () => {
                 fullWidth
                 label="Mã vòng đánh giá (Round ID)"
                 value={formData.roundId}
-                onChange={(e) => setFormData({ ...formData, roundId: e.target.value })}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setFormData({ ...formData, roundId: id });
+                  fetchCriteriaForRound(id);
+                }}
                 margin="normal"
               />
             </Grid>
@@ -197,12 +260,19 @@ const AssessmentResultsManagement = () => {
               <Box key={index} sx={{ mb: 2, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={3}>
-                    <TextField
+                    <Autocomplete
+                      sx={{ minWidth: 200 }}
                       fullWidth
-                      label="Mã tiêu chí (Criterion ID)"
-                      size="small"
-                      value={item.criterionId}
-                      onChange={(e) => handleResultChange(index, "criterionId", e.target.value)}
+                      options={suggestedCriteria}
+                      getOptionLabel={(option) => option.criterionName || ""}
+                      value={suggestedCriteria.find(c => c.criterionId == item.criterionId) || null}
+                      isOptionEqualToValue={(option, value) => option.criterionId == value.criterionId}
+                      onChange={(e, newValue) => {
+                        handleResultChange(index, "criterionId", newValue ? newValue.criterionId : "");
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} label="Chọn tiêu chí" size="small" />
+                      )}
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -221,13 +291,14 @@ const AssessmentResultsManagement = () => {
                       fullWidth
                       label="Nhận xét"
                       size="small"
-                      value={item.comment}
-                      onChange={(e) => handleResultChange(index, "comment", e.target.value)}
+                      value={item.comments
+                      }
+                      onChange={(e) => handleResultChange(index, "comments", e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12} sm={2} sx={{ textAlign: 'right' }}>
-                    <Button 
-                      color="error" 
+                    <Button
+                      color="error"
                       onClick={() => handleRemoveResultRow(index)}
                       disabled={formData.results.length === 1}
                     >

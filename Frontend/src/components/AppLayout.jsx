@@ -112,6 +112,7 @@ export const AppLayout = ({ children }) => {
   };
 
   const handleLogout = async () => {
+    
     await logout();
     navigate("/login");
   };

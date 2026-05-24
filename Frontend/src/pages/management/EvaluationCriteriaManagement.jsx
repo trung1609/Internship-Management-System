@@ -9,6 +9,8 @@ import {
   DialogActions,
   TextField,
   Button,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 
 const EvaluationCriteriaManagement = () => {
@@ -24,6 +26,7 @@ const EvaluationCriteriaManagement = () => {
     criterionName: "",
     description: "",
     maxScore: "",
+    isDeleted: false,
   });
 
   useEffect(() => {
@@ -54,6 +57,7 @@ const EvaluationCriteriaManagement = () => {
         criterionName: criteria.criterionName || "",
         description: criteria.description || "",
         maxScore: criteria.maxScore || "",
+        isDeleted: criteria.isDeleted || false,
       });
     } else {
       setEditingCriteria(null);
@@ -61,6 +65,7 @@ const EvaluationCriteriaManagement = () => {
         criterionName: "",
         description: "",
         maxScore: "",
+        isDeleted: false,
       });
     }
     setOpenDialog(true);
@@ -91,10 +96,13 @@ const EvaluationCriteriaManagement = () => {
     }
   };
 
-  const handleDelete = async (criteriaId) => {
+  const handleDelete = async (dataFormTable) => {
+
+    const targetId = dataFormTable.id;
+
     try {
       setLoading(true);
-      await evaluationCriteriaApi.deleteCriteria(criteriaId);
+      await evaluationCriteriaApi.deleteCriteria(targetId);
       fetchCriteria();
     } catch (err) {
       console.error("Error deleting criteria:", err);
@@ -108,6 +116,18 @@ const EvaluationCriteriaManagement = () => {
     { field: "criterionName", label: "Criteria Name" },
     { field: "description", label: "Description" },
     { field: "maxScore", label: "Max Score" },
+    {
+      field: "isDeleted",
+      label: "Active",
+      render: (isDeleted) => (
+        <span style={{
+          color: isDeleted ? "red" : "green",
+          fontWeight: "bold"
+        }}>
+          {isDeleted ? "Đã khóa" : "Hoạt động"}
+        </span>
+      ),
+    },
   ];
 
   return (
@@ -175,6 +195,17 @@ const EvaluationCriteriaManagement = () => {
               setFormData({ ...formData, maxScore: e.target.value })
             }
             margin="normal"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!formData.isDeleted}
+                onChange={(e) => setFormData({ ...formData, isDeleted: !e.target.checked })}
+                color="primary"
+              />
+            }
+            label={formData.isDeleted ? "Trạng thái: Đã khóa" : "Trạng thái: Hoạt động"}
+            sx={{ mt: 2 }}
           />
         </DialogContent>
         <DialogActions>

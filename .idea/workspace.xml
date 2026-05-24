@@ -16,7 +16,7 @@
   <component name="CopilotChats">
     <option name="panelChat">
       <chat>
-        <option name="activeSessionId" value="79316ec3-3cfc-40ff-849e-27a72a1f7a7f" />
+        <option name="activeSessionId" value="996a7f3f-1aad-4b51-950a-0dc855078b0e" />
         <option name="sessions">
           <session>
             <option name="chatType" value="PANEL" />
@@ -40,6 +40,15 @@
             <option name="modeId" value="Ask" />
             <option name="modelType" value="builtin_family" />
             <option name="modelValue" value="auto" />
+            <option name="status" value="Completed" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="996a7f3f-1aad-4b51-950a-0dc855078b0e" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="claude-haiku-4.5" />
             <option name="targetType" value="LOCAL" />
           </session>
         </option>
@@ -55,8 +64,8 @@
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
-      <entry key="chat-panel" value="Claude Haiku 4.5" />
-      <entry key="agent-panel" value="Claude Haiku 4.5" />
+      <entry key="agent-panel" value="Auto" />
+      <entry key="chat-panel" value="Auto" />
     </selectedModels>
   </component>
   <component name="EmbeddingIndexingInfo">
@@ -129,6 +138,20 @@
   <component name="ProjectId" id="3BLcUWNvmFjawsmNXjmyBGzlyuW" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Ask" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="LOCAL" />
+      </template>
+    </option>
   </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -296,6 +319,7 @@
       <workItem from="1779447174559" duration="1545000" />
       <workItem from="1779453583043" duration="352000" />
       <workItem from="1779454001016" duration="3511000" />
+      <workItem from="1779589546831" duration="22680000" />
     </task>
     <servers />
   </component>

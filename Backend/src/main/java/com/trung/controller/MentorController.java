@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -45,5 +46,11 @@ public class MentorController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MENTOR')")
     public ResponseEntity<ApiResponse<MentorResponse>> updateMentor(@PathVariable Long mentorId, @Valid @RequestBody MentorUpdateRequest request) throws ResourceConflictException, ResourceForbiddenException, ResourceNotFoundException, ResourceBadRequestException {
         return new ResponseEntity<>(mentorService.updateMentor(mentorId, request), HttpStatus.OK);
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<ApiResponse<MentorResponse>> getMentorInfo(Authentication authentication) throws ResourceNotFoundException {
+        String username = authentication.getName();
+        return new ResponseEntity<>(mentorService.getMentorInfo(username), HttpStatus.OK);
     }
 }

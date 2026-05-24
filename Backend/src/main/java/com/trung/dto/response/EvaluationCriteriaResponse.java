@@ -14,5 +14,5 @@ public class EvaluationCriteriaResponse {
     private String criterionName;
     private String description;
     private BigDecimal maxScore;
-    private boolean isDeleted;
+    private Boolean isDeleted;
 }

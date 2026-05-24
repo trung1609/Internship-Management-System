@@ -16,4 +16,5 @@ public interface IMentorService {
     ApiResponse<Object> getMentorById(Long id) throws ResourceNotFoundException, ResourceForbiddenException;
     ApiResponse<MentorResponse> createMentor(MentorCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException;
     ApiResponse<MentorResponse> updateMentor(Long id, MentorUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException;
+    ApiResponse<MentorResponse> getMentorInfo(String username) throws ResourceNotFoundException;
 }

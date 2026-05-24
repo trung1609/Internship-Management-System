@@ -43,4 +43,10 @@ public class AssessmentResultController {
         return new ResponseEntity<>(assessmentResultService.updateAssessmentResult(resultId, request), HttpStatus.OK);
     }
 
+    @GetMapping("/{resultId}")
+    public ResponseEntity<ApiResponse<AssessmentResultResponse>> getAssessmentResultById(@PathVariable Long resultId) throws ResourceConflictException, ResourceForbiddenException, ResourceNotFoundException {
+        return new ResponseEntity<>(assessmentResultService.getAssessmentResultById(resultId), HttpStatus.OK);
+    }
+
+
 }

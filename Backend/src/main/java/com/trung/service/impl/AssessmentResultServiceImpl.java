@@ -90,7 +90,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                     .round(round)
                     .criterion(criteria)
                     .score(req.getScore())
-                    .comment(req.getComment())
+                    .comment(req.getComments())
                     .evaluationId(user)
                     .evaluationDate(LocalDateTime.now().toLocalDate())
                     .build();
@@ -176,5 +176,12 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                 null,
                 LocalDateTime.now()
         );
+    }
+
+    @Override
+    public ApiResponse<AssessmentResultResponse> getAssessmentResultById(Long resultId) throws ResourceNotFoundException {
+        AssessmentResult result = assessmentResultRepository.findById(resultId)
+                .orElseThrow(() -> new ResourceNotFoundException("Assessment result not found with id: " + resultId));
+        return new ApiResponse<>(AssessmentResultMapper.toDTO(result), true, "SUCCESS", null, LocalDateTime.now());
     }
 }

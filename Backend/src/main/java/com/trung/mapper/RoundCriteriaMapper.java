@@ -15,6 +15,7 @@ public class RoundCriteriaMapper {
                 .maxScore(rc.getCriterion().getMaxScore())
                 .roundName(rc.getRound().getRoundName())
                 .isDeleted(rc.isDeleted())
+                .criterionId(rc.getCriterion().getCriterionId())
                 .build();
     }
 

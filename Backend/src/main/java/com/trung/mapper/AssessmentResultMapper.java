@@ -26,8 +26,8 @@ public class AssessmentResultMapper {
         if (dto.getScore() != null) {
             entity.setScore(dto.getScore());
         }
-        if (dto.getComment() != null) {
-            entity.setComment(dto.getComment());
+        if (dto.getComments() != null) {
+            entity.setComment(dto.getComments());
         }
     }
 }

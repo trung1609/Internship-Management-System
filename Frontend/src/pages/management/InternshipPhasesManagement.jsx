@@ -9,7 +9,10 @@ import {
   DialogActions,
   TextField,
   Button,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
+import { toast } from "react-toastify";
 
 const InternshipPhasesManagement = () => {
   const [data, setData] = useState([]);
@@ -25,6 +28,7 @@ const InternshipPhasesManagement = () => {
     description: "",
     startDate: "",
     endDate: "",
+    isDeleted: false,
   });
 
   useEffect(() => {
@@ -52,11 +56,23 @@ const InternshipPhasesManagement = () => {
   const handleOpenDialog = (phase = null) => {
     if (phase) {
       setEditingPhase(phase);
+
+      const formatToISO = (dateStr) => {
+        if (!dateStr) return "";
+        if (dateStr.includes("-")) return dateStr;
+        if (dateStr.includes("/")) {
+          const [day, month, year] = dateStr.split("/");
+          return `${year}-${month}-${day}`;
+        }
+        return dateStr;
+      };
+
       setFormData({
         phaseName: phase.phaseName || "",
         description: phase.description || "",
-        startDate: phase.startDate || "",
-        endDate: phase.endDate || "",
+        startDate: formatToISO(phase.startDate),
+        endDate: formatToISO(phase.endDate),
+        isDeleted: phase.isDeleted || false,
       });
     } else {
       setEditingPhase(null);
@@ -65,6 +81,7 @@ const InternshipPhasesManagement = () => {
         description: "",
         startDate: "",
         endDate: "",
+        isDeleted: false,
       });
     }
     setOpenDialog(true);
@@ -78,10 +95,20 @@ const InternshipPhasesManagement = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
+
+      const payload = { ...formData };
+
+      console.log("Payload before date processing:", payload);
+
+      if (!payload.startDate || payload.startDate.trim() === "") payload.startDate = null;
+      if (!payload.endDate || payload.endDate.trim() === "") payload.endDate = null;
+
       if (editingPhase) {
-        await internshipPhaseApi.updatePhase(editingPhase.id, formData);
+        await internshipPhaseApi.updatePhase(editingPhase.id, payload);
+        toast.success("Cập nhật phase thành công!");
       } else {
-        await internshipPhaseApi.createPhase(formData);
+        await internshipPhaseApi.createPhase(payload);
+        toast.success("Thêm phase thành công!");
       }
       handleCloseDialog();
       fetchPhases();
@@ -92,10 +119,13 @@ const InternshipPhasesManagement = () => {
     }
   };
 
-  const handleDelete = async (phaseId) => {
+  const handleDelete = async (dataFormTable) => {
+    const targetId = dataFormTable.phaseId || dataFormTable.id;
+
     try {
       setLoading(true);
-      await internshipPhaseApi.deletePhase(phaseId);
+      await internshipPhaseApi.deletePhase(targetId);
+      toast.success("Xóa phase thành công!");
       fetchPhases();
     } catch (err) {
       console.error("Error deleting phase:", err);
@@ -110,6 +140,18 @@ const InternshipPhasesManagement = () => {
     { field: "description", label: "Description" },
     { field: "startDate", label: "Start Date" },
     { field: "endDate", label: "End Date" },
+    {
+      field: "isDeleted",
+      label: "Active",
+      render: (isDeleted) => (
+        <span style={{
+          color: isDeleted ? "red" : "green",
+          fontWeight: "bold"
+        }}>
+          {isDeleted ? "Đã khóa" : "Hoạt động"}
+        </span>
+      ),
+    },
   ];
 
   return (
@@ -189,6 +231,18 @@ const InternshipPhasesManagement = () => {
             }
             InputLabelProps={{ shrink: true }}
             margin="normal"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!formData.isDeleted}
+                onChange={(e) => 
+                  setFormData({ ...formData, isDeleted: !e.target.checked })}
+                color="primary"
+              />
+            }
+            label={formData.isDeleted ? "Trạng thái: Đang khóa" : "Trạng thái: Đang hoạt động"}
+            sx={{ mt: 2 }}
           />
         </DialogContent>
         <DialogActions>

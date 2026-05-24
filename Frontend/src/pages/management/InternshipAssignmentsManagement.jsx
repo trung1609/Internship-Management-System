@@ -29,6 +29,8 @@ const InternshipAssignmentsManagement = () => {
     mentorId: "",
     phaseId: "",
     status: "PENDING",
+    assignmentTitle: "",
+    assignmentDescription: "",
   });
 
   useEffect(() => {
@@ -61,6 +63,8 @@ const InternshipAssignmentsManagement = () => {
         mentorId: assignment.mentorId || "",
         phaseId: assignment.phaseId || "",
         status: assignment.status || "PENDING",
+        assignmentTitle: assignment.assignmentTitle || "",
+        assignmentDescription: assignment.assignmentDescription || "",
       });
     } else {
       setEditingAssignment(null);
@@ -69,6 +73,8 @@ const InternshipAssignmentsManagement = () => {
         mentorId: "",
         phaseId: "",
         status: "PENDING",
+        assignmentTitle: "",
+        assignmentDescription: "",
       });
     }
     setOpenDialog(true);
@@ -157,9 +163,9 @@ const InternshipAssignmentsManagement = () => {
           <TextField
             fullWidth
             label="Mô tả"
-            value={formData.description}
+            value={formData.assignmentDescription}
             onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
+              setFormData({ ...formData, assignmentDescription: e.target.value })
             }
             multiline
             rows={3}
@@ -201,6 +207,7 @@ const InternshipAssignmentsManagement = () => {
                 setFormData({ ...formData, status: e.target.value })
               }
             >
+              <MenuItem value="PENDING">Đang chờ</MenuItem>
               <MenuItem value="ACTIVE">Hoạt động</MenuItem>
               <MenuItem value="COMPLETED">Hoàn thành</MenuItem>
               <MenuItem value="CANCELLED">Hủy</MenuItem>
