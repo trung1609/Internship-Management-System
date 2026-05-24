@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { DataTable } from "../../components/DataTable";
+import { useContext } from "react";
 import { internshipPhaseApi } from "../../api/resourceApi";
 import {
   Box,
@@ -13,6 +14,7 @@ import {
   Switch,
 } from "@mui/material";
 import { toast } from "react-toastify";
+import { AuthContext } from "../../context/AuthContext";
 
 const InternshipPhasesManagement = () => {
   const [data, setData] = useState([]);
@@ -134,6 +136,9 @@ const InternshipPhasesManagement = () => {
     }
   };
 
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
+
   const columns = [
     { field: "id", label: "ID" },
     { field: "phaseName", label: "Phase Name" },
@@ -161,9 +166,9 @@ const InternshipPhasesManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        onEdit={(phase) => handleOpenDialog(phase)}
-        onDelete={handleDelete}
-        onAdd={() => handleOpenDialog()}
+        onEdit={isAdmin ? (phase) => handleOpenDialog(phase) : null}
+        onDelete={isAdmin ? handleDelete : null}
+        onAdd={isAdmin ? () => handleOpenDialog() : null}
         totalCount={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}
@@ -236,7 +241,7 @@ const InternshipPhasesManagement = () => {
             control={
               <Switch
                 checked={!formData.isDeleted}
-                onChange={(e) => 
+                onChange={(e) =>
                   setFormData({ ...formData, isDeleted: !e.target.checked })}
                 color="primary"
               />

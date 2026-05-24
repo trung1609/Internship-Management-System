@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { DataTable } from "../../components/DataTable";
 import { assessmentRoundsApi, evaluationCriteriaApi } from "../../api/resourceApi";
 import {
@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const AssessmentRoundsManagement = () => {
   const [data, setData] = useState([]);
@@ -181,6 +182,9 @@ const AssessmentRoundsManagement = () => {
     },
   ];
 
+  const { user } = useContext(AuthContext); // Lấy user từ Context
+  const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
+
   return (
     <Box>
       <DataTable
@@ -188,9 +192,9 @@ const AssessmentRoundsManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        onEdit={(round) => handleOpenDialog(round)}
-        onDelete={handleDelete}
-        onAdd={() => handleOpenDialog()}
+        onEdit={isAdmin ? (round) => handleOpenDialog(round) : null}
+        onDelete={isAdmin ? handleDelete : null}
+        onAdd={isAdmin ? () => handleOpenDialog() : null}
         totalCount={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}

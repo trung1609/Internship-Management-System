@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { DataTable } from "../../components/DataTable";
 import { assessmentResultApi, assessmentRoundsApi } from "../../api/resourceApi";
 import { toast } from "react-toastify";
@@ -15,6 +15,7 @@ import {
   Autocomplete,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const AssessmentResultsManagement = () => {
   const [data, setData] = useState([]);
@@ -186,6 +187,9 @@ const AssessmentResultsManagement = () => {
     { field: "evaluationDate", label: "Ngày đánh giá" },
   ];
 
+  const { user } = useContext(AuthContext); // Lấy user từ Context
+  const isMentor = user?.role === "MENTOR" || user?.role === "ROLE_MENTOR";
+
   return (
     <Box>
       <DataTable
@@ -193,8 +197,8 @@ const AssessmentResultsManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        onEdit={(result) => handleOpenDialog(result)}
-        onAdd={() => handleOpenDialog()}
+        onEdit={isMentor ? (result) => handleOpenDialog(result) : null}
+        onAdd={isMentor ? () => handleOpenDialog() : null}
         totalCount={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}

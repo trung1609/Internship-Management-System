@@ -108,15 +108,16 @@ export const DataTable = ({
                   {columns.map((column) => (
                     <TableCell key={column.field} sx={{ fontWeight: "bold" }}>{column.label}</TableCell>
                   ))}
-                  {(onEdit || onDelete) && (
-                    <TableCell sx={{ fontWeight: "bold" }}>Hành động</TableCell>
+                  {/* SỬA LỖI TRỐNG TIÊU ĐỀ: Đổi onView thành onDetail */}
+                  {(onEdit || onDelete || onDetail) && (
+                    <TableCell align="center" sx={{ fontWeight: "bold" }}>Hành động</TableCell>
                   )}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {data.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} sx={{ textAlign: "center", py: 3 }}>
+                    <TableCell colSpan={columns.length + (onEdit || onDelete || onDetail ? 1 : 0)} sx={{ textAlign: "center", py: 3 }}>
                       Không có dữ liệu
                     </TableCell>
                   </TableRow>
@@ -129,9 +130,10 @@ export const DataTable = ({
                           {column.render ? column.render(row[column.field], row) : row[column.field]}
                         </TableCell>
                       ))}
-                      {(onEdit || onDelete || onDetail) && ( // Sửa điều kiện hiển thị cột Action
-                        <TableCell>
-                          <Box sx={{ display: "flex", gap: 1 }}>
+                      {(onEdit || onDelete || onDetail) && (
+                        // SỬA LỖI LỆCH ICON: Thêm align="center" cho TableCell và justifyContent: "center" cho Box
+                        <TableCell align="center">
+                          <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
                             {onEdit && (
                               <IconButton size="small" color="primary" onClick={() => onEdit(row)}>
                                 <EditIcon />
@@ -142,7 +144,6 @@ export const DataTable = ({
                                 <DeleteIcon />
                               </IconButton>
                             )}
-                            {/* THÊM ĐOẠN NÀY ĐỂ HIỂN THỊ NÚT CHI TIẾT */}
                             {onDetail && (
                               <IconButton size="small" color="info" onClick={() => onDetail(row)}>
                                 <DetailIcon />
@@ -184,5 +185,4 @@ export const DataTable = ({
       </Dialog>
     </Box>
   );
-
 };

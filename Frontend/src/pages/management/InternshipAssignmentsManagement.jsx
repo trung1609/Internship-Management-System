@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { DataTable } from "../../components/DataTable";
 import { internshipAssignmentApi } from "../../api/resourceApi";
 import {
@@ -14,6 +14,7 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
+import { AuthContext } from "../../context/AuthContext";
 
 const InternshipAssignmentsManagement = () => {
   const [data, setData] = useState([]);
@@ -32,6 +33,8 @@ const InternshipAssignmentsManagement = () => {
     assignmentTitle: "",
     assignmentDescription: "",
   });
+  const { user } = useContext(AuthContext); // Lấy user từ Context
+  const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
 
   useEffect(() => {
     fetchAssignments();
@@ -123,8 +126,8 @@ const InternshipAssignmentsManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        onEdit={(assignment) => handleOpenDialog(assignment)}
-        onAdd={() => handleOpenDialog()}
+        onEdit={isAdmin ? (assignment) => handleOpenDialog(assignment) : null}
+        onAdd={isAdmin ? () => handleOpenDialog() : null}
         totalCount={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}

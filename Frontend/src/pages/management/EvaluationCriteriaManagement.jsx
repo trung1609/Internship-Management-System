@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { DataTable } from "../../components/DataTable";
 import { evaluationCriteriaApi } from "../../api/resourceApi";
 import {
@@ -12,6 +12,7 @@ import {
   FormControlLabel,
   Switch,
 } from "@mui/material";
+import { AuthContext } from "../../context/AuthContext";
 
 const EvaluationCriteriaManagement = () => {
   const [data, setData] = useState([]);
@@ -111,6 +112,9 @@ const EvaluationCriteriaManagement = () => {
     }
   };
 
+  const { user } = useContext(AuthContext); // Lấy user từ Context
+  const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
+
   const columns = [
     { field: "id", label: "ID" },
     { field: "criterionName", label: "Criteria Name" },
@@ -137,9 +141,9 @@ const EvaluationCriteriaManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        onEdit={(criteria) => handleOpenDialog(criteria)}
-        onDelete={handleDelete}
-        onAdd={() => handleOpenDialog()}
+        onEdit={isAdmin ? (criteria) => handleOpenDialog(criteria) : null}
+        onDelete={isAdmin ? handleDelete : null}
+        onAdd={isAdmin ? () => handleOpenDialog() : null}
         totalCount={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}

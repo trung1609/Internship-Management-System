@@ -22,6 +22,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import AssessmentRoundDetail from "./pages/management/AssessmentRoundDetail";
 import AssessmentResultDetail from "./pages/management/AssessmentResultDetail";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
@@ -38,8 +39,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<LandingPage />} />
 
         {/* Dashboard Routes */}
         <Route element={<ProtectedRoute />}>

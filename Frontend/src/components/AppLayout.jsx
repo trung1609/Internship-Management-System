@@ -61,7 +61,7 @@ const allMenuItems = [
   {
     label: "Internship Management",
     icon: <SchoolIcon />,
-    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR"],
+    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR", "STUDENT", "ROLE_STUDENT"],
     children: [
       { label: "Internship Phases", path: "/management/phases" },
       { label: "Internship Assignments", path: "/management/assignments" },
@@ -70,7 +70,7 @@ const allMenuItems = [
   {
     label: "Assessment Management",
     icon: <RateReviewIcon />,
-    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR"],
+    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR", "STUDENT", "ROLE_STUDENT"],
     children: [
       { label: "Evaluation Criteria", path: "/management/evaluation-criteria" },
       { label: "Assessment Rounds", path: "/management/assessment-rounds" },
@@ -112,9 +112,8 @@ export const AppLayout = ({ children }) => {
   };
 
   const handleLogout = async () => {
-    
     await logout();
-    navigate("/login");
+    window.location.href = "/";
   };
 
   const isActive = (path) => location.pathname === path;
