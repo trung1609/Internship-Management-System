@@ -1,8 +1,10 @@
 package com.trung.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.trung.util.enums.AssignmentStatus;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,6 +22,8 @@ public class InternshipAssignmentResponse {
     private String mentorName;
     private Long phaseId;
     private String phaseName;
-    private LocalDateTime assignedDate;
+
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate assignedDate;
     private AssignmentStatus status;
 }

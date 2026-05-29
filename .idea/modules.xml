@@ -2,11 +2,13 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
-      <module fileurl="file://$PROJECT_DIR$/.idea/Intership-Management-System.iml" filepath="$PROJECT_DIR$/.idea/Intership-Management-System.iml" />
-=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Backend.Intership-Management-System.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Backend.Intership-Management-System.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Intership-Management-System.iml" filepath="$PROJECT_DIR$/.idea/modules/Intership-Management-System.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Intership-Management-System.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Intership-Management-System.main.iml" />
->>>>>>> c11644162d080922150d756580943dadd5594151
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Intership-Management-System.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Intership-Management-System.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.trung.Intership-Management-System.iml" filepath="$PROJECT_DIR$/.idea/modules/com.trung.Intership-Management-System.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.trung.Intership-Management-System.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.trung.Intership-Management-System.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.trung.Intership-Management-System.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.trung.Intership-Management-System.test.iml" />
     </modules>
   </component>
 </project>

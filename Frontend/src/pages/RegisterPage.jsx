@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { authApi } from '../api/authApi';
-import {
-  Container, Box, Typography, TextField, Button,
-  Paper, Alert, CircularProgress, Avatar, Grid
-} from '@mui/material';
+import { Box, Typography, TextField, Button, Alert, CircularProgress, Avatar, Slide, Paper, Grid, Stack } from '@mui/material';
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
 
 const RegisterPage = () => {
@@ -22,23 +19,15 @@ const RegisterPage = () => {
     try {
       const { confirmPassword, ...registerData } = data;
       await authApi.register(registerData);
-      setSuccessMsg('Registration successful! Redirecting...');
+      setSuccessMsg('Đăng ký thành công! Đang chuyển hướng...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
-      if (error.response && error.response.data) {
-        const errorData = error.response.data;
-
-        if (errorData.error && typeof errorData.error === 'object') {
-          setBackendErrors(errorData.error);
-          Object.keys(errorData.error).forEach((fieldName) => {
-            setError(fieldName, {
-              type: 'manual',
-              message: errorData.error[fieldName]
-            });
-          });
-        }
+      if (error.response?.data?.error) {
+        const errObj = error.response.data.error;
+        setBackendErrors(errObj);
+        Object.keys(errObj).forEach(field => setError(field, { type: 'manual', message: errObj[field] }));
       } else {
-        setBackendErrors({ general: 'Registration failed. Please check your information.' });
+        setBackendErrors({ general: 'Đăng ký thất bại. Vui lòng kiểm tra lại.' });
       }
     } finally {
       setIsLoading(false);
@@ -46,233 +35,60 @@ const RegisterPage = () => {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box sx={{ marginTop: 6, display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
-        <Paper elevation={3} sx={{
-          padding: { xs: 3, sm: 5 }, // Tăng nhẹ padding cho cân đối với form to
-          width: '100%',
-          borderRadius: 2,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-        }}>
-
-          {/* Header section */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-            <Avatar sx={{
-              m: 1,
-              bgcolor: '#9c27b0',
-              width: 56,
-              height: 56
-            }}>
-              <PersonAddOutlinedIcon sx={{ fontSize: 32 }} />
-            </Avatar>
-            <Typography component="h1" variant="h4" sx={{
-              fontWeight: 'bold',
-              color: '#333',
-              mt: 1
-            }}>
-              Create Account
-            </Typography>
-          </Box>
-
-          {/* Success & Error messages */}
-          {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
-          {backendErrors.general && <Alert severity="error" sx={{ mb: 2 }}>{backendErrors.general}</Alert>}
-
-          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 2, width: '100%' }}>
-            <Grid container spacing={2.5}>
-              {/* Full Name */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Full Name"
-                  placeholder="Enter your full name"
-                  {...register('fullName', {
-                    required: 'Full name is required',
-                    pattern: {
-                      value: /^[\p{L}0-9]+( [\p{L}0-9]+)*$/u,
-                      message: 'Full name must contain only letters, numbers, and spaces'
-                    }
-                  })}
-                  error={!!errors.fullName || !!backendErrors.fullName}
-                  helperText={backendErrors.fullName || errors.fullName?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
-
-              {/* Username */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Username"
-                  placeholder="Minimum 3 characters"
-                  {...register('username', {
-                    required: 'Username is required',
-                    minLength: { value: 3, message: 'Minimum 3 characters' }
-                  })}
-                  error={!!errors.username || !!backendErrors.username}
-                  helperText={backendErrors.username || errors.username?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
-
-              {/* Email */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^\S+@\S+\.\S+$/i,
-                      message: 'Invalid email address'
-                    }
-                  })}
-                  error={!!errors.email || !!backendErrors.email}
-                  helperText={backendErrors.email || errors.email?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
-
-              {/* Phone Number */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Phone Number"
-                  placeholder="0xxxxxxxxx"
-                  {...register('phoneNumber', {
-                    required: 'Phone number is required',
-                    pattern: {
-                      value: /^0[356789]\d{8}$/,
-                      message: 'Phone number must start with 0 and have 10 digits'
-                    }
-                  })}
-                  error={!!errors.phoneNumber || !!backendErrors.phoneNumber}
-                  helperText={backendErrors.phoneNumber || errors.phoneNumber?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
-
-              {/* Password */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Password"
-                  type="password"
-                  placeholder="Min 8 characters, uppercase, lowercase, number, special character"
-                  {...register('password', {
-                    required: 'Password is required'
-                  })}
-                  error={!!errors.password || !!backendErrors.password}
-                  helperText={backendErrors.password || errors.password?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
-
-              {/* Confirm Password */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  variant="outlined"
-                  label="Confirm Password"
-                  type="password"
-                  placeholder="Re-enter your password"
-                  {...register('confirmPassword', {
-                    required: 'Please confirm your password',
-                    validate: (value) => value === watch('password') || 'Passwords do not match'
-                  })}
-                  error={!!errors.confirmPassword || !!backendErrors.confirmPassword}
-                  helperText={backendErrors.confirmPassword || errors.confirmPassword?.message}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': { borderColor: '#9c27b0' },
-                      '&.Mui-focused fieldset': { borderColor: '#9c27b0' }
-                    }
-                  }}
-                />
-              </Grid>
-            </Grid>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isLoading}
-              sx={{
-                mt: 4,
-                mb: 2,
-                py: 1.5,
-                fontSize: '1.1rem',
-                fontWeight: 'bold',
-                bgcolor: '#9c27b0',
-                '&:hover': { bgcolor: '#7b1fa2' },
-                '&:disabled': { bgcolor: '#bbb' }
-              }}
-            >
-              {isLoading ? <CircularProgress size={24} color="inherit" /> : 'REGISTER NOW'}
-            </Button>
-
-            {/* Login Link */}
-            <Box sx={{ textAlign: 'right', mt: 2 }}>
-              <Typography variant="body1">
-                Already have an account?{' '}
-                <Link
-                  to="/login"
-                  style={{
-                    textDecoration: 'none',
-                    color: '#9c27b0',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                >
-                  Login here
-                </Link>
+    <Box sx={{ minHeight: "100vh", display: "flex", bgcolor: "#f4f6f8" }}>
+      {/* Cột trái: Form có hiệu ứng Slide (Trượt từ phải sang) */}
+      {/* Cột trái: Form có hiệu ứng Slide (Trượt từ phải sang) */}
+      <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
+        <Slide direction="left" in={true} mountOnEnter unmountOnExit timeout={1000}>
+          {/* GIẢM maxWidth VỀ 450 ĐỂ BẰNG ĐÚNG KÍCH THƯỚC TRANG LOGIN */}
+          <Paper elevation={4} sx={{ p: { xs: 4, sm: 5 }, width: "100%", maxWidth: 450, borderRadius: 3 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <Avatar sx={{ m: 1, bgcolor: "#1976d2", width: 56, height: 56 }}>
+                <PersonAddOutlinedIcon fontSize="large" />
+              </Avatar>
+              <Typography component="h1" variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+                Tạo tài khoản
               </Typography>
+
+              {successMsg && <Alert severity="success" sx={{ width: "100%", mb: 2 }}>{successMsg}</Alert>}
+              {backendErrors.general && <Alert severity="error" sx={{ width: "100%", mb: 2 }}>{backendErrors.general}</Alert>}
+
+              {/* Thay toàn bộ <Grid> bằng <Stack> để đảm bảo ô nhập dài full 100% */}
+              <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ width: "100%" }}>
+
+                <Stack spacing={2}>
+                  <TextField fullWidth required label="Họ và tên" {...register('fullName', { required: 'Nhập họ tên' })} error={!!errors.fullName} helperText={errors.fullName?.message} />
+
+                  <TextField fullWidth required label="Tên đăng nhập" {...register('username', { required: 'Nhập tên đăng nhập' })} error={!!errors.username} helperText={errors.username?.message} />
+
+                  <TextField fullWidth required label="Email" type="email" {...register('email', { required: 'Nhập Email' })} error={!!errors.email} helperText={errors.email?.message} />
+
+                  <TextField fullWidth required label="Số điện thoại" {...register('phoneNumber', { required: 'Nhập SĐT' })} error={!!errors.phoneNumber} helperText={errors.phoneNumber?.message} />
+
+                  <TextField fullWidth required label="Mật khẩu" type="password" {...register('password', { required: 'Nhập mật khẩu' })} error={!!errors.password} helperText={errors.password?.message} />
+
+                  <TextField fullWidth required label="Xác nhận mật khẩu" type="password" {...register('confirmPassword', { required: 'Xác nhận lại mật khẩu', validate: val => val === watch('password') || 'MK không khớp' })} error={!!errors.confirmPassword} helperText={errors.confirmPassword?.message} />
+                </Stack>
+
+                <Box sx={{ textAlign: "right", mt: 2, mb: 2 }}>
+                  <Typography variant="body2">Đã có tài khoản? <Link to="/login" style={{ textDecoration: "none", color: "#1976d2", fontWeight: "bold" }}>Đăng nhập</Link></Typography>
+                </Box>
+
+                <Button type="submit" fullWidth variant="contained" disabled={isLoading} sx={{ py: 1.5, fontSize: "1.1rem", borderRadius: 2 }}>
+                  {isLoading ? <CircularProgress size={24} color="inherit" /> : "ĐĂNG KÝ NGAY"}
+                </Button>
+                <Button fullWidth variant="text" onClick={() => navigate("/")} sx={{ mt: 1, color: "text.secondary" }}>Quay lại trang chủ</Button>
+              </Box>
             </Box>
-          </Box>
-        </Paper>
+          </Paper>
+        </Slide>
       </Box>
-    </Container>
+
+      {/* Cột phải: Gradient trang trí */}
+      <Box sx={{ flex: 1, display: { xs: "none", md: "flex" }, background: "linear-gradient(135deg, #005A9C 0%, #001f3f 100%)", alignItems: "center", justifyContent: "center", color: "white" }}>
+        <Typography variant="h3" sx={{ fontWeight: "bold", textAlign: "center", px: 4 }}>Bắt đầu hành trình! <br /> <Typography variant="h6" sx={{ mt: 2, fontWeight: 400 }}>Tạo tài khoản để truy cập hệ thống ngay hôm nay.</Typography></Typography>
+      </Box>
+    </Box>
   );
 };
 

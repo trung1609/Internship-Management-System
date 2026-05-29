@@ -18,4 +18,7 @@ public interface IMentorRepository extends JpaRepository<Mentor, Long> {
 
     @Query("select m from Mentor m where m.mentorId = :mentorId and m.user.isDeleted = false and m.user.isActive = true")
     Optional<Mentor> findByMentorId(@Param("mentorId") Long mentorId);
+
+    @Query("select m from Mentor m where m.user.username = :username and m.user.isDeleted = false and m.user.isActive = true")
+    Optional<Mentor> findByUser_Username(String username);
 }

@@ -80,7 +80,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
     @Override
     public ApiResponse<EvaluationCriteriaResponse> updateCriteria(Long id, EvaluationCriteriaUpdateRequest request) throws ResourceNotFoundException, ResourceConflictException {
         Map<String, String> errors = ValidationErrorUtil.createErrorMap();
-        EvaluationCriteria existingCriteria = evaluationCriteriaRepository.findByCriterionIdAndIsDeletedFalse(id)
+        EvaluationCriteria existingCriteria = evaluationCriteriaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evaluation criteria not found with id: " + id));
 
         if (evaluationCriteriaRepository.existsByCriterionNameIgnoreCaseAndIsDeletedFalseAndCriterionIdNot(request.getCriterionName(), id)) {

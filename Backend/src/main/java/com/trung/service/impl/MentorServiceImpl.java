@@ -1,14 +1,13 @@
 package com.trung.service.impl;
 
-import com.trung.entity.Mentor;
-import com.trung.entity.User;
-import com.trung.util.enums.Role;
 import com.trung.dto.request.MentorCreateRequest;
 import com.trung.dto.request.MentorUpdateRequest;
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.MentorResponse;
 import com.trung.dto.response.PageResponseDTO;
+import com.trung.entity.Mentor;
+import com.trung.entity.User;
 import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceForbiddenException;
@@ -20,6 +19,7 @@ import com.trung.service.IMentorService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
 import com.trung.util.ValidationErrorUtil;
+import com.trung.util.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -112,7 +112,7 @@ public class MentorServiceImpl implements IMentorService {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User currentUser = currentUserUtil.getCurrentUser();
 
-        if (currentUser.getRole() == Role.ROLE_ADMIN){
+        if (currentUser.getRole() == Role.ROLE_ADMIN) {
             Mentor existingMentor = mentorRepository.findByMentorId(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Mentor not found with id: " + id));
 
@@ -150,9 +150,21 @@ public class MentorServiceImpl implements IMentorService {
                     "Mentor updated successfully",
                     null,
                     LocalDateTime.now());
-        }else {
+        } else {
             throw new ResourceForbiddenException("User role not supported for this operation");
         }
+    }
+
+    @Override
+    public ApiResponse<MentorResponse> getMentorInfo(String username) throws ResourceNotFoundException {
+        Mentor mentor = mentorRepository.findByUser_Username(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Mentor not found with username: " + username));
+        return new ApiResponse<>(
+                MentorMapper.toDto(mentor),
+                true,
+                "SUCCESS",
+                null,
+                LocalDateTime.now());
     }
 
 

@@ -53,5 +53,8 @@ public class InternshipPhaseMapper {
         if (request.getDescription() != null) {
             internshipPhase.setDescription(request.getDescription());
         }
+        if (request.getIsDeleted() != null) {
+            internshipPhase.setDeleted(request.getIsDeleted());
+        }
     }
 }

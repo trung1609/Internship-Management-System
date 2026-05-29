@@ -21,4 +21,5 @@ public class EvaluationCriteriaUpdateRequest {
     @Positive(message = "Max score must be positive")
     private BigDecimal maxScore;
 
+    private Boolean isDeleted;
 }

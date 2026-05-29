@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { DataTable } from "../../components/DataTable";
 import { internshipAssignmentApi } from "../../api/resourceApi";
 import {
@@ -14,11 +14,11 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
+import { AuthContext } from "../../context/AuthContext";
 
 const InternshipAssignmentsManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -30,7 +30,11 @@ const InternshipAssignmentsManagement = () => {
     mentorId: "",
     phaseId: "",
     status: "PENDING",
+    assignmentTitle: "",
+    assignmentDescription: "",
   });
+  const { user } = useContext(AuthContext); // Lấy user từ Context
+  const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
 
   useEffect(() => {
     fetchAssignments();
@@ -39,7 +43,6 @@ const InternshipAssignmentsManagement = () => {
   const fetchAssignments = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await internshipAssignmentApi.getAllAssignments(
         search,
         page,
@@ -48,7 +51,8 @@ const InternshipAssignmentsManagement = () => {
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
-      setError("Error loading data: " + (err.message || "Unknown error"));
+      console.error("Error status:", err?.response?.status);
+      console.error("Error data:", err?.response?.data);
     } finally {
       setLoading(false);
     }
@@ -62,6 +66,8 @@ const InternshipAssignmentsManagement = () => {
         mentorId: assignment.mentorId || "",
         phaseId: assignment.phaseId || "",
         status: assignment.status || "PENDING",
+        assignmentTitle: assignment.assignmentTitle || "",
+        assignmentDescription: assignment.assignmentDescription || "",
       });
     } else {
       setEditingAssignment(null);
@@ -70,6 +76,8 @@ const InternshipAssignmentsManagement = () => {
         mentorId: "",
         phaseId: "",
         status: "PENDING",
+        assignmentTitle: "",
+        assignmentDescription: "",
       });
     }
     setOpenDialog(true);
@@ -94,7 +102,7 @@ const InternshipAssignmentsManagement = () => {
       handleCloseDialog();
       fetchAssignments();
     } catch (err) {
-      setError("Error saving data: " + err.message);
+      console.error("Error saving assignment:", err);
     } finally {
       setLoading(false);
     }
@@ -104,8 +112,10 @@ const InternshipAssignmentsManagement = () => {
     { field: "id", label: "ID" },
     { field: "assignmentTitle", label: "Assignment Title" },
     { field: "assignmentDescription", label: "Description" },
-    { field: "studentId", label: "Student ID" },
-    { field: "mentorId", label: "Mentor ID" },
+    { field: "studentName", label: "Student Name" },
+    { field: "mentorName", label: "Mentor Name" },
+    { field: "phaseName", label: "Phase Name" },
+    { field: "assignedDate", label: "Assign Date" },
     { field: "status", label: "Status" },
   ];
 
@@ -116,9 +126,8 @@ const InternshipAssignmentsManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        error={error}
-        onEdit={(assignment) => handleOpenDialog(assignment)}
-        onAdd={() => handleOpenDialog()}
+        onEdit={isAdmin ? (assignment) => handleOpenDialog(assignment) : null}
+        onAdd={isAdmin ? () => handleOpenDialog() : null}
         totalCount={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}
@@ -157,9 +166,9 @@ const InternshipAssignmentsManagement = () => {
           <TextField
             fullWidth
             label="Mô tả"
-            value={formData.description}
+            value={formData.assignmentDescription}
             onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
+              setFormData({ ...formData, assignmentDescription: e.target.value })
             }
             multiline
             rows={3}
@@ -201,6 +210,7 @@ const InternshipAssignmentsManagement = () => {
                 setFormData({ ...formData, status: e.target.value })
               }
             >
+              <MenuItem value="PENDING">Đang chờ</MenuItem>
               <MenuItem value="ACTIVE">Hoạt động</MenuItem>
               <MenuItem value="COMPLETED">Hoàn thành</MenuItem>
               <MenuItem value="CANCELLED">Hủy</MenuItem>

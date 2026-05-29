@@ -20,5 +20,5 @@ public class InternshipPhaseResponse {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate endDate;
     private String description;
-    private boolean isDeleted;
+    private Boolean isDeleted;
 }

@@ -34,6 +34,8 @@ export const mentorApi = {
   // Update mentor info (Admin/Mentor)
   updateMentor: (mentorId, data) =>
     axiosClient.put(`/api/v1/mentors/${mentorId}`, data),
+
+  getMentorInfo: () => axiosClient.get("/api/v1/mentors/info"),
 };
 
 export const userApi = {
@@ -184,7 +186,4 @@ export const assessmentResultApi = {
   updateResult: (resultId, data) =>
     axiosClient.put(`/api/v1/assessment-results/${resultId}`, data),
 
-  // Delete result
-  deleteResult: (resultId) =>
-    axiosClient.delete(`/api/v1/assessment-results/${resultId}`),
 };

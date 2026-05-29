@@ -115,7 +115,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
 
     @Override
     public ApiResponse<AssessmentRoundsResponse> updateAssessmentRound(Long id, AssessmentRoundUpdateRequest request) throws ResourceNotFoundException, ResourceConflictException, ResourceBadRequestException {
-        AssessmentRound assessmentRound = assessmentRoundsRepository.findByRoundIdAndIsDeletedFalse(id)
+        AssessmentRound assessmentRound = assessmentRoundsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));
 
         AssessmentRoundsMapper.updateFromDto(assessmentRound, request);

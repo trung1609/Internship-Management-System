@@ -18,5 +18,5 @@ public class CriterionScoreRequest {
     @NotNull(message = "Score cannot be null")
     @Positive(message = "Score must be a positive number")
     private BigDecimal score;
-    private String comment;
+    private String comments;
 }

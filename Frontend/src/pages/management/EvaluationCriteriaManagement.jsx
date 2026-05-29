@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { DataTable } from "../../components/DataTable";
 import { evaluationCriteriaApi } from "../../api/resourceApi";
 import {
@@ -9,12 +9,14 @@ import {
   DialogActions,
   TextField,
   Button,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
+import { AuthContext } from "../../context/AuthContext";
 
 const EvaluationCriteriaManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -22,9 +24,10 @@ const EvaluationCriteriaManagement = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingCriteria, setEditingCriteria] = useState(null);
   const [formData, setFormData] = useState({
-    criteriaName: "",
+    criterionName: "",
     description: "",
     maxScore: "",
+    isDeleted: false,
   });
 
   useEffect(() => {
@@ -34,7 +37,6 @@ const EvaluationCriteriaManagement = () => {
   const fetchCriteria = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await evaluationCriteriaApi.getAllCriteria(
         search,
         page,
@@ -43,7 +45,7 @@ const EvaluationCriteriaManagement = () => {
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
-      setError("Error loading data: " + (err.message || "Unknown error"));
+      console.error("Error loading criteria:", err);
     } finally {
       setLoading(false);
     }
@@ -53,16 +55,18 @@ const EvaluationCriteriaManagement = () => {
     if (criteria) {
       setEditingCriteria(criteria);
       setFormData({
-        criteriaName: criteria.criteriaName || "",
+        criterionName: criteria.criterionName || "",
         description: criteria.description || "",
         maxScore: criteria.maxScore || "",
+        isDeleted: criteria.isDeleted || false,
       });
     } else {
       setEditingCriteria(null);
       setFormData({
-        criteriaName: "",
+        criterionName: "",
         description: "",
         maxScore: "",
+        isDeleted: false,
       });
     }
     setOpenDialog(true);
@@ -87,29 +91,47 @@ const EvaluationCriteriaManagement = () => {
       handleCloseDialog();
       fetchCriteria();
     } catch (err) {
-      setError("Error saving data: " + err.message);
+      console.error("Error saving criteria:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (criteriaId) => {
+  const handleDelete = async (dataFormTable) => {
+
+    const targetId = dataFormTable.id;
+
     try {
       setLoading(true);
-      await evaluationCriteriaApi.deleteCriteria(criteriaId);
+      await evaluationCriteriaApi.deleteCriteria(targetId);
       fetchCriteria();
     } catch (err) {
-      setError("Error deleting data: " + err.message);
+      console.error("Error deleting criteria:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const { user } = useContext(AuthContext); // Lấy user từ Context
+  const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
 
   const columns = [
     { field: "id", label: "ID" },
     { field: "criterionName", label: "Criteria Name" },
     { field: "description", label: "Description" },
     { field: "maxScore", label: "Max Score" },
+    {
+      field: "isDeleted",
+      label: "Active",
+      render: (isDeleted) => (
+        <span style={{
+          color: isDeleted ? "red" : "green",
+          fontWeight: "bold"
+        }}>
+          {isDeleted ? "Đã khóa" : "Hoạt động"}
+        </span>
+      ),
+    },
   ];
 
   return (
@@ -119,10 +141,9 @@ const EvaluationCriteriaManagement = () => {
         columns={columns}
         data={data}
         loading={loading}
-        error={error}
-        onEdit={(criteria) => handleOpenDialog(criteria)}
-        onDelete={handleDelete}
-        onAdd={() => handleOpenDialog()}
+        onEdit={isAdmin ? (criteria) => handleOpenDialog(criteria) : null}
+        onDelete={isAdmin ? handleDelete : null}
+        onAdd={isAdmin ? () => handleOpenDialog() : null}
         totalCount={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}
@@ -152,9 +173,9 @@ const EvaluationCriteriaManagement = () => {
           <TextField
             fullWidth
             label="Tên tiêu chí"
-            value={formData.criteriaName}
+            value={formData.criterionName}
             onChange={(e) =>
-              setFormData({ ...formData, criteriaName: e.target.value })
+              setFormData({ ...formData, criterionName: e.target.value })
             }
             margin="normal"
           />
@@ -178,6 +199,17 @@ const EvaluationCriteriaManagement = () => {
               setFormData({ ...formData, maxScore: e.target.value })
             }
             margin="normal"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!formData.isDeleted}
+                onChange={(e) => setFormData({ ...formData, isDeleted: !e.target.checked })}
+                color="primary"
+              />
+            }
+            label={formData.isDeleted ? "Trạng thái: Đã khóa" : "Trạng thái: Hoạt động"}
+            sx={{ mt: 2 }}
           />
         </DialogContent>
         <DialogActions>

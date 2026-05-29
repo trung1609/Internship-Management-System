@@ -32,5 +32,8 @@ public class EvaluationCriteriaMapper {
         if (dto.getMaxScore() != null) {
             entity.setMaxScore(dto.getMaxScore());
         }
+        if (dto.getIsDeleted() != null) {
+            entity.setDeleted(dto.getIsDeleted());
+        }
     }
 }
