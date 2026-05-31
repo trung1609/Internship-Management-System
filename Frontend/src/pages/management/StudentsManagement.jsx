@@ -340,7 +340,7 @@ const StudentsManagement = () => {
 
             label="Date of Birth"
 
-            type="date"
+            type={formData.dateOfBirth ? "date" : "text"}
 
             value={formData.dateOfBirth}
 
@@ -349,11 +349,10 @@ const StudentsManagement = () => {
               setFormData({ ...formData, dateOfBirth: e.target.value })
 
             }
+            onFocus={(e) => (e.target.type = "date")}
+            onBlur={(e) => {
 
-            InputLabelProps={{
-
-              shrink: true,
-
+              if (!formData.dateOfBirth) e.target.type = "text";
             }}
 
             margin="normal"

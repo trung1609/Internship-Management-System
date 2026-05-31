@@ -17,6 +17,10 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  Typography,
+  Stack,
+  Paper,
+  Divider,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -172,12 +176,22 @@ const AssessmentRoundsManagement = () => {
       field: "isDeleted",
       label: "Active",
       render: (isDeleted) => (
-        <span style={{
-          color: isDeleted ? "red" : "green",
-          fontWeight: "bold"
-        }}>
+        <Box
+          sx={{
+            display: "inline-block",
+            px: 2,
+            py: 0.5,
+            borderRadius: "20px",
+            backgroundColor: isDeleted
+              ? "rgba(211, 47, 47, 0.1)"
+              : "rgba(46, 125, 50, 0.1)",
+            color: isDeleted ? "#d32f2f" : "#2e7d32",
+            fontWeight: "bold",
+            fontSize: "0.85rem",
+          }}
+        >
           {isDeleted ? "Đã khóa" : "Hoạt động"}
-        </span>
+        </Box>
       ),
     },
   ];
@@ -186,173 +200,243 @@ const AssessmentRoundsManagement = () => {
   const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
 
   return (
-    <Box>
-      <DataTable
-        title="Assessment Rounds Management"
-        columns={columns}
-        data={data}
-        loading={loading}
-        onEdit={isAdmin ? (round) => handleOpenDialog(round) : null}
-        onDelete={isAdmin ? handleDelete : null}
-        onAdd={isAdmin ? () => handleOpenDialog() : null}
-        totalCount={totalCount}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(newPage) => setPage(newPage)}
-        onRowsPerPageChange={(newRowsPerPage) => {
-          setRowsPerPage(newRowsPerPage);
-          setPage(0);
-        }}
-        searchValue={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(0);
-        }}
-        onDetail={(round) => navigate(`/admin/assessment-rounds/${round.id}`)}
-      />
+    <Box sx={{ p: 3 }}>
+      {/* Header trang */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: "#1a237e", mb: 0.5 }}>
+            Quản lý Vòng Đánh giá
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Thiết lập các vòng đánh giá và phân bổ tiêu chí
+          </Typography>
+        </Box>
+      </Box>
 
-      {/* Add/Edit Dialog */}
+      {/* Bảng Dữ Liệu */}
+      <Paper sx={{ p: 3, borderRadius: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+        <DataTable
+          title=""
+          columns={columns}
+          data={data}
+          loading={loading}
+          onEdit={isAdmin ? (round) => handleOpenDialog(round) : null}
+          onDelete={isAdmin ? handleDelete : null}
+          onAdd={isAdmin ? () => handleOpenDialog() : null}
+          totalCount={totalCount}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(newPage) => setPage(newPage)}
+          onRowsPerPageChange={(newRowsPerPage) => {
+            setRowsPerPage(newRowsPerPage);
+            setPage(0);
+          }}
+          searchValue={search}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPage(0);
+          }}
+          onDetail={(round) => navigate(`/admin/assessment-rounds/${round.id}`)}
+        />
+      </Paper>
+
+      {/* Modal Thêm/Sửa */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3, overflow: "visible" },
+        }}
       >
-        <DialogTitle>
-          {editingRound
-            ? "Update Assessment Round"
-            : "Add New Assessment Round"}
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", color: "#333" }}>
+            {editingRound ? "Cập nhật Vòng đánh giá" : "Tạo Vòng đánh giá mới"}
+          </Typography>
         </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          <TextField
-            fullWidth
-            label="Tên vòng đánh giá"
-            value={formData.roundName}
-            onChange={(e) =>
-              setFormData({ ...formData, roundName: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Mô tả"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            multiline
-            rows={3}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Ngày bắt đầu"
-            type="date"
-            value={formData.startDate}
-            onChange={(e) =>
-              setFormData({ ...formData, startDate: e.target.value })
-            }
-            InputLabelProps={{ shrink: true }}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Ngày kết thúc"
-            type="date"
-            value={formData.endDate}
-            onChange={(e) =>
-              setFormData({ ...formData, endDate: e.target.value })
-            }
-            InputLabelProps={{ shrink: true }}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Mã giai đoạn"
-            value={formData.phaseId}
-            onChange={(e) =>
-              setFormData({ ...formData, phaseId: e.target.value })
-            }
-            margin="normal"
-          />
-          <Autocomplete
-            multiple
-            options={allCriteria}
-            getOptionLabel={(o) => o.criterionName}
-            isOptionEqualToValue={(option, value) => option.criterionId === value.criterionId}
-            value={formData.roundCriteria}
-            onChange={(event, newValue) => {
-              const updated = newValue.map((item) => {
-                const currentId = item.id || item.criterionId;
+        <Divider />
 
-                const existing = formData.roundCriteria.find((old) => (old.id || old.criterionId) === currentId);
+        <DialogContent sx={{ pt: 3 }}>
+          <Stack spacing={3}>
+            <TextField
+              fullWidth
+              label="Tên vòng đánh giá"
+              value={formData.roundName}
+              onChange={(e) =>
+                setFormData({ ...formData, roundName: e.target.value })
+              }
+            />
 
-                return {
-                  criterionId: currentId, 
-                  criterionName: item.criterionName,
-                  maxScore: item.maxScore,
-                  weight: existing ? existing.weight : 0 
-                };
-              });
-              setFormData({ ...formData, roundCriteria: updated });
-            }}
-            renderInput={(params) => <TextField {...params} label="Chọn tiêu chí" margin="normal" />}
-          />
-          {formData.roundCriteria.length > 0 && (
-            <Table size="small" sx={{ mt: 2 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Tiêu chí</TableCell>
-                  <TableCell>Trọng số</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {formData.roundCriteria.map((item, index) => (
-                  <TableRow key={item.criterionId}>
-                    <TableCell>{item.criterionName}</TableCell>
-                    <TableCell>
-                      <TextField
-                        type="number"
-                        size="small"
-                        value={item.weight ?? ""}
-                        onChange={(e) => {
-                          const val = e.target.value;
+            <TextField
+              fullWidth
+              label="Mô tả"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              multiline
+              rows={3}
+            />
 
-                          setFormData(prev => {
-                            const nextCriteria = [...prev.roundCriteria];
-                            nextCriteria[index] = {
-                              ...nextCriteria[index],
-                              weight: val
-                            };
-                            return {
-                              ...prev,
-                              roundCriteria: nextCriteria
-                            };
-                          });
-                        }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={!formData.isDeleted}
-                onChange={(e) => setFormData({ ...formData, isDeleted: !e.target.checked })}
-                color="primary"
+            <TextField
+              fullWidth
+              label="Ngày bắt đầu"
+              type={formData.startDate ? "date" : "text"}
+              value={formData.startDate}
+              onChange={(e) =>
+                setFormData({ ...formData, startDate: e.target.value })
+              }
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => {
+                if (!formData.startDate) e.target.type = "text";
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="Ngày kết thúc"
+              type={formData.endDate ? "date" : "text"}
+              value={formData.endDate}
+              onChange={(e) =>
+                setFormData({ ...formData, endDate: e.target.value })
+              }
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => {
+                if (!formData.endDate) e.target.type = "text";
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="Mã giai đoạn"
+              value={formData.phaseId}
+              onChange={(e) =>
+                setFormData({ ...formData, phaseId: e.target.value })
+              }
+            />
+
+            {/* Phần chọn Tiêu chí */}
+            <Box sx={{ bgcolor: "#f8f9fa", p: 2, borderRadius: 2, border: "1px solid #e0e0e0" }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#555", mb: 1 }}>
+                Chọn Tiêu chí đánh giá
+              </Typography>
+              <Autocomplete
+                multiple
+                options={allCriteria}
+                getOptionLabel={(o) => o.criterionName}
+                isOptionEqualToValue={(option, value) => option.criterionId === value.criterionId}
+                value={formData.roundCriteria}
+                onChange={(event, newValue) => {
+                  const updated = newValue.map((item) => {
+                    const currentId = item.id || item.criterionId;
+                    const existing = formData.roundCriteria.find((old) => (old.id || old.criterionId) === currentId);
+
+                    return {
+                      criterionId: currentId,
+                      criterionName: item.criterionName,
+                      maxScore: item.maxScore,
+                      weight: existing ? existing.weight : 0
+                    };
+                  });
+                  setFormData({ ...formData, roundCriteria: updated });
+                }}
+                renderInput={(params) => <TextField {...params} placeholder="Tìm kiếm tiêu chí..." sx={{ bgcolor: 'white' }} />}
               />
-            }
-            label={formData.isDeleted ? "Trạng thái: Đã khóa" : "Trạng thái: Hoạt động"}
-            sx={{ mt: 2 }}
-          />
+
+              {formData.roundCriteria.length > 0 && (
+                <Table size="small" sx={{ mt: 2, bgcolor: 'white', borderRadius: 1 }}>
+                  <TableHead sx={{ bgcolor: "#e3f2fd" }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Tiêu chí</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>Trọng số</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {formData.roundCriteria.map((item, index) => (
+                      <TableRow key={item.criterionId}>
+                        <TableCell>{item.criterionName}</TableCell>
+                        <TableCell>
+                          <TextField
+                            type="number"
+                            size="small"
+                            fullWidth
+                            value={item.weight ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setFormData(prev => {
+                                const nextCriteria = [...prev.roundCriteria];
+                                nextCriteria[index] = {
+                                  ...nextCriteria[index],
+                                  weight: val
+                                };
+                                return {
+                                  ...prev,
+                                  roundCriteria: nextCriteria
+                                };
+                              });
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </Box>
+
+            {/* Switch Trạng thái */}
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: "#f8f9fa",
+                border: "1px solid #e0e0e0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#555" }}>
+                Trạng thái hoạt động
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={!formData.isDeleted}
+                    onChange={(e) => setFormData({ ...formData, isDeleted: !e.target.checked })}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: "bold",
+                      color: !formData.isDeleted ? "#2e7d32" : "#d32f2f",
+                    }}
+                  >
+                    {!formData.isDeleted ? "Đang hoạt động" : "Đã khóa"}
+                  </Typography>
+                }
+                labelPlacement="start"
+                sx={{ m: 0 }}
+              />
+            </Box>
+          </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button onClick={handleSave} variant="contained">
-            Lưu
+
+        <Divider />
+        <DialogActions sx={{ p: 2.5, justifyContent: "flex-end" }}>
+          <Button onClick={handleCloseDialog} sx={{ fontWeight: "bold", color: "#666" }}>
+            Hủy bỏ
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            sx={{ px: 4, borderRadius: 2, fontWeight: "bold" }}
+          >
+            {editingRound ? "Lưu thay đổi" : "Tạo mới"}
           </Button>
         </DialogActions>
       </Dialog>

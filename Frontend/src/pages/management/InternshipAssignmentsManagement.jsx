@@ -13,8 +13,13 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Typography,
+  Stack,
+  Paper,
+  Divider,
 } from "@mui/material";
 import { AuthContext } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 
 const InternshipAssignmentsManagement = () => {
   const [data, setData] = useState([]);
@@ -33,7 +38,8 @@ const InternshipAssignmentsManagement = () => {
     assignmentTitle: "",
     assignmentDescription: "",
   });
-  const { user } = useContext(AuthContext); // Lấy user từ Context
+
+  const { user } = useContext(AuthContext);
   const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
 
   useEffect(() => {
@@ -96,13 +102,16 @@ const InternshipAssignmentsManagement = () => {
           editingAssignment.id,
           formData,
         );
+        toast.success("Cập nhật phân công thành công!");
       } else {
         await internshipAssignmentApi.createAssignment(formData);
+        toast.success("Thêm phân công thành công!");
       }
       handleCloseDialog();
       fetchAssignments();
     } catch (err) {
       console.error("Error saving assignment:", err);
+      toast.error("Có lỗi xảy ra khi lưu phân công!");
     } finally {
       setLoading(false);
     }
@@ -116,111 +125,186 @@ const InternshipAssignmentsManagement = () => {
     { field: "mentorName", label: "Mentor Name" },
     { field: "phaseName", label: "Phase Name" },
     { field: "assignedDate", label: "Assign Date" },
-    { field: "status", label: "Status" },
+    {
+      field: "status",
+      label: "Status",
+      render: (status) => {
+        let color, bgColor, label;
+        switch (status) {
+          case "IN_PROGRESS":
+            color = "#2e7d32";
+            bgColor = "rgba(46, 125, 50, 0.1)";
+            label = "Hoạt động";
+            break;
+          case "COMPLETED":
+            color = "#1976d2";
+            bgColor = "rgba(25, 118, 210, 0.1)";
+            label = "Hoàn thành";
+            break;
+          case "CANCELLED":
+            color = "#d32f2f";
+            bgColor = "rgba(211, 47, 47, 0.1)";
+            label = "Hủy";
+            break;
+          default:
+            color = "#ed6c02";
+            bgColor = "rgba(237, 108, 2, 0.1)";
+            label = "Đang chờ";
+        }
+        return (
+          <Box
+            sx={{
+              display: "inline-block",
+              px: 2,
+              py: 0.5,
+              borderRadius: "20px",
+              backgroundColor: bgColor,
+              color: color,
+              fontWeight: "bold",
+              fontSize: "0.85rem",
+            }}
+          >
+            {label}
+          </Box>
+        );
+      },
+    },
   ];
 
   return (
-    <Box>
-      <DataTable
-        title="Internship Assignments Management"
-        columns={columns}
-        data={data}
-        loading={loading}
-        onEdit={isAdmin ? (assignment) => handleOpenDialog(assignment) : null}
-        onAdd={isAdmin ? () => handleOpenDialog() : null}
-        totalCount={totalCount}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(newPage) => setPage(newPage)}
-        onRowsPerPageChange={(newRowsPerPage) => {
-          setRowsPerPage(newRowsPerPage);
-          setPage(0);
-        }}
-        searchValue={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(0);
-        }}
-      />
+    <Box sx={{ p: 3 }}>
+      {/* Header */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: "#1a237e", mb: 0.5 }}>
+            Quản lý Phân công Thực tập
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Theo dõi phân công sinh viên, cố vấn và trạng thái đồ án
+          </Typography>
+        </Box>
+      </Box>
 
-      {/* Add/Edit Dialog */}
+      {/* Bảng Dữ Liệu */}
+      <Paper sx={{ p: 3, borderRadius: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+        <DataTable
+          title=""
+          columns={columns}
+          data={data}
+          loading={loading}
+          onEdit={isAdmin ? (assignment) => handleOpenDialog(assignment) : null}
+          onAdd={isAdmin ? () => handleOpenDialog() : null}
+          totalCount={totalCount}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(newPage) => setPage(newPage)}
+          onRowsPerPageChange={(newRowsPerPage) => {
+            setRowsPerPage(newRowsPerPage);
+            setPage(0);
+          }}
+          searchValue={search}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPage(0);
+          }}
+        />
+      </Paper>
+
+      {/* Modal Thêm/Sửa bằng Stack */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3, overflow: "visible" },
+        }}
       >
-        <DialogTitle>
-          {editingAssignment ? "Update Assignment" : "Add New Assignment"}
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", color: "#333" }}>
+            {editingAssignment ? "Cập nhật Phân công" : "Tạo Phân công mới"}
+          </Typography>
         </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          <TextField
-            fullWidth
-            label="Tiêu đề phân công"
-            value={formData.assignmentTitle}
-            onChange={(e) =>
-              setFormData({ ...formData, assignmentTitle: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Mô tả"
-            value={formData.assignmentDescription}
-            onChange={(e) =>
-              setFormData({ ...formData, assignmentDescription: e.target.value })
-            }
-            multiline
-            rows={3}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Mã sinh viên"
-            value={formData.studentId}
-            onChange={(e) =>
-              setFormData({ ...formData, studentId: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Mã cố vấn"
-            value={formData.mentorId}
-            onChange={(e) =>
-              setFormData({ ...formData, mentorId: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Mã giai đoạn"
-            value={formData.phaseId}
-            onChange={(e) =>
-              setFormData({ ...formData, phaseId: e.target.value })
-            }
-            margin="normal"
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Trạng thái</InputLabel>
-            <Select
-              value={formData.status}
-              label="Trạng thái"
+        <Divider />
+
+        <DialogContent sx={{ pt: 3 }}>
+          <Stack spacing={2.5}>
+            <TextField
+              fullWidth
+              label="Tiêu đề phân công"
+              value={formData.assignmentTitle}
               onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value })
+                setFormData({ ...formData, assignmentTitle: e.target.value })
               }
-            >
-              <MenuItem value="PENDING">Đang chờ</MenuItem>
-              <MenuItem value="ACTIVE">Hoạt động</MenuItem>
-              <MenuItem value="COMPLETED">Hoàn thành</MenuItem>
-              <MenuItem value="CANCELLED">Hủy</MenuItem>
-            </Select>
-          </FormControl>
+            />
+
+            <TextField
+              fullWidth
+              label="Mô tả công việc"
+              value={formData.assignmentDescription}
+              onChange={(e) =>
+                setFormData({ ...formData, assignmentDescription: e.target.value })
+              }
+              multiline
+              rows={3}
+            />
+
+            <TextField
+              fullWidth
+              label="Mã sinh viên"
+              value={formData.studentId}
+              onChange={(e) =>
+                setFormData({ ...formData, studentId: e.target.value })
+              }
+            />
+
+            <TextField
+              fullWidth
+              label="Mã cố vấn"
+              value={formData.mentorId}
+              onChange={(e) =>
+                setFormData({ ...formData, mentorId: e.target.value })
+              }
+            />
+
+            <TextField
+              fullWidth
+              label="Mã giai đoạn (Phase)"
+              value={formData.phaseId}
+              onChange={(e) =>
+                setFormData({ ...formData, phaseId: e.target.value })
+              }
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Trạng thái phân công</InputLabel>
+              <Select
+                value={formData.status}
+                label="Trạng thái phân công"
+                onChange={(e) =>
+                  setFormData({ ...formData, status: e.target.value })
+                }
+              >
+                <MenuItem value="PENDING">Đang chờ (Pending)</MenuItem>
+                <MenuItem value="IN_PROGRESS">Hoạt động (In Progress)</MenuItem>
+                <MenuItem value="COMPLETED">Hoàn thành (Completed)</MenuItem>
+                <MenuItem value="CANCELLED">Đã Hủy (Cancelled)</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button onClick={handleSave} variant="contained">
-            Lưu
+
+        <Divider />
+        <DialogActions sx={{ p: 2.5, justifyContent: "flex-end" }}>
+          <Button onClick={handleCloseDialog} sx={{ fontWeight: "bold", color: "#666" }}>
+            Hủy bỏ
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            sx={{ px: 4, borderRadius: 2, fontWeight: "bold" }}
+          >
+            {editingAssignment ? "Lưu thay đổi" : "Tạo mới"}
           </Button>
         </DialogActions>
       </Dialog>
