@@ -10,13 +10,15 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
   Typography,
   Autocomplete,
+  Stack,
+  Paper,
+  Divider
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-
+import { Delete as DeleteIcon } from "@mui/icons-material";
 const AssessmentResultsManagement = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -27,12 +29,11 @@ const AssessmentResultsManagement = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingResult, setEditingResult] = useState(null);
 
-  // Khởi tạo
   const [formData, setFormData] = useState({
     id: null,
     assignmentId: "",
     roundId: "",
-    results: [], // Luôn là mảng
+    results: [],
   });
 
   const [suggestedCriteria, setSuggestedCriteria] = useState([]);
@@ -52,7 +53,6 @@ const AssessmentResultsManagement = () => {
         rowsPerPage,
         search,
       );
-      console.log("Fetched assessment results:", response);
       setData(response?.content || []);
       setTotalCount(response?.totalElements || 0);
     } catch (err) {
@@ -94,7 +94,6 @@ const AssessmentResultsManagement = () => {
         id: result.id,
         assignmentId: result.assignmentId || "",
         roundId: result.roundId || "",
-        // Map về đúng cấu trúc chuẩn, đảm bảo có id
         results: [{
           criterionId: result.criterionId,
           score: result.score,
@@ -148,7 +147,6 @@ const AssessmentResultsManagement = () => {
       setLoading(true);
 
       if (editingResult) {
-        // UPDATE: Dùng ID ở cấp cao nhất (formData.id)
         const currentRow = formData.results[0];
         await assessmentResultApi.updateResult(formData.id, {
           score: parseFloat(currentRow.score) || 0,
@@ -156,7 +154,6 @@ const AssessmentResultsManagement = () => {
         });
         toast.success("Cập nhật thành công!");
       } else {
-        // CREATE: Vẫn gửi mảng như cũ
         const payload = {
           assignmentId: parseInt(formData.assignmentId),
           roundId: parseInt(formData.roundId),
@@ -187,85 +184,108 @@ const AssessmentResultsManagement = () => {
     { field: "evaluationDate", label: "Ngày đánh giá" },
   ];
 
-  const { user } = useContext(AuthContext); // Lấy user từ Context
+  const { user } = useContext(AuthContext);
   const isMentor = user?.role === "MENTOR" || user?.role === "ROLE_MENTOR";
 
   return (
-    <Box>
-      <DataTable
-        title="Assessment Results Management"
-        columns={columns}
-        data={data}
-        loading={loading}
-        onEdit={isMentor ? (result) => handleOpenDialog(result) : null}
-        onAdd={isMentor ? () => handleOpenDialog() : null}
-        totalCount={totalCount}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(newPage) => setPage(newPage)}
-        onRowsPerPageChange={(newRowsPerPage) => {
-          setRowsPerPage(newRowsPerPage);
-          setPage(0);
-        }}
-        searchValue={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(0);
-        }}
-        onDetail={(result) => navigate(`/admin/assessment-results/${result.id}`)}
-      />
+    <Box sx={{ p: 3 }}>
+      {/* Header trang */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: "#1a237e", mb: 0.5 }}>
+            Quản lý Kết quả Đánh giá
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Ghi nhận và theo dõi điểm số chi tiết từ Mentor
+          </Typography>
+        </Box>
+      </Box>
 
+      {/* Bảng Dữ Liệu */}
+      <Paper sx={{ p: 3, borderRadius: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+        <DataTable
+          title=""
+          columns={columns}
+          data={data}
+          loading={loading}
+          onEdit={isMentor ? (result) => handleOpenDialog(result) : null}
+          onAdd={isMentor ? () => handleOpenDialog() : null}
+          totalCount={totalCount}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(newPage) => setPage(newPage)}
+          onRowsPerPageChange={(newRowsPerPage) => {
+            setRowsPerPage(newRowsPerPage);
+            setPage(0);
+          }}
+          searchValue={search}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPage(0);
+          }}
+          onDetail={(result) => navigate(`/admin/assessment-results/${result.id}`)}
+        />
+      </Paper>
+
+      {/* Modal Thêm/Sửa bằng STACK (Không dùng Grid) */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        maxWidth="md"
+        maxWidth="sm" // Thu nhỏ lại thành sm vì xếp dọc không cần rộng quá
         fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3, overflow: "visible" },
+        }}
       >
-        <DialogTitle sx={{ fontWeight: 'bold' }}>
-          {editingResult ? "Cập nhật kết quả đánh giá" : "Thêm kết quả đánh giá mới"}
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", color: "#333" }}>
+            {editingResult ? "Cập nhật kết quả đánh giá" : "Thêm kết quả đánh giá mới"}
+          </Typography>
         </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
+        <Divider />
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Mã phân công (Assignment ID)"
-                value={formData.assignmentId}
-                onChange={(e) => setFormData({ ...formData, assignmentId: e.target.value })}
-                disabled={editingResult !== null}
-                margin="normal"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Mã vòng đánh giá (Round ID)"
-                value={formData.roundId}
-                onChange={(e) => {
-                  const id = e.target.value;
-                  setFormData({ ...formData, roundId: id });
-                  fetchCriteriaForRound(id);
-                }}
-                margin="normal"
-              />
-            </Grid>
-          </Grid>
+        <DialogContent sx={{ pt: 3 }}>
+          {/* Thông tin cơ bản */}
+          <Stack spacing={2.5}>
+            <TextField
+              fullWidth
+              label="Mã phân công (Assignment ID)"
+              value={formData.assignmentId}
+              onChange={(e) => setFormData({ ...formData, assignmentId: e.target.value })}
+              disabled={editingResult !== null}
+            />
 
-          <Box sx={{ mt: 3, p: 2, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+            <TextField
+              fullWidth
+              label="Mã vòng đánh giá (Round ID)"
+              value={formData.roundId}
+              onChange={(e) => {
+                const id = e.target.value;
+                setFormData({ ...formData, roundId: id });
+                fetchCriteriaForRound(id);
+              }}
+            />
+          </Stack>
+
+          {/* Vùng chi tiết điểm */}
+          <Box sx={{ mt: 4, p: 2, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>Chi tiết điểm các tiêu chí</Typography>
-              <Button variant="outlined" size="small" onClick={handleAddResultRow}>
-                + Thêm tiêu chí
-              </Button>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#1565c0' }}>
+                Chi tiết điểm các tiêu chí
+              </Typography>
+              {!editingResult && (
+                <Button variant="outlined" size="small" onClick={handleAddResultRow} sx={{ borderRadius: 2 }}>
+                  + Thêm tiêu chí
+                </Button>
+              )}
             </Box>
 
-            {formData.results.map((item, index) => (
-              <Box key={index} sx={{ mb: 2, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} sm={3}>
+            <Stack spacing={3}>
+              {formData.results.map((item, index) => (
+                <Paper key={index} elevation={0} sx={{ p: 2.5, border: '1px solid #ddd', borderRadius: 2 }}>
+                  {/* Mỗi kết quả cũng xếp dọc hoàn toàn */}
+                  <Stack spacing={2}>
                     <Autocomplete
-                      sx={{ minWidth: 200 }}
                       fullWidth
                       options={suggestedCriteria}
                       getOptionLabel={(option) => option.criterionName || ""}
@@ -275,49 +295,51 @@ const AssessmentResultsManagement = () => {
                         handleResultChange(index, "criterionId", newValue ? newValue.criterionId : "");
                       }}
                       renderInput={(params) => (
-                        <TextField {...params} label="Chọn tiêu chí" size="small" />
+                        <TextField {...params} label="Chọn tiêu chí" />
                       )}
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={2}>
+
                     <TextField
                       fullWidth
-                      label="Điểm"
+                      label="Điểm số"
                       type="number"
-                      size="small"
                       inputProps={{ step: "0.1", min: "0" }}
                       value={item.score}
                       onChange={(e) => handleResultChange(index, "score", e.target.value)}
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={5}>
+
                     <TextField
                       fullWidth
                       label="Nhận xét"
-                      size="small"
-                      value={item.comments
-                      }
+                      multiline
+                      rows={2}
+                      value={item.comments}
                       onChange={(e) => handleResultChange(index, "comments", e.target.value)}
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={2} sx={{ textAlign: 'right' }}>
-                    <Button
-                      color="error"
-                      onClick={() => handleRemoveResultRow(index)}
-                      disabled={formData.results.length === 1}
-                    >
-                      XÓA
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Box>
-            ))}
-          </Box>
 
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Button
+                        color="error"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => handleRemoveResultRow(index)}
+                        disabled={formData.results.length === 1}
+                      >
+                        Xóa dòng này
+                      </Button>
+                    </Box>
+                  </Stack>
+                </Paper>
+              ))}
+            </Stack>
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={handleCloseDialog} color="inherit">Hủy</Button>
-          <Button onClick={handleSave} variant="contained" disabled={loading}>
+
+        <Divider />
+        <DialogActions sx={{ p: 2.5, justifyContent: "flex-end" }}>
+          <Button onClick={handleCloseDialog} sx={{ fontWeight: "bold", color: "#666" }}>
+            Hủy bỏ
+          </Button>
+          <Button onClick={handleSave} variant="contained" disabled={loading} sx={{ px: 4, borderRadius: 2, fontWeight: "bold" }}>
             {loading ? "Đang lưu..." : "Lưu Kết Quả"}
           </Button>
         </DialogActions>

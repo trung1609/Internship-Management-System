@@ -21,11 +21,11 @@ public class InternshipPhaseCreateRequest {
     private String phaseName;
 
     @NotNull(message = "Start date is required")
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
     @NotNull(message = "End date is required")
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
 
