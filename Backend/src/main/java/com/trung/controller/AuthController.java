@@ -45,7 +45,7 @@ public class AuthController {
                 .secure(true)
                 .path("/api/v1/auth")
                 .maxAge((expire * 7) / 1000) // 7 ngày
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -77,7 +77,7 @@ public class AuthController {
                 .secure(true)
                 .path("/api/v1/auth")
                 .maxAge(0) // Xóa cookie ngay lập tức
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         ApiResponse<String> response = authService.logout(accessToken, refreshToken);
@@ -93,6 +93,18 @@ public class AuthController {
 
         ApiResponse<RefreshTokenResponse> response = authService.refreshToken(refreshToken);
 
-        return ResponseEntity.ok().body(response);
+        String newRefreshToken = response.getData().getRefreshToken();
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/v1/auth")
+                .maxAge(expire * 7 / 1000) // 7 ngày
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(response);
     }
 }

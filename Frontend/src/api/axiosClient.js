@@ -46,10 +46,6 @@ axiosClient.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
-        
-        // ==============================================================
-        // A. XỬ LÝ TOKEN HẾT HẠN (LỖI 401)
-        // ==============================================================
         if (error.response?.status === 401 && !originalRequest._retry) {
             
             if (isRefreshing) {
@@ -71,6 +67,11 @@ axiosClient.interceptors.response.use(
 
                 const newAccessToken = res.data.data.accessToken;
                 localStorage.setItem('accessToken', newAccessToken);
+                
+                if (originalRequest.headers) {
+                    originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
+                }
+
                 
                 axiosClient.defaults.headers.common['Authorization'] = 'Bearer ' + newAccessToken;
                 processQueue(null, newAccessToken);

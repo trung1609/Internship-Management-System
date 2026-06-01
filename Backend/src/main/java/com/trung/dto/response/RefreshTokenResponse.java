@@ -11,5 +11,6 @@ import java.util.Date;
 @Builder
 public class RefreshTokenResponse {
     private String accessToken;
+    private String refreshToken;
     private Date expiresIn;
 }
