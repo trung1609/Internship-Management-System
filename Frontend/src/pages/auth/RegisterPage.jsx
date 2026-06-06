@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { authApi } from '../api/authApi';
+import { authApi } from '../../api/authApi';
 import { Box, Typography, TextField, Button, Alert, CircularProgress, Avatar, Paper, Stack } from '@mui/material';
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
 import { motion } from 'framer-motion';

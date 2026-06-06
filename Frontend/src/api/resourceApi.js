@@ -187,3 +187,21 @@ export const assessmentResultApi = {
     axiosClient.put(`/api/v1/assessment-results/${resultId}`, data),
 
 };
+export const reportApi = {
+  uploadReport: (file, title) => {
+    // Phải dùng FormData để đóng gói file
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+
+    return axiosClient.post("/api/v1/reports/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", 
+      },
+    });
+  },
+  getAllReports: (search = "", page = 0, size = 10) =>
+    axiosClient.get("/api/v1/reports", {
+      params: { search, page, size },
+    }),
+};

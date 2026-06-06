@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import { Box, Typography, TextField, Button, Alert, CircularProgress, Avatar, Paper, Stack } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { motion } from "framer-motion";

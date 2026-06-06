@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Box, Typography, Paper, CircularProgress, Alert, Avatar, Chip, Stack
 } from "@mui/material";
-import { authApi } from "../api/authApi";
+import { authApi } from "../../api/authApi";
 import { motion } from "framer-motion";
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';

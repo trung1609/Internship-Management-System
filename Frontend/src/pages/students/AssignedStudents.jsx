@@ -9,7 +9,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ClassIcon from '@mui/icons-material/Class';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import axiosClient from '../api/axiosClient';
+import axiosClient from '../../api/axiosClient';
 
 const getInitials = (name) => {
     if (!name) return '';

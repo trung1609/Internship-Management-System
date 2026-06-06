@@ -6,7 +6,7 @@ import {
 import BusinessIcon from '@mui/icons-material/Business';
 import SchoolIcon from '@mui/icons-material/School';
 import BadgeIcon from '@mui/icons-material/Badge';
-import axiosClient from '../api/axiosClient';
+import axiosClient from '../../api/axiosClient';
 
 const getInitials = (name) => {
     if (!name) return '';

@@ -2,10 +2,9 @@ import { useContext } from "react";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { AuthContext } from "../context/AuthContext";
 import { motion } from "framer-motion";
-
-import AdminDashboard from "./AdminDashboard";
-import MentorDashboard from "./MentorDashboard";
-import StudentDashboard from "./StudentDashboard";
+import AdminDashboard from "./admin/AdminDashboard";
+import MentorDashboard from "./mentors/MentorDashboard";
+import StudentDashboard from "./students/StudentDashboard";
 
 const MainDashboard = () => {
   const { user, loading } = useContext(AuthContext);

@@ -33,6 +33,8 @@ import {
   Person as PersonIcon,
   Group as GroupIcon,
   WarningRounded as WarningIcon,
+  UploadFile as UploadFileIcon,
+  AssignmentTurnedIn as AssignmentTurnedInIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -60,6 +62,12 @@ const allMenuItems = [
     roles: ["MENTOR", "ROLE_MENTOR"],
   },
   {
+    label: "Nộp Báo cáo",
+    icon: <UploadFileIcon />,
+    path: "/submit-report",
+    roles: ["STUDENT", "ROLE_STUDENT"],
+  },
+  {
     label: "User Management",
     icon: <PeopleIcon />,
     roles: ["ADMIN", "ROLE_ADMIN"],
@@ -77,6 +85,12 @@ const allMenuItems = [
       { label: "Internship Phases", path: "/management/phases" },
       { label: "Internship Assignments", path: "/management/assignments" },
     ],
+  },
+  {
+    label: "Quản lý Báo cáo",
+    icon: <AssignmentTurnedInIcon />,
+    path: "/management/reports",
+    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR"], // ADMIN và MENTOR đều thấy
   },
   {
     label: "Assessment Management",
