@@ -26,10 +26,12 @@ import {
   Dashboard as DashboardIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
+  Person as PersonIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+
 
 const drawerWidth = 280;
 
@@ -47,6 +49,18 @@ const allMenuItems = [
       "STUDENT",
       "ROLE_STUDENT",
     ],
+  },
+  {
+    label: "My Mentor",
+    icon: <PersonIcon />,
+    path: "/my-mentor",
+    roles: ["STUDENT", "ROLE_STUDENT"],
+  },
+  {
+    label: "My Students",
+    icon: <SchoolIcon />,
+    path: "/my-students",
+    roles: ["MENTOR", "ROLE_MENTOR"],
   },
   {
     label: "User Management",

@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class MentorPublicResponse {
+    private Long id;
     private String fullName;
     private String department;
     private String academicRank;

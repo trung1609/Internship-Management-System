@@ -23,6 +23,8 @@ import { ToastContainer } from "react-toastify";
 import AssessmentRoundDetail from "./pages/management/AssessmentRoundDetail";
 import AssessmentResultDetail from "./pages/management/AssessmentResultDetail";
 import LandingPage from "./pages/LandingPage";
+import AssignedMentor from "./pages/AssignedMentor";
+import AssignedStudents from "./pages/AssignedStudents";
 
 function App() {
   return (
@@ -67,6 +69,8 @@ function App() {
           <Route path="/student/:studentId" element={<AppLayout><StudentDetailPage /></AppLayout>} />
           <Route path="/admin/assessment-rounds/:id" element={<AppLayout><AssessmentRoundDetail /></AppLayout>} />
           <Route path="/admin/assessment-results/:id" element={<AppLayout><AssessmentResultDetail /></AppLayout>} />
+          <Route path="/my-mentor" element={<AppLayout><AssignedMentor /></AppLayout>} />
+          <Route path="/my-students" element={<AppLayout><AssignedStudents /></AppLayout>} />
         </Route>
         {/* Bắt các đường dẫn không tồn tại -> Đẩy về login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
