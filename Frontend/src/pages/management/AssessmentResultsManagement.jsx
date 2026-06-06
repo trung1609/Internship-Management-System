@@ -181,17 +181,15 @@ const AssessmentResultsManagement = () => {
     <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f4f6f8' }}>
 
       {/* --- HEADER CHÍNH --- */}
+      {/* --- HEADER CHÍNH --- */}
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-            lg: "repeat(4, 1fr)",
-          },
-          gap: 4,
-          alignItems: "stretch",
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          justifyContent: "space-between",
+          alignItems: { xs: "flex-start", sm: "center" },
+          gap: 2,
+          mb: 4 // Thêm margin-bottom để cách phần tìm kiếm một chút
         }}
       >
         <Box>
@@ -205,8 +203,18 @@ const AssessmentResultsManagement = () => {
 
         {isMentor && (
           <Button
-            variant="contained" size="large" startIcon={<AddTaskIcon />} onClick={() => handleOpenModal()}
-            sx={{ borderRadius: '50px', px: 4, py: 1.5, boxShadow: '0 8px 16px rgba(26, 35, 126, 0.2)', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)' } }}
+            variant="contained"
+            size="large"
+            startIcon={<AddTaskIcon />}
+            onClick={() => handleOpenModal()}
+            sx={{
+              borderRadius: '50px',
+              px: 4,
+              py: 1.5,
+              boxShadow: '0 8px 16px rgba(26, 35, 126, 0.2)',
+              transition: 'all 0.3s',
+              '&:hover': { transform: 'translateY(-2px)' }
+            }}
           >
             Thêm Điểm Mới
           </Button>

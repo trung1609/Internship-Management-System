@@ -30,19 +30,38 @@ public interface IAssessmentResultRepository extends JpaRepository<AssessmentRes
                                                         Pageable pageable);
 
     @Query("select ar from AssessmentResult ar where " +
-            "ar.assignment.assignmentId = :assignmentId")
+            "ar.assignment.assignmentId = :assignmentId and " +
+            "(:keyword is null or :keyword = '' or lower(ar.assignment.phase.phaseName) like lower(concat('%', :keyword, '%')))")
     Page<AssessmentResult> findAllByAssignment_AssignmentId(@Param("assignmentId") Long assignmentId,
+                                                            @Param("keyword") String keyword,
                                                             Pageable pageable);
 
     @Query("select ar from AssessmentResult ar where " +
-            "ar.assignment.assignmentId = :assignmentId and ar.assignment.mentor.mentorId = :userId")
+            "ar.assignment.assignmentId = :assignmentId and ar.assignment.mentor.mentorId = :userId and " +
+            "(:keyword is null or :keyword = '' or lower(ar.assignment.phase.phaseName) like lower(concat('%', :keyword, '%')))")
     Page<AssessmentResult> findAllByAssignment_AssignmentIdAndEvaluationId_UserId(@Param("assignmentId") Long assignmentId,
+                                                                                  @Param("keyword") String keyword,
                                                                                   @Param("userId") Long userId,
                                                                                   Pageable pageable);
 
     @Query("select ar from AssessmentResult ar where " +
-            "ar.assignment.student.studentId = :studentId")
+            "ar.assignment.student.studentId = :studentId and " +
+            "(:keyword is null or :keyword = '' or lower(ar.assignment.phase.phaseName) like lower(concat('%', :keyword, '%')))")
     Page<AssessmentResult> findAllByAssignment_Student_StudentId(@Param("studentId") Long studentId,
+                                                                 @Param("keyword") String keyword,
                                                                  Pageable pageable);
+
+    @Query("select ar from AssessmentResult ar where " +
+            "(:keyword is null or :keyword = '' or lower(ar.assignment.phase.phaseName) like lower(concat('%', :keyword, '%')))")
+    Page<AssessmentResult> searchAllAssessmentResults(@Param("keyword") String keyword,
+                                                      Pageable pageable);
+
+
+    @Query("select ar from AssessmentResult ar where " +
+            "ar.assignment.mentor.mentorId = :mentorId and " +
+            "(:keyword is null or :keyword = '' or lower(ar.assignment.phase.phaseName) like lower(concat('%', :keyword, '%')))")
+    Page<AssessmentResult> searchByMentorId(@Param("mentorId") Long mentorId,
+                                            @Param("keyword") String keyword,
+                                            Pageable pageable);
 
 }

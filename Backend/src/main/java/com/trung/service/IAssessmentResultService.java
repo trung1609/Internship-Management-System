@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface IAssessmentResultService {
     ApiResponse<List<AssessmentResultResponse>> createAssessmentResult(AssessmentResultCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException;
-    PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(Long assignmentId ,PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException;
+    PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(String search, Long assignmentId ,PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException;
     ApiResponse<AssessmentResultResponse> updateAssessmentResult(Long id, AssessmentResultUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException;
 
     ApiResponse<AssessmentResultResponse> getAssessmentResultById(Long resultId) throws ResourceNotFoundException;

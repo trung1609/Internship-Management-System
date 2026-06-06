@@ -33,8 +33,9 @@ public class AssessmentResultController {
 
     @GetMapping
     public ResponseEntity<PageResponseDTO<AssessmentResultResponse>> getAllAssessmentResults(@RequestParam(required = false) Long assignmentId,
+                                                                                             @RequestParam(required = false) String search,
                                                                                              @ModelAttribute PageRequestDTO request) throws ResourceConflictException, ResourceForbiddenException, ResourceNotFoundException {
-        return new ResponseEntity<>(assessmentResultService.getAllAssessmentResult(assignmentId, request), HttpStatus.OK);
+        return new ResponseEntity<>(assessmentResultService.getAllAssessmentResult(search,assignmentId, request), HttpStatus.OK);
     }
     @PutMapping("/{resultId}")
     @PreAuthorize("hasAuthority('ROLE_MENTOR')")

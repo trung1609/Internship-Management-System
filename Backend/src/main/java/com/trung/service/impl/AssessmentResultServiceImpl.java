@@ -1,9 +1,7 @@
 package com.trung.service.impl;
 
-import com.trung.util.enums.Role;
 import com.trung.dto.request.AssessmentResultCreateRequest;
 import com.trung.dto.request.AssessmentResultUpdateRequest;
-import com.trung.dto.request.CriterionScoreRequest;
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.AssessmentResultResponse;
@@ -18,6 +16,7 @@ import com.trung.service.IAssessmentResultService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
 import com.trung.util.ValidationErrorUtil;
+import com.trung.util.enums.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,7 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -86,14 +88,14 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                     }
 
                     return AssessmentResult.builder()
-                    .assignment(assignment)
-                    .round(round)
-                    .criterion(criteria)
-                    .score(req.getScore())
-                    .comment(req.getComments())
-                    .evaluationId(user)
-                    .evaluationDate(LocalDateTime.now().toLocalDate())
-                    .build();
+                            .assignment(assignment)
+                            .round(round)
+                            .criterion(criteria)
+                            .score(req.getScore())
+                            .comment(req.getComments())
+                            .evaluationId(user)
+                            .evaluationDate(LocalDateTime.now().toLocalDate())
+                            .build();
                 }).toList();
 
         if (ValidationErrorUtil.hasErrors(errorList)) {
@@ -116,7 +118,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     }
 
     @Override
-    public PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(Long assignmentId, PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
+    public PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(String search, Long assignmentId, PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
 
         Pageable pageable = PaginationUtil.createPageRequest(requestDTO, "assessmentResult");
         Page<AssessmentResult> assessmentResultPage;
@@ -125,18 +127,18 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
 
         if (user.getRole() == Role.ROLE_ADMIN) {
             if (assignmentId != null) {
-                assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentId(assignmentId, pageable);
+                assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentId(assignmentId, search, pageable);
             } else {
-                assessmentResultPage = assessmentResultRepository.findAll(pageable);
+                assessmentResultPage = assessmentResultRepository.searchAllAssessmentResults(search, pageable);
             }
         } else if (user.getRole() == Role.ROLE_MENTOR) {
             if (assignmentId != null) {
                 if (!internshipAssignmentRepository.existsByMentor_MentorIdAndAssignmentId(user.getMentor().getMentorId(), assignmentId)) {
                     throw new ResourceForbiddenException("Mentor does not have permission to view assessment results for this assignment");
                 }
-                assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentIdAndEvaluationId_UserId(assignmentId, user.getUserId(), pageable);
+                assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentIdAndEvaluationId_UserId(assignmentId, search, user.getUserId(), pageable);
             } else {
-                assessmentResultPage = assessmentResultRepository.findAllByEvaluationId_UserId(user.getMentor().getMentorId(), pageable);
+                assessmentResultPage = assessmentResultRepository.searchByMentorId(user.getMentor().getMentorId(), search, pageable);
             }
 
         } else if (user.getRole() == Role.ROLE_STUDENT) {
@@ -144,9 +146,9 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                 if (!internshipAssignmentRepository.existsByStudent_StudentIdAndAssignmentId(user.getStudent().getStudentId(), assignmentId)) {
                     throw new ResourceForbiddenException("Student does not have permission to view assessment results for this assignment");
                 }
-                assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentId(assignmentId, pageable);
+                assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentId(assignmentId, search, pageable);
             } else {
-                assessmentResultPage = assessmentResultRepository.findAllByAssignment_Student_StudentId(user.getStudent().getStudentId(), pageable);
+                assessmentResultPage = assessmentResultRepository.findAllByAssignment_Student_StudentId(user.getStudent().getStudentId(), search, pageable);
             }
         } else {
             throw new ResourceForbiddenException("User does not have permission to view assessment results");
