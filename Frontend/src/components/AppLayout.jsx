@@ -27,6 +27,7 @@ import {
   Logout as LogoutIcon,
   Settings as SettingsIcon,
   Person as PersonIcon,
+  Group as GroupIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useContext } from "react";
@@ -58,7 +59,7 @@ const allMenuItems = [
   },
   {
     label: "My Students",
-    icon: <SchoolIcon />,
+    icon: <GroupIcon />,
     path: "/my-students",
     roles: ["MENTOR", "ROLE_MENTOR"],
   },
