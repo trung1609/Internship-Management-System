@@ -1,19 +1,11 @@
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { studentApi } from "../api/resourceApi";
+import { motion } from "framer-motion";
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Chip,
-  CircularProgress,
-  Alert,
-  Avatar,
-  Divider
+  Box, Typography, Paper, Chip, CircularProgress, Alert, Avatar, Stack
 } from "@mui/material";
 
-// Import các Icon để làm đẹp giao diện
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
@@ -21,6 +13,7 @@ import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import CakeOutlinedIcon from '@mui/icons-material/CakeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 
 const StudentDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -33,10 +26,9 @@ const StudentDashboard = () => {
       try {
         setError(null);
         setLoading(true);
-        const studentInfo = await studentApi.getCurrentStudentInfo();
-        setStudentInfo(studentInfo);
+        const info = await studentApi.getCurrentStudentInfo();
+        setStudentInfo(info);
       } catch (err) {
-        console.error("Failed to load student info:", err);
         setError("Error loading information: " + (err.message || "Unknown error"));
       } finally {
         setLoading(false);
@@ -45,127 +37,93 @@ const StudentDashboard = () => {
     fetchStudentInfo();
   }, []);
 
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  if (loading) return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}><CircularProgress /></Box>;
 
-  // Khai báo một Component nhỏ để render từng dòng thông tin cho code gọn gàng
-  const InfoItem = ({ icon, label, value }) => (
-    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}>
-      <Box sx={{ color: "primary.main", mt: 0.5 }}>
-        {icon}
-      </Box>
-      <Box>
-        <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
-          {label}
-        </Typography>
-        <Typography variant="body1" sx={{ fontWeight: 500, color: "#333" }}>
-          {value || "N/A"}
-        </Typography>
-      </Box>
-    </Box>
+  const InfoCard = ({ icon, label, value, delay }) => (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.4 }}
+      style={{ flex: '1 1 280px' }} 
+    >
+      <Paper sx={{ 
+        p: 3, borderRadius: 4, display: 'flex', alignItems: 'center', gap: 2.5,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.04)',
+        transition: 'transform 0.3s, box-shadow 0.3s',
+        '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 28px rgba(25, 118, 210, 0.12)' }
+      }}>
+        <Box sx={{ 
+          width: 56, height: 56, borderRadius: 3, display: 'flex', justifyContent: 'center', alignItems: 'center',
+          background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%)',
+          color: '#1976d2'
+        }}>
+          {icon}
+        </Box>
+        <Box>
+          <Typography variant="caption" sx={{ color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            {label}
+          </Typography>
+          <Typography variant="body1" sx={{ fontWeight: 700, color: '#2c3e50', mt: 0.5 }}>
+            {value || "N/A"}
+          </Typography>
+        </Box>
+      </Paper>
+    </motion.div>
   );
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 1200, margin: '0 auto' }}>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      {/* Banner Chào mừng */}
-      <Paper elevation={0} sx={{ p: 3, mb: 4, bgcolor: "#e3f2fd", color: "#1565c0", borderRadius: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 0.5 }}>
-          Welcome back, {studentInfo?.data?.fullName || user?.username}! 👋
-        </Typography>
-        <Typography variant="body2">
-          Manage your internship applications and track your progress.
-        </Typography>
-      </Paper>
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+        <Paper sx={{ 
+          p: { xs: 4, md: 6 }, mb: 4, borderRadius: 5, position: 'relative', overflow: 'hidden',
+          background: 'linear-gradient(135deg, #1976d2 0%, #0d47a1 100%)', color: 'white',
+          boxShadow: '0 16px 40px rgba(13, 71, 161, 0.3)'
+        }}>
+          <Box sx={{ position: 'absolute', top: -50, right: -20, width: 250, height: 250, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)' }} />
+          
+          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={4} sx={{ position: 'relative', zIndex: 1 }}>
+            <motion.div initial={{ rotate: -10, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} transition={{ delay: 0.2, type: 'spring' }}>
+              <Avatar sx={{ 
+                width: 120, height: 120, fontSize: '3.5rem', fontWeight: 800,
+                background: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(10px)',
+                border: '4px solid rgba(255, 255, 255, 0.5)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', color: '#fff'
+              }}>
+                {studentInfo?.data?.fullName?.charAt(0).toUpperCase() || "S"}
+              </Avatar>
+            </motion.div>
+            
+            <Box textAlign={{ xs: 'center', sm: 'left' }}>
+              <Chip icon={<RocketLaunchIcon sx={{ color: '#fff !important' }}/>} label="Thực Tập Sinh" 
+                sx={{ background: 'rgba(255,255,255,0.15)', color: 'white', fontWeight: 600, mb: 2, backdropFilter: 'blur(5px)' }} 
+              />
+              <Typography variant="h3" sx={{ fontWeight: 800, mb: 1, letterSpacing: '-1px' }}>
+                Chào, {studentInfo?.data?.fullName || user?.username}! 👋
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 400, opacity: 0.8 }}>
+                Chào mừng bạn đến với kỳ thực tập. Hãy theo dõi tiến độ của mình tại đây.
+              </Typography>
+            </Box>
+          </Stack>
+        </Paper>
+      </motion.div>
 
-      {/* Profile Card kiểu mới */}
-      <Paper elevation={2} sx={{ borderRadius: 3, overflow: "hidden" }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 800, color: '#1565c0', mb: 3, pl: 1 }}>
+          Hồ Sơ Của Bạn
+        </Typography>
         
-        {/* Phần 1: Header Profile (Có màu nền nhạt, chứa Avatar và Tên) */}
-        <Box sx={{ p: 4, bgcolor: "#fafafa", display: "flex", alignItems: "center", gap: 3 }}>
-          <Avatar 
-            sx={{ width: 90, height: 90, bgcolor: "primary.main", fontSize: "2rem", boxShadow: 2 }}
-          >
-            {/* Hiển thị chữ cái đầu tiên của tên */}
-            {studentInfo?.data?.fullName?.charAt(0).toUpperCase() || "S"}
-          </Avatar>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: "bold", color: "#1976d2", mb: 0.5 }}>
-              {studentInfo?.data?.fullName || "Chưa cập nhật tên"}
-            </Typography>
-            <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 1 }}>
-              {studentInfo?.data?.major || "Chưa cập nhật ngành học"}
-            </Typography>
-            <Chip
-              label={user?.isActive ? "Tài khoản Đang hoạt động" : "Tài khoản Bị khóa"}
-              color={user?.isActive ? "success" : "error"}
-              size="small"
-              sx={{ fontWeight: "bold", px: 1 }}
-            />
-          </Box>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          <InfoCard delay={0.1} icon={<BadgeOutlinedIcon fontSize="large"/>} label="Mã Sinh Viên" value={studentInfo?.data?.studentCode} />
+          <InfoCard delay={0.2} icon={<SchoolOutlinedIcon fontSize="large"/>} label="Ngành Học" value={studentInfo?.data?.major} />
+          <InfoCard delay={0.3} icon={<SchoolOutlinedIcon fontSize="large"/>} label="Lớp Danh Nghĩa" value={studentInfo?.data?.classRoom} />
+          <InfoCard delay={0.4} icon={<EmailOutlinedIcon fontSize="large"/>} label="Email Liên Hệ" value={studentInfo?.data?.email} />
+          <InfoCard delay={0.5} icon={<LocalPhoneOutlinedIcon fontSize="large"/>} label="Số Điện Thoại" value={studentInfo?.data?.phoneNumber} />
+          <InfoCard delay={0.6} icon={<CakeOutlinedIcon fontSize="large"/>} label="Ngày Sinh" value={studentInfo?.data?.dateOfBirth} />
+          <InfoCard delay={0.7} icon={<HomeOutlinedIcon fontSize="large"/>} label="Địa Chỉ Thường Trú" value={studentInfo?.data?.address} />
+          <InfoCard delay={0.8} icon={<AccountCircleOutlinedIcon fontSize="large"/>} label="Tên Đăng Nhập" value={user?.username} />
         </Box>
+      </Box>
 
-        <Divider />
-
-        {/* Phần 2: Chi tiết thông tin (Sử dụng Icon và không dùng Box viền xám) */}
-        <Box sx={{ p: 4 }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 4, color: "#333" }}>
-            Chi tiết liên hệ & Học vấn
-          </Typography>
-
-          <Grid container spacing={x => 4}>
-            {/* Cột trái */}
-            <Grid item xs={12} md={6}>
-              <InfoItem 
-                icon={<BadgeOutlinedIcon />} 
-                label="Mã Sinh Viên (Student Code)" 
-                value={studentInfo?.data?.studentCode} 
-              />
-              <InfoItem 
-                icon={<EmailOutlinedIcon />} 
-                label="Địa chỉ Email" 
-                value={studentInfo?.data?.email} 
-              />
-              <InfoItem 
-                icon={<LocalPhoneOutlinedIcon />} 
-                label="Số Điện Thoại" 
-                value={studentInfo?.data?.phoneNumber} 
-              />
-              <InfoItem 
-                icon={<AccountCircleOutlinedIcon />} 
-                label="Tên Đăng Nhập (Username)" 
-                value={user?.username} 
-              />
-            </Grid>
-
-            {/* Cột phải */}
-            <Grid item xs={12} md={6}>
-              <InfoItem 
-                icon={<SchoolOutlinedIcon />} 
-                label="Lớp Danh Nghĩa (Class)" 
-                value={studentInfo?.data?.classRoom} 
-              />
-              <InfoItem 
-                icon={<CakeOutlinedIcon />} 
-                label="Ngày Sinh (Date of Birth)" 
-                value={studentInfo?.data?.dateOfBirth} 
-              />
-              <InfoItem 
-                icon={<HomeOutlinedIcon />} 
-                label="Địa Chỉ Thường Trú (Address)" 
-                value={studentInfo?.data?.address} 
-              />
-            </Grid>
-          </Grid>
-        </Box>
-
-      </Paper>
     </Box>
   );
 };

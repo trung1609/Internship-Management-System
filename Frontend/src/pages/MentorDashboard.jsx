@@ -1,25 +1,18 @@
 import { useState, useEffect } from "react";
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  CircularProgress,
-  Alert,
-  Avatar,
-  Divider,
-  Chip
+  Box, Typography, Paper, CircularProgress, Alert, Avatar, Chip, Stack
 } from "@mui/material";
 import { authApi } from "../api/authApi";
 import { mentorApi } from "../api/resourceApi";
+import { motion } from "framer-motion";
 
-// Import Icons cho Mentor
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
 import DomainOutlinedIcon from '@mui/icons-material/DomainOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import LightbulbCircleIcon from '@mui/icons-material/LightbulbCircle';
 
 const MentorDashboard = () => {
   const [mentorInfo, setMentorInfo] = useState(null);
@@ -31,13 +24,10 @@ const MentorDashboard = () => {
     const fetchMentorData = async () => {
       try {
         setLoading(true);
-        const res = await authApi.getMe();
+        const [res, info] = await Promise.all([authApi.getMe(), mentorApi.getMentorInfo()]);
         setResponse(res);
-
-        const info = await mentorApi.getMentorInfo();
         setMentorInfo(info);
       } catch (err) {
-        console.error("Error loading mentor:", err);
         setError("Failed to load mentor information");
       } finally {
         setLoading(false);
@@ -46,120 +36,91 @@ const MentorDashboard = () => {
     fetchMentorData();
   }, []);
 
-  if (loading)
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-        <CircularProgress />
-      </Box>
-    );
+  if (loading) return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}><CircularProgress /></Box>;
 
-  // Component tái sử dụng
-  const InfoItem = ({ icon, label, value }) => (
-    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}>
-      <Box sx={{ color: "#00796b", mt: 0.5 }}>
-        {icon}
-      </Box>
-      <Box>
-        <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
-          {label}
-        </Typography>
-        <Typography variant="body1" sx={{ fontWeight: 500, color: "#333" }}>
-          {value || "N/A"}
-        </Typography>
-      </Box>
-    </Box>
+  const InfoCard = ({ icon, label, value, delay }) => (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.4 }}
+      style={{ flex: '1 1 280px' }} 
+    >
+      <Paper sx={{ 
+        p: 3, borderRadius: 4, display: 'flex', alignItems: 'center', gap: 2.5,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.04)',
+        transition: 'transform 0.3s, box-shadow 0.3s',
+        '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 28px rgba(0, 105, 92, 0.12)' }
+      }}>
+        <Box sx={{ 
+          width: 56, height: 56, borderRadius: 3, display: 'flex', justifyContent: 'center', alignItems: 'center',
+          background: 'linear-gradient(135deg, rgba(0, 105, 92, 0.1) 0%, rgba(0, 105, 92, 0.05) 100%)',
+          color: '#00695c'
+        }}>
+          {icon}
+        </Box>
+        <Box>
+          <Typography variant="caption" sx={{ color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            {label}
+          </Typography>
+          <Typography variant="body1" sx={{ fontWeight: 700, color: '#2c3e50', mt: 0.5 }}>
+            {value || "N/A"}
+          </Typography>
+        </Box>
+      </Paper>
+    </motion.div>
   );
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 1200, margin: '0 auto' }}>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      {/* Banner Mentor */}
-      <Paper elevation={0} sx={{
-          p: 2.5,
-          background: "linear-gradient(135deg, #1976d2 0%, #1565c0 100%)",
-          color: "white",
-          borderBottom: "2px solid rgba(255,255,255,0.1)",
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+        <Paper sx={{ 
+          p: { xs: 4, md: 6 }, mb: 4, borderRadius: 5, position: 'relative', overflow: 'hidden',
+          background: 'linear-gradient(135deg, #00695c 0%, #004d40 100%)', color: 'white',
+          boxShadow: '0 16px 40px rgba(0, 77, 64, 0.3)'
         }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 0.5 }}>
-          Welcome back, {mentorInfo?.data?.fullName || "Mentor"}! 🎓
-        </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-          Mentor Dashboard Overview - Guide and assess your students.
-        </Typography>
-      </Paper>
+          <Box sx={{ position: 'absolute', top: -50, right: -20, width: 250, height: 250, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)' }} />
+          
+          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={4} sx={{ position: 'relative', zIndex: 1 }}>
+            <motion.div initial={{ rotate: -10, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} transition={{ delay: 0.2, type: 'spring' }}>
+              <Avatar sx={{ 
+                width: 120, height: 120, fontSize: '3.5rem', fontWeight: 800,
+                background: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(10px)',
+                border: '4px solid rgba(255, 255, 255, 0.5)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', color: '#fff'
+              }}>
+                {mentorInfo?.data?.fullName?.charAt(0).toUpperCase() || "M"}
+              </Avatar>
+            </motion.div>
+            
+            <Box textAlign={{ xs: 'center', sm: 'left' }}>
+              <Chip icon={<LightbulbCircleIcon sx={{ color: '#fff !important' }}/>} label="Mentor / Giảng Viên" 
+                sx={{ background: 'rgba(255,255,255,0.15)', color: 'white', fontWeight: 600, mb: 2, backdropFilter: 'blur(5px)' }} 
+              />
+              <Typography variant="h3" sx={{ fontWeight: 800, mb: 1, letterSpacing: '-1px' }}>
+                Chào, {mentorInfo?.data?.fullName || "Thầy/Cô"}! 🎓
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 400, opacity: 0.8 }}>
+                Hãy cùng dẫn dắt và đánh giá tiến độ của các sinh viên thực tập.
+              </Typography>
+            </Box>
+          </Stack>
+        </Paper>
+      </motion.div>
 
-      {/* Profile Card Mentor */}
-      <Paper elevation={2} sx={{ borderRadius: 3, overflow: "hidden" }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 800, color: '#004d40', mb: 3, pl: 1 }}>
+          Thông Tin Chuyên Môn
+        </Typography>
         
-        <Box sx={{ p: 4, bgcolor: "#f1f8e9", display: "flex", alignItems: "center", gap: 3 }}>
-          <Avatar 
-            sx={{ width: 90, height: 90, bgcolor: "#00695c", fontSize: "2.5rem", boxShadow: 2 }}
-          >
-            {mentorInfo?.data?.fullName?.charAt(0).toUpperCase() || "M"}
-          </Avatar>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: "bold", color: "#004d40", mb: 0.5 }}>
-              {mentorInfo?.data?.fullName || "Chưa cập nhật tên"}
-            </Typography>
-            <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <WorkspacePremiumOutlinedIcon fontSize="small" /> {mentorInfo?.data?.academicRank || "Mentor / Cố vấn"}
-            </Typography>
-            <Chip
-              label={response?.data?.isActive ? "Tài khoản Đang hoạt động" : "Tài khoản Bị khóa"}
-              color={response?.data?.isActive ? "success" : "error"}
-              size="small"
-              sx={{ fontWeight: "bold", px: 1 }}
-            />
-          </Box>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          <InfoCard delay={0.1} icon={<BadgeOutlinedIcon fontSize="large"/>} label="Họ và Tên" value={mentorInfo?.data?.fullName} />
+          <InfoCard delay={0.2} icon={<WorkspacePremiumOutlinedIcon fontSize="large"/>} label="Học Hàm / Học Vị" value={mentorInfo?.data?.academicRank} />
+          <InfoCard delay={0.3} icon={<DomainOutlinedIcon fontSize="large"/>} label="Khoa / Phòng Ban" value={mentorInfo?.data?.department} />
+          <InfoCard delay={0.4} icon={<EmailOutlinedIcon fontSize="large"/>} label="Email Liên Hệ" value={mentorInfo?.data?.email} />
+          <InfoCard delay={0.5} icon={<LocalPhoneOutlinedIcon fontSize="large"/>} label="Số Điện Thoại" value={mentorInfo?.data?.phoneNumber} />
+          <InfoCard delay={0.6} icon={<AccountCircleOutlinedIcon fontSize="large"/>} label="Tên Đăng Nhập" value={response?.data?.username} />
         </Box>
+      </Box>
 
-        <Divider />
-
-        <Box sx={{ p: 4 }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 4, color: "#333" }}>
-            Personal & Professional Information
-          </Typography>
-
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={6}>
-              <InfoItem 
-                icon={<BadgeOutlinedIcon />} 
-                label="Họ và Tên (Full Name)" 
-                value={mentorInfo?.data?.fullName} 
-              />
-              <InfoItem 
-                icon={<EmailOutlinedIcon />} 
-                label="Địa chỉ Email" 
-                value={mentorInfo?.data?.email} 
-              />
-              <InfoItem 
-                icon={<LocalPhoneOutlinedIcon />} 
-                label="Số Điện Thoại" 
-                value={mentorInfo?.data?.phoneNumber} 
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <InfoItem 
-                icon={<DomainOutlinedIcon />} 
-                label="Phòng ban / Khoa (Department)" 
-                value={mentorInfo?.data?.department} 
-              />
-              <InfoItem 
-                icon={<WorkspacePremiumOutlinedIcon />} 
-                label="Học hàm / Học vị (Specialization)" 
-                value={mentorInfo?.data?.academicRank} 
-              />
-              <InfoItem 
-                icon={<AccountCircleOutlinedIcon />} 
-                label="Tên Đăng Nhập (Username)" 
-                value={response?.data?.username} 
-              />
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
     </Box>
   );
 };

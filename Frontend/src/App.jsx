@@ -3,8 +3,6 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import MentorDashboard from "./pages/MentorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import StudentDetailPage from "./pages/StudentDetailPage";
-import MentorDetailPage from "./pages/MentorDetailPage";
 import UserDetailPage from "./pages/UserDetailPage";
 import MainDashboard from "./pages/MainDashboard";
 import { AppLayout } from "./components/AppLayout";
@@ -64,9 +62,7 @@ function App() {
           <Route path="/management/assessment-results" element={<AppLayout><AssessmentResultsManagement /></AppLayout>} />
 
           <Route path="/mentor-dashboard" element={<AppLayout><MentorDashboard /></AppLayout>} />
-          <Route path="/mentor/:mentorId" element={<AppLayout><MentorDetailPage /></AppLayout>} />
           {/* Ví dụ: Chi tiết sinh viên thì cả Admin và Mentor phụ trách đều xem được */}
-          <Route path="/student/:studentId" element={<AppLayout><StudentDetailPage /></AppLayout>} />
           <Route path="/admin/assessment-rounds/:id" element={<AppLayout><AssessmentRoundDetail /></AppLayout>} />
           <Route path="/admin/assessment-results/:id" element={<AppLayout><AssessmentResultDetail /></AppLayout>} />
           <Route path="/my-mentor" element={<AppLayout><AssignedMentor /></AppLayout>} />
