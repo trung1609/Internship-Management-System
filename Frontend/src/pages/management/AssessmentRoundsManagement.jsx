@@ -27,11 +27,11 @@ const AssessmentRoundsManagement = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
-  
+
   // State Modal Form
   const [openModal, setOpenModal] = useState(false);
   const [editingRound, setEditingRound] = useState(null);
-  
+
   // State Modal Xóa
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [roundToDelete, setRoundToDelete] = useState(null);
@@ -180,7 +180,7 @@ const AssessmentRoundsManagement = () => {
 
   return (
     <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f4f6f8' }}>
-      
+
       {/* --- HEADER CHÍNH --- */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
         <Box>
@@ -191,7 +191,7 @@ const AssessmentRoundsManagement = () => {
             Thiết lập các vòng đánh giá và phân bổ tiêu chí
           </Typography>
         </Box>
-        
+
         {isAdmin && (
           <Button
             variant="contained" size="large" startIcon={<AddTaskIcon />} onClick={() => handleOpenModal()}
@@ -204,15 +204,27 @@ const AssessmentRoundsManagement = () => {
 
       {/* --- THANH TÌM KIẾM --- */}
       <Paper sx={{ p: 2, mb: 4, borderRadius: 4, display: "flex", alignItems: "center", boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-        <TextField 
-          fullWidth variant="outlined" placeholder="Tìm kiếm vòng đánh giá..." 
+        <TextField
+          fullWidth variant="outlined" placeholder="Tìm kiếm vòng đánh giá..."
           value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }}
           size="small" sx={{ '& fieldset': { border: 'none' }, bgcolor: '#f8f9fa', borderRadius: 2 }}
         />
       </Paper>
 
       {/* --- DANH SÁCH THẺ 3D --- */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-start' }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+            lg: "repeat(4, 1fr)",
+          },
+          gap: 4,
+          alignItems: "stretch",
+        }}
+      >
         <AnimatePresence>
           {data.map((round, index) => (
             <motion.div
@@ -222,10 +234,13 @@ const AssessmentRoundsManagement = () => {
               exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
               transition={{ duration: 0.4, delay: index * 0.05 }}
               whileHover={{ scale: 1.03, y: -5 }}
-              style={{ flex: '1 1 350px', maxWidth: '420px' }}
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
             >
               <Paper
-                sx={{ 
+                sx={{
                   p: 3, borderRadius: 4, position: "relative", overflow: "hidden",
                   background: 'linear-gradient(145deg, #ffffff, #fcfcfc)',
                   boxShadow: '8px 8px 16px #e6e6e6, -8px -8px 16px #ffffff',
@@ -244,10 +259,10 @@ const AssessmentRoundsManagement = () => {
                       <Typography variant="h6" sx={{ fontWeight: 800, color: '#1a237e', lineHeight: 1.2, mb: 0.5 }}>
                         {round.roundName || "Chưa có tên vòng"}
                       </Typography>
-                      <Chip 
-                        label={round.isDeleted ? "Đã khóa" : "Hoạt động"} 
-                        size="small" 
-                        sx={{ fontWeight: 'bold', fontSize: '0.7rem', height: 22, bgcolor: round.isDeleted ? 'rgba(211, 47, 47, 0.1)' : 'rgba(46, 125, 50, 0.1)', color: round.isDeleted ? '#d32f2f' : '#2e7d32' }} 
+                      <Chip
+                        label={round.isDeleted ? "Đã khóa" : "Hoạt động"}
+                        size="small"
+                        sx={{ fontWeight: 'bold', fontSize: '0.7rem', height: 22, bgcolor: round.isDeleted ? 'rgba(211, 47, 47, 0.1)' : 'rgba(46, 125, 50, 0.1)', color: round.isDeleted ? '#d32f2f' : '#2e7d32' }}
                       />
                     </Box>
                   </Box>
@@ -274,7 +289,7 @@ const AssessmentRoundsManagement = () => {
                   <Button startIcon={<VisibilityIcon />} size="small" variant="contained" color="info" onClick={() => navigate(`/admin/assessment-rounds/${round.id}`)} sx={{ borderRadius: 2, fontWeight: 600, boxShadow: 0 }}>
                     Chi tiết
                   </Button>
-                  
+
                   {isAdmin && (
                     <Box>
                       <IconButton size="small" color="primary" onClick={() => handleOpenModal(round)}>
@@ -312,14 +327,14 @@ const AssessmentRoundsManagement = () => {
                   <Typography variant="h5" sx={{ fontWeight: 800, color: '#1a237e' }}>{editingRound ? "Cập nhật Vòng Đánh giá" : "Tạo Vòng Đánh giá mới"}</Typography>
                   <IconButton onClick={handleCloseModal} sx={{ bgcolor: '#f4f6f8', '&:hover': { bgcolor: '#e0e0e0' } }}><CloseIcon /></IconButton>
                 </Box>
-                
+
                 <Divider />
 
                 <Box sx={{ p: 4, bgcolor: '#fff', overflowY: 'auto' }}>
                   <Stack spacing={3}>
                     <TextField fullWidth label="Tên vòng đánh giá" value={formData.roundName} onChange={(e) => setFormData({ ...formData, roundName: e.target.value })} />
                     <TextField fullWidth label="Mô tả chi tiết" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} multiline rows={2} />
-                    
+
                     <Stack direction="row" spacing={2}>
                       <TextField fullWidth label="Ngày bắt đầu" type={formData.startDate ? "date" : "text"} value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} onFocus={(e) => (e.target.type = "date")} onBlur={(e) => { if (!formData.startDate) e.target.type = "text"; }} />
                       <TextField fullWidth label="Ngày kết thúc" type={formData.endDate ? "date" : "text"} value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} onFocus={(e) => (e.target.type = "date")} onBlur={(e) => { if (!formData.endDate) e.target.type = "text"; }} />

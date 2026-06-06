@@ -215,7 +215,19 @@ const InternshipPhasesManagement = () => {
       </Paper>
 
       {/* --- DANH SÁCH THẺ 3D --- */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-start' }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+            lg: "repeat(4, 1fr)",
+          },
+          gap: 4,
+          alignItems: "stretch",
+        }}
+      >
         <AnimatePresence>
           {data.map((phase, index) => (
             <motion.div

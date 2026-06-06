@@ -41,11 +41,11 @@ const InternshipPhasesManagement = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
-  
+
   // State Modal Thêm/Sửa
   const [openModal, setOpenModal] = useState(false);
   const [editingPhase, setEditingPhase] = useState(null);
-  
+
   // State Modal Xóa
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
@@ -170,9 +170,16 @@ const InternshipPhasesManagement = () => {
 
   return (
     <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f4f6f8' }}>
-      
+
       {/* --- HEADER CHÍNH --- */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 4,
+        }}
+      >
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#1a237e", letterSpacing: '-0.5px' }}>
             Quản lý Kỳ Thực tập
@@ -181,17 +188,17 @@ const InternshipPhasesManagement = () => {
             Thiết lập và theo dõi các giai đoạn thực tập của sinh viên
           </Typography>
         </Box>
-        
+
         {isAdmin && (
           <Button
             variant="contained"
             size="large"
             startIcon={<AddTaskIcon />}
             onClick={() => handleOpenModal()}
-            sx={{ 
-              borderRadius: '50px', 
-              px: 4, 
-              py: 1.5, 
+            sx={{
+              borderRadius: '50px',
+              px: 4,
+              py: 1.5,
               boxShadow: '0 8px 16px rgba(26, 35, 126, 0.2)',
               transition: 'all 0.3s',
               '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 20px rgba(26, 35, 126, 0.3)' }
@@ -204,10 +211,10 @@ const InternshipPhasesManagement = () => {
 
       {/* --- THANH TÌM KIẾM --- */}
       <Paper sx={{ p: 2, mb: 4, borderRadius: 4, display: "flex", alignItems: "center", boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-        <TextField 
-          fullWidth 
-          variant="outlined" 
-          placeholder="Tìm kiếm kỳ thực tập..." 
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Tìm kiếm kỳ thực tập..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(0); }}
           size="small"
@@ -216,7 +223,19 @@ const InternshipPhasesManagement = () => {
       </Paper>
 
       {/* --- DANH SÁCH THẺ 3D --- */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-start' }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+            lg: "repeat(4, 1fr)",
+          },
+          gap: 4,
+          alignItems: "stretch",
+        }}
+      >
         <AnimatePresence>
           {data.map((phase, index) => (
             <motion.div
@@ -229,10 +248,10 @@ const InternshipPhasesManagement = () => {
               style={{ flex: '1 1 320px', maxWidth: '400px' }}
             >
               <Paper
-                sx={{ 
-                  p: 3, 
-                  borderRadius: 4, 
-                  position: "relative", 
+                sx={{
+                  p: 3,
+                  borderRadius: 4,
+                  position: "relative",
                   overflow: "hidden",
                   background: 'linear-gradient(145deg, #ffffff, #f9f9f9)',
                   boxShadow: '8px 8px 16px #e6e6e6, -8px -8px 16px #ffffff',
@@ -254,14 +273,14 @@ const InternshipPhasesManagement = () => {
                       <Typography variant="h6" sx={{ fontWeight: 800, color: '#1a237e', lineHeight: 1.2, mb: 0.5 }}>
                         {phase.phaseName}
                       </Typography>
-                      <Chip 
-                        label={phase.isDeleted ? "Đã khóa" : "Hoạt động"} 
-                        size="small" 
-                        sx={{ 
+                      <Chip
+                        label={phase.isDeleted ? "Đã khóa" : "Hoạt động"}
+                        size="small"
+                        sx={{
                           fontWeight: 'bold', fontSize: '0.7rem', height: 20,
                           bgcolor: phase.isDeleted ? 'rgba(211, 47, 47, 0.1)' : 'rgba(46, 125, 50, 0.1)',
-                          color: phase.isDeleted ? '#d32f2f' : '#2e7d32' 
-                        }} 
+                          color: phase.isDeleted ? '#d32f2f' : '#2e7d32'
+                        }}
                       />
                     </Box>
                   </Box>
@@ -316,8 +335,8 @@ const InternshipPhasesManagement = () => {
       </Box>
 
       {/* --- MODAL THÊM / SỬA CHUẨN FRAMER MOTION --- */}
-      <Modal 
-        open={openModal} 
+      <Modal
+        open={openModal}
         onClose={handleCloseModal}
         closeAfterTransition
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(3px)' }}
@@ -340,14 +359,14 @@ const InternshipPhasesManagement = () => {
                     <CloseIcon />
                   </IconButton>
                 </Box>
-                
+
                 <Divider />
 
                 <Box sx={{ p: 4, bgcolor: '#fff', overflowY: 'auto' }}>
                   <Stack spacing={3}>
                     <TextField fullWidth label="Tên giai đoạn (Phase Name)" value={formData.phaseName} onChange={(e) => setFormData({ ...formData, phaseName: e.target.value })} />
                     <TextField fullWidth label="Mô tả chi tiết" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} multiline rows={3} />
-                    
+
                     {/* Logic DatePicker giữ nguyên */}
                     <TextField
                       fullWidth label="Ngày bắt đầu" type={formData.startDate ? "date" : "text"} value={formData.startDate}

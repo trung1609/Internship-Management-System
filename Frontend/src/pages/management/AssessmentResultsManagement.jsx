@@ -30,7 +30,7 @@ const AssessmentResultsManagement = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
-  
+
   const [openModal, setOpenModal] = useState(false);
   const [editingResult, setEditingResult] = useState(null);
 
@@ -179,9 +179,21 @@ const AssessmentResultsManagement = () => {
 
   return (
     <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f4f6f8' }}>
-      
+
       {/* --- HEADER CHÍNH --- */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+            lg: "repeat(4, 1fr)",
+          },
+          gap: 4,
+          alignItems: "stretch",
+        }}
+      >
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#1a237e", letterSpacing: '-0.5px' }}>
             Quản lý Kết quả Đánh giá
@@ -190,7 +202,7 @@ const AssessmentResultsManagement = () => {
             Ghi nhận và theo dõi điểm số chi tiết từ Mentor
           </Typography>
         </Box>
-        
+
         {isMentor && (
           <Button
             variant="contained" size="large" startIcon={<AddTaskIcon />} onClick={() => handleOpenModal()}
@@ -203,8 +215,8 @@ const AssessmentResultsManagement = () => {
 
       {/* --- THANH TÌM KIẾM --- */}
       <Paper sx={{ p: 2, mb: 4, borderRadius: 4, display: "flex", alignItems: "center", boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-        <TextField 
-          fullWidth variant="outlined" placeholder="Tìm kiếm kết quả..." 
+        <TextField
+          fullWidth variant="outlined" placeholder="Tìm kiếm kết quả..."
           value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }}
           size="small" sx={{ '& fieldset': { border: 'none' }, bgcolor: '#f8f9fa', borderRadius: 2 }}
         />
@@ -221,7 +233,7 @@ const AssessmentResultsManagement = () => {
               style={{ flex: '1 1 350px', maxWidth: '420px' }}
             >
               <Paper
-                sx={{ 
+                sx={{
                   p: 3, borderRadius: 4, position: "relative", overflow: "hidden",
                   background: 'linear-gradient(145deg, #ffffff, #fcfcfc)',
                   boxShadow: '8px 8px 16px #e6e6e6, -8px -8px 16px #ffffff',
@@ -247,7 +259,7 @@ const AssessmentResultsManagement = () => {
                 <Stack spacing={1.5} sx={{ mb: 3, position: 'relative', zIndex: 1, bgcolor: '#f8f9fa', p: 2, borderRadius: 3, flexGrow: 1 }}>
                   <Stack direction="row" alignItems="center" gap={1.5}>
                     <TrackChangesIcon sx={{ color: '#757575', fontSize: 18 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Vòng ĐG: <span style={{ fontWeight: 400, color: '#f57c00' }}>{result.roundName || "N/A"}</span></Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Vòng Đánh Giá: <span style={{ fontWeight: 400, color: '#f57c00' }}>{result.roundName || "N/A"}</span></Typography>
                   </Stack>
                   <Stack direction="row" alignItems="center" gap={1.5}>
                     <PersonIcon sx={{ color: '#757575', fontSize: 18 }} />
@@ -255,7 +267,7 @@ const AssessmentResultsManagement = () => {
                   </Stack>
                   <Stack direction="row" alignItems="center" gap={1.5}>
                     <EventIcon sx={{ color: '#757575', fontSize: 18 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Ngày ĐG: <span style={{ fontWeight: 400 }}>{result.evaluationDate || "N/A"}</span></Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Ngày Đánh Giá: <span style={{ fontWeight: 400 }}>{result.evaluationDate || "N/A"}</span></Typography>
                   </Stack>
                 </Stack>
 
@@ -265,7 +277,7 @@ const AssessmentResultsManagement = () => {
                   <Button startIcon={<VisibilityIcon />} size="small" variant="contained" color="info" onClick={() => navigate(`/admin/assessment-results/${result.id}`)} sx={{ borderRadius: 2, fontWeight: 600, boxShadow: 0 }}>
                     Xem Chi Tiết
                   </Button>
-                  
+
                   {isMentor && (
                     <IconButton size="small" color="primary" onClick={() => handleOpenModal(result)}>
                       <EditIcon />
@@ -330,7 +342,7 @@ const AssessmentResultsManagement = () => {
                             />
                             <TextField fullWidth label="Điểm số" type="number" inputProps={{ step: "0.1", min: "0" }} value={item.score} onChange={(e) => handleResultChange(index, "score", e.target.value)} />
                             <TextField fullWidth label="Nhận xét" multiline rows={2} value={item.comments} onChange={(e) => handleResultChange(index, "comments", e.target.value)} />
-                            
+
                             {!editingResult && (
                               <Box sx={{ textAlign: 'right' }}>
                                 <Button color="error" startIcon={<DeleteIcon />} onClick={() => handleRemoveResultRow(index)} disabled={formData.results.length === 1} sx={{ fontWeight: 'bold' }}>
