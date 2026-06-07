@@ -29,8 +29,6 @@ const AssignedStudents = () => {
     useEffect(() => {
         const fetchAssignedStudents = async () => {
             try {
-                // Gọi API lấy danh sách sinh viên (page: 0)
-                // Đảm bảo endpoint này khớp với cấu hình API của bạn
                 const response = await axiosClient.get('/api/v1/students', {
                     params: { page: 0, size: 20 }
                 });

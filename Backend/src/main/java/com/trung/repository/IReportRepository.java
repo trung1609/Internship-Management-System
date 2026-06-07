@@ -19,7 +19,7 @@ public interface IReportRepository extends JpaRepository<Report, Long> {
                                 Pageable pageable);
 
     @Query("select r from Report r where r.user.student.studentId in " +
-            "(select ia.student.studentId from InternshipAssignment ia where ia.mentor.mentorId = :mentorId) and " +
+            "(select s.studentId from InternshipAssignment ia join ia.students s where ia.mentor.mentorId = :mentorId) and " +
             "(:keyword is null or :keyword = '' or lower(r.title) like lower(concat('%', :keyword, '%')))")
     Page<Report> findByMentorId(@Param("mentorId") Long mentorId,
                                 @Param("keyword") String keyword,

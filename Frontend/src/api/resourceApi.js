@@ -115,10 +115,6 @@ export const internshipAssignmentApi = {
       `/api/v1/internship-assignments/${assignmentId}/status`,
       data,
     ),
-
-  // Delete assignment
-  deleteAssignment: (assignmentId) =>
-    axiosClient.delete(`/api/v1/internship-assignments/${assignmentId}`),
 };
 
 export const assessmentRoundsApi = {
@@ -185,7 +181,7 @@ export const assessmentResultApi = {
   // Update result
   updateResult: (resultId, data) =>
     axiosClient.put(`/api/v1/assessment-results/${resultId}`, data),
-
+  saveBulkGrades: (data) => axiosClient.post("/api/v1/assessment-results/bulk", data),
 };
 export const reportApi = {
   uploadReport: (file, title) => {
@@ -212,15 +208,25 @@ export const reportApi = {
   },
   getMyReports: () => {
     return axiosClient.get("/api/v1/reports/my-reports");
-  }
+  },
+  exportExcel: (search = "", page = 0, size = 10) =>
+    axiosClient.get(`/api/v1/reports/export-excel`, {
+      params: { search, page, size },
+      responseType: 'blob',
+    }),
+  exportZip: (search = "", page = 0, size = 100) =>
+    axiosClient.get(`/api/v1/reports/export-zip`, {
+      params: { search, page, size },
+      responseType: 'blob',
+    }),
 };
 
 export const notificationApi = {
-    getMyNotifications: () => {
-        return axiosClient.get("/api/v1/notifications/my-notifications");
-    },
-    markAsRead: (id) => {
-        return axiosClient.put(`/api/v1/notifications/${id}/read`);
-    },
-    markAllAsRead: () => axiosClient.put("/api/v1/notifications/mark-all-as-read")
+  getMyNotifications: () => {
+    return axiosClient.get("/api/v1/notifications/my-notifications");
+  },
+  markAsRead: (id) => {
+    return axiosClient.put(`/api/v1/notifications/${id}/read`);
+  },
+  markAllAsRead: () => axiosClient.put("/api/v1/notifications/mark-all-as-read")
 };

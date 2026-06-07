@@ -47,6 +47,9 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	// Source: https://mvnrepository.com/artifact/org.apache.poi/poi
+	implementation("org.apache.poi:poi:5.2.3")
+	implementation 'org.apache.poi:poi-ooxml:5.2.3'
 
 }
 

@@ -28,6 +28,7 @@ import AssessmentRoundDetail from "./pages/management/AssessmentRoundDetail";
 import AssessmentResultDetail from "./pages/management/AssessmentResultDetail";
 import LandingPage from "./pages/LandingPage";
 import { AnimatePresence } from "framer-motion";
+import AssignmentDetail from "./pages/AssignmentDetail";
 
 function App() {
   const location = useLocation();
@@ -69,6 +70,7 @@ function App() {
             <Route path="/my-students" element={<AppLayout><AssignedStudents /></AppLayout>} />
             <Route path="/submit-report" element={<AppLayout><StudentReportSubmit /></AppLayout>} />
             <Route path="/management/reports" element={<AppLayout><ReportManagement /></AppLayout>} />
+            <Route path="/assignments/:id" element={<AppLayout><AssignmentDetail /></AppLayout>} />
           </Route>
           {/* Bắt các đường dẫn không tồn tại -> Đẩy về login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

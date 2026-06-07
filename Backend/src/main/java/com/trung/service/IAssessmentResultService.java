@@ -2,6 +2,7 @@ package com.trung.service;
 
 import com.trung.dto.request.AssessmentResultCreateRequest;
 import com.trung.dto.request.AssessmentResultUpdateRequest;
+import com.trung.dto.request.BulkAssessmentSaveRequest;
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.AssessmentResultResponse;
@@ -14,8 +15,12 @@ import java.util.List;
 
 public interface IAssessmentResultService {
     ApiResponse<List<AssessmentResultResponse>> createAssessmentResult(AssessmentResultCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException;
-    PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(String search, Long assignmentId ,PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException;
+
+    PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(String search, Long assignmentId, PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException;
+
     ApiResponse<AssessmentResultResponse> updateAssessmentResult(Long id, AssessmentResultUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException;
 
     ApiResponse<AssessmentResultResponse> getAssessmentResultById(Long resultId) throws ResourceNotFoundException;
+
+    void saveBulkGrades(BulkAssessmentSaveRequest request) throws ResourceNotFoundException;
 }

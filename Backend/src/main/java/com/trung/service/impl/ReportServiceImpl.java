@@ -13,6 +13,7 @@ import com.trung.repository.IReportRepository;
 import com.trung.repository.InternshipAssignmentRepository;
 import com.trung.service.IReportService;
 import com.trung.util.CurrentUserUtil;
+import com.trung.util.ExcelUtil;
 import com.trung.util.PaginationUtil;
 import com.trung.util.enums.Role;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +24,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -129,4 +135,44 @@ public class ReportServiceImpl implements IReportService {
         return PaginationUtil.toPageResponseDTO(reportPage, ReportMapper::toDTO);
     }
 
+    @Override
+    public ByteArrayInputStream exportReportExcel(String search, PageRequestDTO pageRequestDTO) {
+        PageResponseDTO<ReportResponse> pageData = this.getAllReport(search, pageRequestDTO);
+
+        List<ReportResponse> dtoList = pageData.getContent();
+
+        return ExcelUtil.exportReportsToExcel(dtoList);
+    }
+
+    @Override
+    public ByteArrayInputStream exportReportZip(String search, PageRequestDTO pageRequestDTO) {
+        PageResponseDTO<ReportResponse> pageData = this.getAllReport(search, pageRequestDTO);
+        List<ReportResponse> reports = pageData.getContent();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            for (ReportResponse report : reports) {
+                try {
+                    // Lấy file vật lý từ hệ thống
+                    Resource resource = this.getReportFileAsResource(report.getStoredFileName());
+
+                    if (resource != null && resource.exists()) {
+                        String entryName = report.getStudentCode() + "_" + report.getOriginalFileName();
+                        ZipEntry zipEntry = new ZipEntry(entryName);
+                        zos.putNextEntry(zipEntry);
+
+                        StreamUtils.copy(resource.getInputStream(), zos);
+                        zos.closeEntry();
+                    }
+                } catch (Exception e) {
+                    System.err.println("Không thể nén file: " + report.getStoredFileName() + " - " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi trong quá trình khởi tạo file ZIP: " + e.getMessage());
+        }
+
+        return new ByteArrayInputStream(baos.toByteArray());
+    }
 }

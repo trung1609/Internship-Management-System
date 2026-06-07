@@ -9,13 +9,23 @@ public class AssessmentResultMapper {
         return AssessmentResultResponse.builder()
                 .id(entity.getResultId())
                 .assignmentId(entity.getAssignment().getAssignmentId())
-                .assignmentName(entity.getAssignment().getPhase().getPhaseName())
+                .assignmentName(entity.getAssignment().getAssignmentTitle())
+
+                // Map thông tin sinh viên
+                .studentId(entity.getStudent().getStudentId())
+                .studentName(entity.getStudent().getUser().getFullName())
+                .studentCode(entity.getStudent().getStudentCode())
+
                 .roundId(entity.getRound().getRoundId())
                 .roundName(entity.getRound().getRoundName())
+
+                // Map tiêu chí đánh giá
                 .criterionId(entity.getCriterion().getCriterionId())
                 .criterionName(entity.getCriterion().getCriterionName())
+
                 .score(entity.getScore())
-                .comments(entity.getComment())
+                .contribution(entity.getContribution())
+                .comments(entity.getComment()) // Nhớ lấy đúng trường comment trong entity
                 .evaluatorId(entity.getEvaluationId().getUserId())
                 .evaluatorName(entity.getEvaluationId().getFullName())
                 .evaluationDate(entity.getEvaluationDate())

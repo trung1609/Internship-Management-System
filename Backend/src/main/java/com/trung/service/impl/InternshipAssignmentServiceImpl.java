@@ -42,8 +42,9 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ApiResponse<List<InternshipAssignmentResponse>> createInternshipAssignment(InternshipAssignmentCreateRequest request) throws ResourceNotFoundException, ResourceConflictException {
+    public ApiResponse<InternshipAssignmentResponse> createInternshipAssignment(InternshipAssignmentCreateRequest request) throws ResourceNotFoundException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
+
         InternshipPhase phase = internshipPhaseRepository.findByPhaseIdAndIsDeletedFalse(request.getPhaseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Internship phase not found with id: " + request.getPhaseId()));
 
@@ -61,8 +62,9 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             throw new ResourceNotFoundException("One or more students not found with the provided IDs");
         }
 
+        // Kiểm tra xem sinh viên đã có đề tài ở Phase này chưa
         for (Long studentId : request.getStudentIds()) {
-            if (internshipAssignmentRepository.existsByStudent_StudentIdAndPhase_PhaseId(studentId, request.getPhaseId())) {
+            if (internshipAssignmentRepository.existsByStudentIdAndPhaseId(studentId, request.getPhaseId())) {
                 errorList.put("studentId_" + studentId, "Student with id " + studentId + " is already assigned to this phase");
             }
         }
@@ -70,19 +72,14 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
-        List<InternshipAssignment> internshipAssignmentList = studentList.stream()
-                .map(student -> InternshipAssignmentMapper.toEntity(student, mentor, phase))
-                .toList();
-        internshipAssignmentRepository.saveAll(internshipAssignmentList);
-
-        List<InternshipAssignmentResponse> responseList = internshipAssignmentList.stream()
-                .map(InternshipAssignmentMapper::toDto)
-                .toList();
+        // THAY ĐỔI: Chỉ tạo ra 1 Object Đề tài (Assignment) duy nhất, chứa tất cả sinh viên
+        InternshipAssignment assignment = InternshipAssignmentMapper.toEntity(request, studentList, mentor, phase);
+        InternshipAssignment savedAssignment = internshipAssignmentRepository.save(assignment);
 
         return new ApiResponse<>(
-                responseList,
+                InternshipAssignmentMapper.toDto(savedAssignment),
                 true,
-                "Internship assignments created successfully",
+                "Internship assignment created successfully",
                 null,
                 LocalDateTime.now());
     }
@@ -90,17 +87,17 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     @Override
     public PageResponseDTO<InternshipAssignmentResponse> getAllInternshipAssignment(String search, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
-
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "internshipAssignment");
-
         Page<InternshipAssignment> internshipAssignmentPage;
 
         if (user.getRole() == Role.ROLE_ADMIN) {
             internshipAssignmentPage = internshipAssignmentRepository.findAllByKeyword(search, pageable);
         } else if (user.getRole() == Role.ROLE_MENTOR) {
-            internshipAssignmentPage = internshipAssignmentRepository.findStudent_StudentIdByMentor_MentorId(search, user.getMentor().getMentorId(), pageable);
+            // Thay đổi hàm gọi Repository
+            internshipAssignmentPage = internshipAssignmentRepository.findByMentorIdAndKeyword(search, user.getMentor().getMentorId(), pageable);
         } else if (user.getRole() == Role.ROLE_STUDENT) {
-            internshipAssignmentPage = internshipAssignmentRepository.findByStudent_StudentId(search, user.getStudent().getStudentId(), pageable);
+            // Thay đổi hàm gọi Repository
+            internshipAssignmentPage = internshipAssignmentRepository.findByStudentIdAndKeyword(search, user.getStudent().getStudentId(), pageable);
         } else {
             throw new ResourceForbiddenException("User does not have permission to access internship assignments");
         }
@@ -115,30 +112,16 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
         if (user.getRole() == Role.ROLE_ADMIN) {
             InternshipAssignment internshipAssignment = internshipAssignmentRepository.findById(internshipAssignmentId)
                     .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
-
-            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment),
-                    true,
-                    "Get internshipAssignment by id successfully",
-                    null,
-                    LocalDateTime.now());
+            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment), true, "Get internshipAssignment by id successfully", null, LocalDateTime.now());
         } else if (user.getRole() == Role.ROLE_MENTOR) {
             InternshipAssignment internshipAssignment = internshipAssignmentRepository.findByAssignmentIdAndMentor_MentorId(internshipAssignmentId, user.getMentor().getMentorId())
                     .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
-
-            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment),
-                    true,
-                    "Get internshipAssignment by id successfully",
-                    null,
-                    LocalDateTime.now());
+            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment), true, "Get internshipAssignment by id successfully", null, LocalDateTime.now());
         } else if (user.getRole() == Role.ROLE_STUDENT) {
-            InternshipAssignment internshipAssignment = internshipAssignmentRepository.findByAssignmentIdAndStudent_StudentId(internshipAssignmentId, user.getStudent().getStudentId())
+            // Thay đổi hàm gọi Repository
+            InternshipAssignment internshipAssignment = internshipAssignmentRepository.findByAssignmentIdAndStudentId(internshipAssignmentId, user.getStudent().getStudentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
-
-            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment),
-                    true,
-                    "Get internshipAssignment by id successfully",
-                    null,
-                    LocalDateTime.now());
+            return new ApiResponse<>(InternshipAssignmentMapper.toDto(internshipAssignment), true, "Get internshipAssignment by id successfully", null, LocalDateTime.now());
         } else {
             throw new ResourceForbiddenException("User does not have permission to access internship assignment");
         }

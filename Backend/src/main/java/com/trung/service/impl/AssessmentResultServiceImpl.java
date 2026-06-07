@@ -1,8 +1,6 @@
 package com.trung.service.impl;
 
-import com.trung.dto.request.AssessmentResultCreateRequest;
-import com.trung.dto.request.AssessmentResultUpdateRequest;
-import com.trung.dto.request.PageRequestDTO;
+import com.trung.dto.request.*;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.AssessmentResultResponse;
 import com.trung.dto.response.PageResponseDTO;
@@ -24,11 +22,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +37,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     private final IEvaluationCriteriaRepository iEvaluationCriteriaRepository;
     private final CurrentUserUtil currentUserUtil;
     private final IRoundCriteriaRepository iRoundCriteriaRepository;
+    private final IUserRepository iUserRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -143,7 +141,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
 
         } else if (user.getRole() == Role.ROLE_STUDENT) {
             if (assignmentId != null) {
-                if (!internshipAssignmentRepository.existsByStudent_StudentIdAndAssignmentId(user.getStudent().getStudentId(), assignmentId)) {
+                if (!internshipAssignmentRepository.existsByStudentIdAndAssignmentId(user.getStudent().getStudentId(), assignmentId)) {
                     throw new ResourceForbiddenException("Student does not have permission to view assessment results for this assignment");
                 }
                 assessmentResultPage = assessmentResultRepository.findAllByAssignment_AssignmentId(assignmentId, search, pageable);
@@ -185,5 +183,47 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
         AssessmentResult result = assessmentResultRepository.findById(resultId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment result not found with id: " + resultId));
         return new ApiResponse<>(AssessmentResultMapper.toDTO(result), true, "SUCCESS", null, LocalDateTime.now());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveBulkGrades(BulkAssessmentSaveRequest request) throws ResourceNotFoundException {
+        User currentUser = currentUserUtil.getCurrentUser();
+
+        InternshipAssignment assignment = internshipAssignmentRepository.findById(request.getAssignmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phân công ID: " + request.getAssignmentId()));
+
+        AssessmentRound round = iAssessmentRoundsRepository.findById(request.getRoundId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vòng đánh giá ID: " + request.getRoundId()));
+
+        EvaluationCriteria criterion = iEvaluationCriteriaRepository.findById(request.getCriterionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tiêu chí đánh giá ID: " + request.getCriterionId()));
+
+        List<AssessmentResult> resultsToSave = new ArrayList<>();
+
+        for (StudentEvaluationRequest eval : request.getEvaluations()) {
+
+            User student = iUserRepository.findById(eval.getStudentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sinh viên ID: " + eval.getStudentId()));
+
+            AssessmentResult result = assessmentResultRepository
+                    .findByAssignment_AssignmentIdAndStudent_StudentIdAndRound_RoundIdAndCriterion_CriterionId(
+                            assignment.getAssignmentId(), student.getStudent().getStudentId(), round.getRoundId(), criterion.getCriterionId()
+                    ).orElse(new AssessmentResult());
+
+            result.setAssignment(assignment);
+            result.setStudent(student.getStudent());
+            result.setRound(round);
+            result.setCriterion(criterion);
+            result.setScore(eval.getScore() != null ? eval.getScore() : BigDecimal.ZERO);
+            result.setContribution(eval.getContribution());
+            result.setComment(eval.getComment());
+            result.setEvaluationId(currentUser);
+            result.setEvaluationDate(LocalDate.now());
+
+            resultsToSave.add(result);
+        }
+
+        assessmentResultRepository.saveAll(resultsToSave);
     }
 }

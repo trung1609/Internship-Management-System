@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "assessment_results", uniqueConstraints = @UniqueConstraint(columnNames = {"assignment_id", "round_id", "criterion_id"}))
+@Table(name = "assessment_results", uniqueConstraints = @UniqueConstraint(columnNames = {"assignment_id", "student_id", "round_id", "criterion_id"}))
 public class AssessmentResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +24,10 @@ public class AssessmentResult {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id", nullable = false)
     private InternshipAssignment assignment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "round_id", nullable = false)
@@ -35,6 +39,7 @@ public class AssessmentResult {
 
     @Column(nullable = false)
     private BigDecimal score;
+    private String contribution;
 
     private String comment;
 

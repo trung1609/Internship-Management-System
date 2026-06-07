@@ -9,6 +9,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import BadgeIcon from '@mui/icons-material/Badge';
 import SearchIcon from '@mui/icons-material/Search';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FolderZipIcon from '@mui/icons-material/FolderZip';
 import { reportApi } from '../../api/resourceApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -17,6 +19,37 @@ const ReportManagement = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [exporting, setExporting] = useState(false);
+    const [exportingZip, setExportingZip] = useState(false);
+
+
+    const handleExportExcel = async () => {
+        try {
+            setExporting(true);
+            toast.info("Đang khởi tạo dữ liệu Excel...");
+
+            // Gọi API (Truyền searchTerm và size lớn để lấy nhiều dữ liệu)
+            const response = await reportApi.exportExcel(searchTerm, 0, 100);
+
+            // Xử lý tạo link tải file tự động
+            const url = window.URL.createObjectURL(new Blob([response]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Bao_Cao_Thuc_Tap_${new Date().getTime()}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+
+            // Dọn dẹp
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            toast.success("Xuất file thành công!");
+        } catch (error) {
+            console.error("Lỗi xuất Excel:", error);
+            toast.error("Không thể xuất file. Vui lòng thử lại!");
+        } finally {
+            setExporting(false);
+        }
+    };
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -48,9 +81,34 @@ const ReportManagement = () => {
         } catch (error) {
             console.error("Lỗi download file:", error);
             if (error.code === 'ERR_CANCELED' || error.message === 'Network Error') {
-                return; 
+                return;
             }
             toast.error("Tải xuống thất bại. Vui lòng thử lại.");
+        }
+    };
+
+    const handleExportZip = async () => {
+        try {
+            setExportingZip(true);
+            toast.info("Đang nén toàn bộ file, vui lòng đợi...");
+
+            const response = await reportApi.exportZip(searchTerm, 0, 100);
+
+            const url = window.URL.createObjectURL(new Blob([response]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Tat_Ca_Bao_Cao_${new Date().getTime()}.zip`);
+            document.body.appendChild(link);
+            link.click();
+
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            toast.success("Tải toàn bộ báo cáo thành công!");
+        } catch (error) {
+            console.error("Lỗi xuất ZIP:", error);
+            toast.error("Không thể nén file. Vui lòng thử lại!");
+        } finally {
+            setExportingZip(false);
         }
     };
 
@@ -88,13 +146,64 @@ const ReportManagement = () => {
                 />
             </Paper>
 
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+
+                {/* Nút xuất Excel (Cũ) */}
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                        variant="outlined" // Đổi Excel thành viền cho bớt chói
+                        disabled={exporting}
+                        onClick={handleExportExcel}
+                        startIcon={exporting ? <CircularProgress size={20} /> : <FileDownloadIcon />}
+                        sx={{ borderRadius: '12px', px: 3, py: 1.2, fontWeight: 700 }}
+                    >
+                        Xuất Data (Excel)
+                    </Button>
+                </motion.div>
+
+                {/* Nút tải ZIP (Mới - Nổi bật) */}
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                        variant="contained"
+                        disabled={exportingZip}
+                        onClick={handleExportZip}
+                        startIcon={exportingZip ? <CircularProgress size={20} color="inherit" /> : <FolderZipIcon />}
+                        sx={{
+                            borderRadius: '12px',
+                            px: 3,
+                            py: 1.2,
+                            fontWeight: 800,
+                            background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', // Màu xanh lam chuyên nghiệp
+                            boxShadow: '0 8px 25px rgba(30, 60, 114, 0.3)',
+                            textTransform: 'none',
+                            '&:hover': {
+                                background: 'linear-gradient(135deg, #152b52 0%, #1c3869 100%)',
+                            }
+                        }}
+                    >
+                        {exportingZip ? "Đang nén file..." : "Tải toàn bộ File (ZIP)"}
+                    </Button>
+                </motion.div>
+
+            </Box>
+
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}>
                     <CircularProgress sx={{ color: '#1565c0' }} />
                 </Box>
             ) : (
                 /* --- DANH SÁCH THẺ BÁO CÁO 3D --- */
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-start' }}>
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                            xs: '1fr',           // Màn hình nhỏ: 1 cột
+                            md: 'repeat(2, 1fr)', // Màn hình vừa: 2 cột
+                            lg: 'repeat(3, 1fr)'  // Màn hình lớn: 3 cột
+                        },
+                        gap: 3
+                    }}
+                >
                     <AnimatePresence>
                         {filteredReports.length > 0 ? (
                             filteredReports.map((report, index) => (
@@ -178,10 +287,15 @@ const ReportManagement = () => {
                                 </motion.div>
                             ))
                         ) : (
-                            <Box sx={{ width: '100%', textAlign: 'center', py: 8 }}>
+                            <Box sx={{
+                                gridColumn: '1 / -1',
+                                width: '100%',
+                                textAlign: 'center',
+                                py: 8
+                            }}>
                                 <AssignmentTurnedInIcon sx={{ fontSize: 64, color: '#cbd5e1', mb: 2 }} />
                                 <Typography variant="h6" color="text.secondary">
-                                    Không tìm thấy báo cáo nào phù hợp.
+                                    Hiện chưa có báo cáo nào được tải lên. Hãy khuyến khích sinh viên nộp báo cáo để quản lý dễ dàng hơn!
                                 </Typography>
                             </Box>
                         )}

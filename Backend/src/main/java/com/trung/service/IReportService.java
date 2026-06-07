@@ -7,6 +7,8 @@ import com.trung.dto.response.ReportResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+
 public interface IReportService {
     ApiResponse<ReportResponse> processAndSaveReport(MultipartFile file, String title);
 
@@ -15,4 +17,8 @@ public interface IReportService {
     Resource getReportFileAsResource(String storedFileName);
 
     PageResponseDTO<ReportResponse> getMyReport(String search, PageRequestDTO pageRequestDTO);
+
+    ByteArrayInputStream exportReportExcel(String search, PageRequestDTO pageRequestDTO);
+
+    ByteArrayInputStream exportReportZip(String search, PageRequestDTO pageRequestDTO);
 }
