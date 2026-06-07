@@ -31,4 +31,9 @@ public class AssessmentResultResponse {
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate evaluationDate;
+
+    private Long studentId;
+    private String studentName;
+    private String studentCode;
+    private String contribution;
 }

@@ -20,6 +20,7 @@ public class MentorMapper {
 
     public static MentorPublicResponse toPublicDto(Mentor mentor){
         return MentorPublicResponse.builder()
+                .id(mentor.getMentorId()) 
                 .department(mentor.getDepartment())
                 .academicRank(mentor.getAcademicRank())
                 .fullName(mentor.getUser().getFullName())

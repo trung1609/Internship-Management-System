@@ -5,7 +5,7 @@ import com.trung.util.enums.AssignmentStatus;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List; // Thêm import này
 
 @Getter
 @Setter
@@ -16,8 +16,6 @@ public class InternshipAssignmentResponse {
     private Long id;
     private String assignmentTitle;
     private String assignmentDescription;
-    private Long studentId;
-    private String studentName;
     private Long mentorId;
     private String mentorName;
     private Long phaseId;
@@ -26,4 +24,18 @@ public class InternshipAssignmentResponse {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate assignedDate;
     private AssignmentStatus status;
+
+    private List<StudentBasicInfo> students;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class StudentBasicInfo {
+        private Long id;
+        private String name;
+        private String code;
+        private String major;
+    }
 }

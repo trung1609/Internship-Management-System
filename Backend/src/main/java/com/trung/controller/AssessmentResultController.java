@@ -2,6 +2,7 @@ package com.trung.controller;
 
 import com.trung.dto.request.AssessmentResultCreateRequest;
 import com.trung.dto.request.AssessmentResultUpdateRequest;
+import com.trung.dto.request.BulkAssessmentSaveRequest;
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.AssessmentResultResponse;
@@ -33,8 +34,9 @@ public class AssessmentResultController {
 
     @GetMapping
     public ResponseEntity<PageResponseDTO<AssessmentResultResponse>> getAllAssessmentResults(@RequestParam(required = false) Long assignmentId,
+                                                                                             @RequestParam(required = false) String search,
                                                                                              @ModelAttribute PageRequestDTO request) throws ResourceConflictException, ResourceForbiddenException, ResourceNotFoundException {
-        return new ResponseEntity<>(assessmentResultService.getAllAssessmentResult(assignmentId, request), HttpStatus.OK);
+        return new ResponseEntity<>(assessmentResultService.getAllAssessmentResult(search,assignmentId, request), HttpStatus.OK);
     }
     @PutMapping("/{resultId}")
     @PreAuthorize("hasAuthority('ROLE_MENTOR')")
@@ -48,5 +50,17 @@ public class AssessmentResultController {
         return new ResponseEntity<>(assessmentResultService.getAssessmentResultById(resultId), HttpStatus.OK);
     }
 
+    @PostMapping("/bulk")
+     @PreAuthorize("hasAuthority('ROLE_MENTOR')")
+    public ResponseEntity<ApiResponse<Void>> saveBulkGrades(@RequestBody @Valid BulkAssessmentSaveRequest request) throws ResourceNotFoundException {
 
+        assessmentResultService.saveBulkGrades(request);
+
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(true)
+                .message("Đã lưu điểm cho toàn bộ nhóm thành công!")
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 }

@@ -151,12 +151,14 @@ public class AuthServiceImpl implements IAuthService {
         User users = userRepository.findByUsernameAndIsDeletedFalseAndIsActiveTrue(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
 
-        // Tao moi 1 accessToken
+        // Tao moi 1 accessToken va refreshToken moi
         String accessTokenNew = jwtProvider.generateAccessToken(users);
-
-
+        String refreshTokenNew = jwtProvider.generateRefreshToken(users);
+        refreshTokenService.saveRefreshToken(refreshTokenNew);
+        refreshTokenService.deleteRefreshToken(refreshToken);
         RefreshTokenResponse response = RefreshTokenResponse.builder()
                 .accessToken(accessTokenNew)
+                .refreshToken(refreshTokenNew)
                 .expiresIn(new Date(new Date().getTime() + expire))
                 .build();
 

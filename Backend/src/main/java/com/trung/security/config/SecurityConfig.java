@@ -49,7 +49,8 @@ public class SecurityConfig {
             "/api/v1/assessment-rounds/**",
             "/api/v1/round-criterias/**",
             "/api/v1/internship-assignments/**",
-            "/api/v1/assessment-results/**"
+            "/api/v1/assessment-results/**",
+            "/api/v1/reports/**"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {

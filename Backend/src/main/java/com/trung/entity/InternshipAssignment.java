@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -15,8 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "internship_assignments",
-uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "phase_id"}))
+@Table(name = "internship_assignments")
 public class InternshipAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +26,13 @@ public class InternshipAssignment {
 
     private String assignmentDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
-    private Student student;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "assignment_student_mapping",
+            joinColumns = @JoinColumn(name = "assignment_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    private List<Student> students;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentor_id")

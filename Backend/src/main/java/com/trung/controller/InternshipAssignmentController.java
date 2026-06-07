@@ -28,7 +28,7 @@ public class InternshipAssignmentController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<List<InternshipAssignmentResponse>>> createInternshipAssignment(@Valid @RequestBody InternshipAssignmentCreateRequest request) throws ResourceConflictException, ResourceNotFoundException {
+    public ResponseEntity<ApiResponse<InternshipAssignmentResponse>> createInternshipAssignment(@Valid @RequestBody InternshipAssignmentCreateRequest request) throws ResourceConflictException, ResourceNotFoundException {
         return new ResponseEntity<>(internshipAssignmentService.createInternshipAssignment(request), org.springframework.http.HttpStatus.CREATED);
     }
 

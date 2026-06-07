@@ -1,13 +1,16 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import MentorDashboard from "./pages/MentorDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import StudentDetailPage from "./pages/StudentDetailPage";
-import MentorDetailPage from "./pages/MentorDetailPage";
-import UserDetailPage from "./pages/UserDetailPage";
-import MainDashboard from "./pages/MainDashboard";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
+// Auth Pages
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+// mentor dashboard
+import AssignedMentor from "./pages/mentors/AssignedMentor";
+
+// student dashboard
+import AssignedStudents from "./pages/students/AssignedStudents";
+import StudentReportSubmit from "./pages/students/StudentReportSubmit";
+
+import MainDashboard from "./pages/MainDashboard";
 
 // Management Pages
 import UsersManagement from "./pages/management/UsersManagement";
@@ -18,13 +21,17 @@ import InternshipAssignmentsManagement from "./pages/management/InternshipAssign
 import AssessmentRoundsManagement from "./pages/management/AssessmentRoundsManagement";
 import EvaluationCriteriaManagement from "./pages/management/EvaluationCriteriaManagement";
 import AssessmentResultsManagement from "./pages/management/AssessmentResultsManagement";
+import ReportManagement from "./pages/management/ReportManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import AssessmentRoundDetail from "./pages/management/AssessmentRoundDetail";
 import AssessmentResultDetail from "./pages/management/AssessmentResultDetail";
 import LandingPage from "./pages/LandingPage";
+import { AnimatePresence } from "framer-motion";
+import AssignmentDetail from "./pages/AssignmentDetail";
 
 function App() {
+  const location = useLocation();
   return (
     <>
       <ToastContainer
@@ -36,41 +43,39 @@ function App() {
         pauseOnHover
         theme="colored"
       />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/" element={<LandingPage />} />
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/" element={<LandingPage />} />
 
-        {/* Dashboard Routes */}
-        <Route element={<ProtectedRoute />}>
-          {/* Route này thường dành cho Student, hoặc làm trang chuyển tiếp */}
-          <Route path="/dashboard" element={<AppLayout><MainDashboard /></AppLayout>} />
+          {/* Dashboard Routes */}
+          <Route element={<ProtectedRoute />}>
+            {/* Route này thường dành cho Student, hoặc làm trang chuyển tiếp */}
+            <Route path="/dashboard" element={<AppLayout><MainDashboard /></AppLayout>} />
 
-          {/* Bất kỳ ai cũng có thể xem chi tiết profile user (nếu cần) */}
-          <Route path="/user/:userId" element={<AppLayout><UserDetailPage /></AppLayout>} />
-
-          <Route path="/admin-dashboard" element={<AppLayout><AdminDashboard /></AppLayout>} />
-
-          {/* Toàn bộ các trang Quản lý (Management) đặt trong này */}
-          <Route path="/management/users" element={<AppLayout><UsersManagement /></AppLayout>} />
-          <Route path="/management/students" element={<AppLayout><StudentsManagement /></AppLayout>} />
-          <Route path="/management/mentors" element={<AppLayout><MentorsManagement /></AppLayout>} />
-          <Route path="/management/phases" element={<AppLayout><InternshipPhasesManagement /></AppLayout>} />
-          <Route path="/management/assignments" element={<AppLayout><InternshipAssignmentsManagement /></AppLayout>} />
-          <Route path="/management/assessment-rounds" element={<AppLayout><AssessmentRoundsManagement /></AppLayout>} />
-          <Route path="/management/evaluation-criteria" element={<AppLayout><EvaluationCriteriaManagement /></AppLayout>} />
-          <Route path="/management/assessment-results" element={<AppLayout><AssessmentResultsManagement /></AppLayout>} />
-
-          <Route path="/mentor-dashboard" element={<AppLayout><MentorDashboard /></AppLayout>} />
-          <Route path="/mentor/:mentorId" element={<AppLayout><MentorDetailPage /></AppLayout>} />
-          {/* Ví dụ: Chi tiết sinh viên thì cả Admin và Mentor phụ trách đều xem được */}
-          <Route path="/student/:studentId" element={<AppLayout><StudentDetailPage /></AppLayout>} />
-          <Route path="/admin/assessment-rounds/:id" element={<AppLayout><AssessmentRoundDetail /></AppLayout>} />
-          <Route path="/admin/assessment-results/:id" element={<AppLayout><AssessmentResultDetail /></AppLayout>} />
-        </Route>
-        {/* Bắt các đường dẫn không tồn tại -> Đẩy về login */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+            {/* Toàn bộ các trang Quản lý (Management) đặt trong này */}
+            <Route path="/management/users" element={<AppLayout><UsersManagement /></AppLayout>} />
+            <Route path="/management/students" element={<AppLayout><StudentsManagement /></AppLayout>} />
+            <Route path="/management/mentors" element={<AppLayout><MentorsManagement /></AppLayout>} />
+            <Route path="/management/phases" element={<AppLayout><InternshipPhasesManagement /></AppLayout>} />
+            <Route path="/management/assignments" element={<AppLayout><InternshipAssignmentsManagement /></AppLayout>} />
+            <Route path="/management/assessment-rounds" element={<AppLayout><AssessmentRoundsManagement /></AppLayout>} />
+            <Route path="/management/evaluation-criteria" element={<AppLayout><EvaluationCriteriaManagement /></AppLayout>} />
+            <Route path="/management/assessment-results" element={<AppLayout><AssessmentResultsManagement /></AppLayout>} />
+            {/* Ví dụ: Chi tiết sinh viên thì cả Admin và Mentor phụ trách đều xem được */}
+            <Route path="/admin/assessment-rounds/:id" element={<AppLayout><AssessmentRoundDetail /></AppLayout>} />
+            <Route path="/admin/assessment-results/:id" element={<AppLayout><AssessmentResultDetail /></AppLayout>} />
+            <Route path="/my-mentor" element={<AppLayout><AssignedMentor /></AppLayout>} />
+            <Route path="/my-students" element={<AppLayout><AssignedStudents /></AppLayout>} />
+            <Route path="/submit-report" element={<AppLayout><StudentReportSubmit /></AppLayout>} />
+            <Route path="/management/reports" element={<AppLayout><ReportManagement /></AppLayout>} />
+            <Route path="/assignments/:id" element={<AppLayout><AssignmentDetail /></AppLayout>} />
+          </Route>
+          {/* Bắt các đường dẫn không tồn tại -> Đẩy về login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AnimatePresence >
     </>
   );
 }
