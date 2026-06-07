@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface IReportRepository extends JpaRepository<Report, Long> {
 
@@ -15,10 +17,17 @@ public interface IReportRepository extends JpaRepository<Report, Long> {
     Page<Report> findAllByAdmin(@Param("keyword") String keyword,
                                 Pageable pageable);
 
-    @Query("select r from Report r where r.student.student.studentId in " +
+    @Query("select r from Report r where r.user.student.studentId in " +
             "(select ia.student.studentId from InternshipAssignment ia where ia.mentor.mentorId = :mentorId) and " +
             "(:keyword is null or :keyword = '' or lower(r.title) like lower(concat('%', :keyword, '%')))")
     Page<Report> findByMentorId(@Param("mentorId") Long mentorId,
                                 @Param("keyword") String keyword,
                                 Pageable pageable);
+
+    @Query("select r from Report r where r.user.student.studentId = :studentId and " +
+            "(:keyword is null or :keyword = '' or lower(r.title) like lower(concat('%', :keyword, '%')))" +
+            "order by r.uploadTime desc")
+    Page<Report> findByStudentId(@Param("studentId") Long studentId,
+                                 @Param("keyword") String keyword,
+                                 Pageable pageable);
 }

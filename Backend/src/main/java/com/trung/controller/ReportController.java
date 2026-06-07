@@ -66,4 +66,11 @@ public class ReportController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
     }
+
+    @GetMapping("/my-reports")
+    @PreAuthorize("hasAuthority('ROLE_STUDENT')")
+    public ResponseEntity<PageResponseDTO<ReportResponse>> getMyReports(@RequestParam(required = false) String search,
+                                                                        PageRequestDTO pageRequestDTO) {
+        return new ResponseEntity<>(reportService.getMyReport(search, pageRequestDTO), HttpStatus.OK);
+    }
 }

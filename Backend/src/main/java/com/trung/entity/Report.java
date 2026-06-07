@@ -28,7 +28,7 @@ public class Report {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
-    private User student;
+    private User user;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

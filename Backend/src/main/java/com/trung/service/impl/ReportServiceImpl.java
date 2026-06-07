@@ -38,7 +38,7 @@ public class ReportServiceImpl implements IReportService {
                     .originalFileName(file.getOriginalFilename())
                     .storedFileName(storedFileName)
                     .uploadTime(LocalDateTime.now())
-                    .student(currentUserUtil.getCurrentUser().getStudent().getUser())
+                    .user(currentUserUtil.getCurrentUser().getStudent().getUser())
                     .build();
 
             Report savedReport = reportRepository.save(report);
@@ -71,7 +71,7 @@ public class ReportServiceImpl implements IReportService {
         Page<Report> reportPage;
 
         if (user.getRole() == Role.ROLE_ADMIN) {
-            reportPage = reportRepository.findAllByAdmin(search,pageable);
+            reportPage = reportRepository.findAllByAdmin(search, pageable);
         } else if (user.getRole() == Role.ROLE_MENTOR) {
             reportPage = reportRepository.findByMentorId(user.getMentor().getMentorId(), search, pageable);
         } else {
@@ -84,4 +84,14 @@ public class ReportServiceImpl implements IReportService {
     public Resource getReportFileAsResource(String storedFileName) {
         return fileStorageService.loadFileAsResource(storedFileName);
     }
+
+    @Override
+    public PageResponseDTO<ReportResponse> getMyReport(String search, PageRequestDTO pageRequestDTO) {
+        User user = currentUserUtil.getCurrentUser();
+        Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "report");
+
+        Page<Report> reportPage = reportRepository.findByStudentId(user.getStudent().getStudentId(), search, pageable);
+        return PaginationUtil.toPageResponseDTO(reportPage, ReportMapper::toDTO);
+    }
+
 }

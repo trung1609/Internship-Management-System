@@ -207,7 +207,10 @@ export const reportApi = {
 
   downloadReport: (fileName) => {
     return axiosClient.get(`/api/v1/reports/download/${fileName}`, {
-      responseType: 'blob', 
+      responseType: 'blob',
     });
   },
+  getMyReports: () => {
+    return axiosClient.get("/api/v1/reports/my-reports");
+  }
 };

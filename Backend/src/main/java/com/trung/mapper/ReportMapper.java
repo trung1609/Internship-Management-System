@@ -13,9 +13,9 @@ public class ReportMapper {
                 .originalFileName(report.getOriginalFileName())
                 .storedFileName(report.getStoredFileName())
                 .uploadTime(report.getUploadTime())
-                .studentId(report.getStudent().getStudent().getStudentId())
-                .studentCode(report.getStudent().getStudent().getStudentCode())
-                .studentName(report.getStudent().getFullName())
+                .studentId(report.getUser().getStudent().getStudentId())
+                .studentCode(report.getUser().getStudent().getStudentCode())
+                .studentName(report.getUser().getFullName())
                 .build();
     }
 }
