@@ -214,3 +214,13 @@ export const reportApi = {
     return axiosClient.get("/api/v1/reports/my-reports");
   }
 };
+
+export const notificationApi = {
+    getMyNotifications: () => {
+        return axiosClient.get("/api/v1/notifications/my-notifications");
+    },
+    markAsRead: (id) => {
+        return axiosClient.put(`/api/v1/notifications/${id}/read`);
+    },
+    markAllAsRead: () => axiosClient.put("/api/v1/notifications/mark-all-as-read")
+};

@@ -13,6 +13,11 @@ spring:
             host: localhost
             password: 123456
             port: 6379
+    rabbitmq:
+        port: 5672
+        host: localhost
+        username: guest
+        password: guest
     datasource:
         driver-class-name: org.postgresql.Driver
         password: 123456
@@ -33,3 +38,12 @@ spring:
 
 file:
     upload-dir: uploads
+
+rabbitmq:
+    exchange:
+        name: intership_exchange
+    queue:
+        notification: notification_queue
+    routing:
+        key:
+            notification: notification_routing_key

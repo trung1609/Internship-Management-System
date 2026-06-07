@@ -4,22 +4,29 @@ import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.ReportResponse;
+import com.trung.entity.InternshipAssignment;
 import com.trung.entity.Report;
 import com.trung.entity.User;
+import com.trung.event.NotificationEventDTO;
 import com.trung.mapper.ReportMapper;
 import com.trung.repository.IReportRepository;
+import com.trung.repository.InternshipAssignmentRepository;
 import com.trung.service.IReportService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
 import com.trung.util.enums.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +34,14 @@ public class ReportServiceImpl implements IReportService {
     private final IReportRepository reportRepository;
     private final FileStorageService fileStorageService;
     private final CurrentUserUtil currentUserUtil;
+    private final InternshipAssignmentRepository internshipAssignmentRepository;
+    private final RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange.name}")
+    private String exchangeName;
+
+    @Value("${rabbitmq.routing.key.notification}")
+    private String routingKey;
 
     @Override
     public ApiResponse<ReportResponse> processAndSaveReport(MultipartFile file, String title) {
@@ -42,6 +57,26 @@ public class ReportServiceImpl implements IReportService {
                     .build();
 
             Report savedReport = reportRepository.save(report);
+
+            Page<InternshipAssignment> assignmentPage = internshipAssignmentRepository.findByStudent_StudentId(
+                    "",
+                    currentUserUtil.getCurrentUser().getStudent().getStudentId(),
+                    PageRequest.of(0, 10)
+            );
+
+            List<InternshipAssignment> assignments = assignmentPage.getContent();
+
+            for (InternshipAssignment assignment : assignments) {
+                Long mentorUserId = assignment.getMentor().getUser().getUserId();
+
+                NotificationEventDTO eventDTO = NotificationEventDTO.builder()
+                        .recipientId(mentorUserId)
+                        .message("Sinh viên có mã sinh viên " + currentUserUtil.getCurrentUser().getStudent().getStudentCode() + " vừa nộp báo cáo: " + title)
+                        .type("REPORT")
+                        .build();
+
+                rabbitTemplate.convertAndSend(exchangeName, routingKey, eventDTO);
+            }
 
             ReportResponse reportResponse = ReportMapper.toDTO(savedReport);
 

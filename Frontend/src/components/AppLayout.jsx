@@ -39,6 +39,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import NotificationBell from "../pages/NotificationBell";
 
 const drawerWidth = 280;
 
@@ -344,9 +345,14 @@ export const AppLayout = ({ children }) => {
             <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "700", letterSpacing: "0.5px" }}>
               Internship Management System
             </Typography>
-            <IconButton color="inherit" size="large">
-              <SettingsIcon />
-            </IconButton>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <NotificationBell />
+
+              <IconButton color="inherit" size="large">
+                <SettingsIcon />
+              </IconButton>
+            </Box>
           </Toolbar>
         </AppBar>
 

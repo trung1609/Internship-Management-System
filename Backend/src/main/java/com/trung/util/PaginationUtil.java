@@ -42,6 +42,8 @@ public class PaginationUtil {
 
         List<String> reportAllowedSortFields = List.of("reportId", "title", "originalFileName", "storedFileName", "uploadTime", "createdAt", "updatedAt");
 
+        List<String> notificationAllowedSortFields = List.of("id", "title", "message", "createdAt");
+
         int page = pageRequestDTO.getPage() != null && pageRequestDTO.getPage() > 0 ? pageRequestDTO.getPage() : 0;
         int size = pageRequestDTO.getSize() != null && pageRequestDTO.getSize() > 0 ? pageRequestDTO.getSize() : 10;
 
@@ -56,6 +58,7 @@ public class PaginationUtil {
             case "internshipAssignment" -> internshipAssignmentAllowedSortFields;
             case "assessmentResult" -> assessmentResultAllowedSortFields;
             case "report" -> reportAllowedSortFields;
+            case "notification" -> notificationAllowedSortFields;
             default -> List.of("createdAt");
         };
 
