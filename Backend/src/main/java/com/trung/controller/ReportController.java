@@ -5,7 +5,10 @@ import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.ReportResponse;
 import com.trung.service.impl.ReportServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class ReportController {
 
     private final ReportServiceImpl reportService;
@@ -40,5 +44,26 @@ public class ReportController {
     public ResponseEntity<PageResponseDTO<ReportResponse>> getAllReports(@RequestParam(required = false) String search,
                                                                          PageRequestDTO pageRequestDTO) {
         return new ResponseEntity<>(reportService.getAllReport(search, pageRequestDTO), HttpStatus.OK);
+    }
+
+    @GetMapping("/download/{fileName}")
+    public ResponseEntity<Resource> downloadReportFile(@PathVariable String fileName, HttpServletRequest request) {
+        Resource resource = reportService.getReportFileAsResource(fileName);
+
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (Exception ex) {
+            System.out.println("Không thể xác định loại file tự động.");
+        }
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 }

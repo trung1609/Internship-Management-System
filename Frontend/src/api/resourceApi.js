@@ -196,7 +196,7 @@ export const reportApi = {
 
     return axiosClient.post("/api/v1/reports/upload", formData, {
       headers: {
-        "Content-Type": "multipart/form-data", 
+        "Content-Type": "multipart/form-data",
       },
     });
   },
@@ -204,4 +204,10 @@ export const reportApi = {
     axiosClient.get("/api/v1/reports", {
       params: { search, page, size },
     }),
+
+  downloadReport: (fileName) => {
+    return axiosClient.get(`/api/v1/reports/download/${fileName}`, {
+      responseType: 'blob', 
+    });
+  },
 };

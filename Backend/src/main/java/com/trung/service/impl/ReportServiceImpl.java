@@ -13,6 +13,7 @@ import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
 import com.trung.util.enums.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -77,5 +78,10 @@ public class ReportServiceImpl implements IReportService {
             reportPage = Page.empty();
         }
         return PaginationUtil.toPageResponseDTO(reportPage, ReportMapper::toDTO);
+    }
+
+    @Override
+    public Resource getReportFileAsResource(String storedFileName) {
+        return fileStorageService.loadFileAsResource(storedFileName);
     }
 }
