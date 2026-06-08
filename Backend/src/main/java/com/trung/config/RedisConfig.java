@@ -1,4 +1,4 @@
-package com.trung.security.config;
+package com.trung.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
