@@ -1,5 +1,6 @@
 package com.trung.service.impl;
 
+import com.trung.dto.request.ForgotPasswordRequest;
 import com.trung.entity.User;
 import com.trung.util.enums.Role;
 import com.trung.dto.request.FormLoginRequest;
@@ -169,5 +170,10 @@ public class AuthServiceImpl implements IAuthService {
                 null,
                 LocalDateTime.now()
         );
+    }
+
+    @Override
+    public ApiResponse<String> forgotPassword(ForgotPasswordRequest request) {
+        return null;
     }
 }

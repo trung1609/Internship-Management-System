@@ -58,7 +58,7 @@ const AssignmentDetail = () => {
   const [rounds, setRounds] = useState([]);
   const [criteria, setCriteria] = useState([]);
   const { user } = useContext(AuthContext);
-  const isStudent = user?.role === "STUDENT" || user?.role === "ROLE_STUDENT";
+  const isRoleNotAllowed = role => ["ROLE_STUDENT", "ROLE_ADMIN"].includes(role);
 
   // State lưu trữ dữ liệu chấm điểm của từng sinh viên
   const [grades, setGrades] = useState({});
@@ -565,7 +565,7 @@ const AssignmentDetail = () => {
 
                         {/* CỘT 2: ĐÓNG GÓP */}
                         <TableCell>
-                          {isStudent ? (
+                          {isRoleNotAllowed(user?.role) ? (
                             <Typography
                               variant="body2"
                               fontWeight="700"
@@ -599,7 +599,7 @@ const AssignmentDetail = () => {
 
                         {/* CỘT 3: ĐIỂM SỐ */}
                         <TableCell>
-                          {isStudent ? (
+                          {isRoleNotAllowed(user?.role) ? (
                             <Chip
                               label={
                                 grades[student.id]?.score
@@ -642,7 +642,7 @@ const AssignmentDetail = () => {
 
                         {/* CỘT 4: NHẬN XÉT */}
                         <TableCell>
-                          {isStudent ? (
+                          {isRoleNotAllowed(user?.role) ? (
                             <Typography
                               variant="body2"
                               sx={{
@@ -680,7 +680,7 @@ const AssignmentDetail = () => {
                 </Table>
               </TableContainer>
 
-              {!isStudent && (
+              {!isRoleNotAllowed(user?.role) && (
                 <Box
                   sx={{
                     p: 2.5,
