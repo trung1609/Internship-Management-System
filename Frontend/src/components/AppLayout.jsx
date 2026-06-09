@@ -145,7 +145,7 @@ export const AppLayout = ({ children }) => {
   // Xử lý khi bấm nút "Đăng xuất" trong popup
   const confirmLogout = async () => {
     await logout();
-    window.location.href = "/";
+    window.location.href = "/Internship-Management-System/#/";
   };
 
   const isActive = (path) => location.pathname === path;

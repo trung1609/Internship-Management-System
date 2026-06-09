@@ -15,7 +15,6 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* 2. Đổi thẻ bọc ngoài cùng thành HashRouter */}
     <HashRouter>
       <ThemeProvider theme={theme}>
         <CssBaseline /> 
