@@ -40,12 +40,16 @@ services:
       - rabbitmq
     environment:
       # Spring Boot sẽ kết nối với Redis & RabbitMQ thông qua TÊN SERVICE trong Docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/intership_management_system
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin123
+      - SPRING_PROFILES_ACTIVE=prod
     restart: unless-stopped
 
 volumes:
