@@ -7,23 +7,18 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: intership_management_system
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
   redis:
     image: redis:alpine
     container_name: redis_server
-    ports:
-      - "6379:6379"
     restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq_server
     ports:
-      - "5672:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: admin
@@ -53,4 +48,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  pgdata:
+  - pgdata:
