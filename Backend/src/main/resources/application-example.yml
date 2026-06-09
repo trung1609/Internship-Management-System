@@ -1,0 +1,65 @@
+jwt_expire: 86400000
+jwt_secret: your_jwt_secret_key
+logging:
+  level:
+    com:
+      trung: DEBUG
+    root: INFO
+spring:
+  application:
+    name: Intership-Management-System
+  data:
+    redis:
+      host: localhost
+      password: your_redis_password
+      port: 6379
+  rabbitmq:
+    port: 5672
+    host: localhost
+    username: your_rabbitmq_username
+    password: your_rabbitmq_password
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: your_postgres_password
+    url: jdbc:postgresql://localhost:5432/intership_management_system
+    username: your_postgres_username
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your_email@gmail.com
+    password: your_app_password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+file:
+  upload-dir: uploads
+
+rabbitmq:
+  exchange:
+    name: intership_exchange
+  queue:
+    notification: notification_queue
+  routing:
+    key:
+      notification: notification_routing_key
+

@@ -1,4 +1,4 @@
-# 🎓 Intership Management System
+# 🎓 Internship Management System
 
 Một hệ thống quản lý thực tập toàn diện, xây dựng bằng **Spring Boot** (Backend) và **React + Vite** (Frontend), giúp quản lý toàn bộ quy trình thực tập từ giai đoạn phân công, đánh giá cho đến quản lý kết quả.
 
@@ -21,12 +21,14 @@ Một hệ thống quản lý thực tập toàn diện, xây dựng bằng **Sp
 
 ## 🎯 Tổng Quan
 
-**Intership Management System** là nền tảng quản lý thực tập toàn diện cho các trường đại học, giúp:
+**Internship Management System** là nền tảng quản lý thực tập toàn diện cho các trường đại học, giúp:
 - ✅ Quản lý thông tin sinh viên, cố vấn, và người dùng
 - ✅ Phân công sinh viên cho các vị trí thực tập
 - ✅ Định nghĩa các giai đoạn thực tập với thời gian cụ thể
 - ✅ Đánh giá sinh viên dựa trên tiêu chí có trọng số
-- ✅ Lưu trữ và báo cáo kết quả đánh giá
+- ✅ Lưu trữ và xuất báo cáo kết quả đánh giá (Excel)
+- ✅ Quên mật khẩu & đặt lại mật khẩu qua email
+- ✅ Thông báo qua email sử dụng RabbitMQ
 - ✅ Xác thực an toàn với JWT token
 - ✅ Phân quyền dựa trên vai trò (Role-based Access Control)
 
@@ -42,10 +44,13 @@ Một hệ thống quản lý thực tập toàn diện, xây dựng bằng **Sp
 | **Spring Security** | - | Xác thực & phân quyền |
 | **Spring Validation** | - | Kiểm tra dữ liệu đầu vào |
 | **Spring Web MVC** | - | REST API |
+| **Spring AMQP (RabbitMQ)** | - | Message queue & thông báo bất đồng bộ |
+| **Spring Mail** | - | Gửi email (Gmail SMTP) |
 | **PostgreSQL** | 16+ | Cơ sở dữ liệu chính |
-| **Redis** | 7+ | Token blacklist, caching |
+| **Redis** | 7+ | Token blacklist & password reset token |
 | **Hibernate** | - | JPA Implementation |
 | **JWT (JJWT)** | 0.11.5 | Xác thực token |
+| **Apache POI** | 5.2.3 | Xuất báo cáo Excel |
 | **Lombok** | - | Giảm boilerplate code |
 | **Java** | 17 | Ngôn ngữ lập trình |
 | **Gradle** | 8.x | Build tool |
@@ -59,14 +64,17 @@ Một hệ thống quản lý thực tập toàn diện, xây dựng bằng **Sp
 | **React Router DOM** | 7.15.1 | Routing |
 | **Axios** | 1.16.1 | HTTP client |
 | **React Hook Form** | 7.76.0 | Form management |
-| **React Toastify** | 11.1.0 | Notifications |
+| **React Toastify** | 11.1.0 | Thông báo toast |
+| **SweetAlert2** | 11.26.25 | Dialog & xác nhận hành động |
+| **Framer Motion** | 12.40.0 | Hiệu ứng & animation |
+| **i18next / react-i18next** | 26.3.0 / 17.0.8 | Đa ngôn ngữ |
 
 ---
 
 ## 📁 Cấu Trúc Dự Án
 
 ```
-Intership-Management-System/
+Internship-Management-System/
 │
 ├── Backend/
 │   ├── src/
@@ -84,17 +92,21 @@ Intership-Management-System/
 │   │   │   │   │   ├── RoundCriteriaController.java
 │   │   │   │   │   └── AssessmentResultController.java
 │   │   │   │   ├── service/                 # Business Logic Layer
+│   │   │   │   │   ├── impl/                # Service Implementations
+│   │   │   │   │   └── PasswordResetService.java
 │   │   │   │   ├── repository/              # Data Access Layer (JPA)
 │   │   │   │   ├── entity/                  # JPA Entities / Domain Models
 │   │   │   │   ├── dto/
 │   │   │   │   │   ├── request/             # Request DTOs
 │   │   │   │   │   └── response/            # Response DTOs
 │   │   │   │   ├── mapper/                  # Entity <-> DTO Mapping
-│   │   │   │   ├── security/                # Security Configuration
+│   │   │   │   ├── security/                # Security Configuration & JWT
+│   │   │   │   ├── config/                  # Spring Configuration (AMQP, Mail, Redis)
+│   │   │   │   ├── event/                   # Application Events & Listeners
 │   │   │   │   ├── validation/              # Custom Validators
-│   │   │   │   ├── exception/               # Custom Exceptions
+│   │   │   │   ├── exception/               # Custom Exceptions & Handlers
 │   │   │   │   ├── util/                    # Utility Classes
-│   │   │   │   └── IntershipManagementSystemApplication.java # Main App
+│   │   │   │   └── IntershipManagementSystemApplication.java
 │   │   │   └── resources/
 │   │   │       └── application.yml          # Configuration
 │   │   └── test/
@@ -102,41 +114,42 @@ Intership-Management-System/
 │   ├── gradle/                              # Gradle Wrapper
 │   ├── build.gradle                         # Gradle dependencies
 │   ├── settings.gradle
-│   ├── docker-compose.yml                   # Docker configuration
+│   ├── docker-compose.yml                   # Docker configuration (Redis)
 │   └── README.md
 │
 ├── Frontend/
 │   ├── src/
 │   │   ├── api/                             # API Client
-│   │   │   ├── authApi.js
+│   │   │   ├── authApi.js                   # Auth API calls
 │   │   │   ├── resourceApi.js               # REST API endpoints
-│   │   │   └── axiosClient.js
+│   │   │   └── axiosClient.js               # Axios instance & interceptors
 │   │   ├── components/                      # Reusable Components
 │   │   │   ├── AppLayout.jsx
 │   │   │   ├── DataTable.jsx
 │   │   │   ├── ProtectedRoute.jsx
-│   │   │   └── ...
+│   │   │   └── ThemeToggleButton.jsx
 │   │   ├── context/                         # Context API
 │   │   │   └── AuthContext.jsx
 │   │   ├── pages/                           # Page Components
 │   │   │   ├── LoginPage.jsx
 │   │   │   ├── RegisterPage.jsx
+│   │   │   ├── ForgotPasswordPage.jsx
+│   │   │   ├── ResetPasswordPage.jsx
 │   │   │   ├── MainDashboard.jsx
 │   │   │   ├── AdminDashboard.jsx
 │   │   │   ├── MentorDashboard.jsx
 │   │   │   ├── StudentDashboard.jsx
-│   │   │   ├── management/                  # Management Pages
-│   │   │   │   ├── UsersManagement.jsx
-│   │   │   │   ├── StudentsManagement.jsx
-│   │   │   │   ├── MentorsManagement.jsx
-│   │   │   │   ├── InternshipPhasesManagement.jsx
-│   │   │   │   ├── InternshipAssignmentsManagement.jsx
-│   │   │   │   ├── AssessmentRoundsManagement.jsx
-│   │   │   │   ├── EvaluationCriteriaManagement.jsx
-│   │   │   │   ├── AssessmentResultsManagement.jsx
-│   │   │   │   ├── AssessmentRoundDetail.jsx
-│   │   │   │   └── AssessmentResultDetail.jsx
-│   │   │   └── ...
+│   │   │   └── management/                  # Management Pages
+│   │   │       ├── UsersManagement.jsx
+│   │   │       ├── StudentsManagement.jsx
+│   │   │       ├── MentorsManagement.jsx
+│   │   │       ├── InternshipPhasesManagement.jsx
+│   │   │       ├── InternshipAssignmentsManagement.jsx
+│   │   │       ├── AssessmentRoundsManagement.jsx
+│   │   │       ├── AssessmentRoundDetail.jsx
+│   │   │       ├── EvaluationCriteriaManagement.jsx
+│   │   │       ├── AssessmentResultsManagement.jsx
+│   │   │       └── AssessmentResultDetail.jsx
 │   │   ├── assets/                          # Static assets
 │   │   ├── App.jsx                          # Main App Component
 │   │   ├── main.jsx                         # Entry Point
@@ -145,8 +158,7 @@ Intership-Management-System/
 │   ├── public/                              # Static files
 │   ├── package.json
 │   ├── vite.config.js
-│   ├── eslint.config.js
-│   └── README.md
+│   └── eslint.config.js
 │
 └── README.md (This file)
 ```
@@ -165,78 +177,68 @@ Intership-Management-System/
 │  │ role        │ isActive │ createdAt  │ updatedAt             ││
 │  └─────────────┴──────────┴────────────┴────────────────────────┘│
 └──────────────────────────────────────────────────────────────────┘
-         │                    │                    │
-         ├─────────────────┬──┴──────────┬────────────────────┐
-         ▼                 ▼             ▼                    ▼
-    ┌────────────┐  ┌─────────┐  ┌──────────┐   ┌─────────────────┐
-    │  STUDENT   │  │ MENTOR  │  │ADMIN     │   │  (Other Roles)  │
-    │ (User Role)│  │(User Ro)│  │(User Ro) │   │                 │
-    │ studentId  │  │ mentorId│  │ adminId  │   │                 │
-    │ userId (FK)│  │userId(F)│  │ userId(F)│   │                 │
-    └────────────┘  └─────────┘  └──────────┘   └─────────────────┘
-         │                │
-         └────────────────┴──────────────────────┐
-                                                  │
-                                      ┌──────────────────────────┐
-                                      │INTERNSHIP_ASSIGNMENT     │
-                                      │ assignmentId (PK)        │
-                                      │ studentId (FK) ─────────►│ STUDENT
-                                      │ mentorId (FK) ────────►│ MENTOR
-                                      │ phaseId (FK) ───────────┐
-                                      │ status                  │
-                                      │ startDate, endDate      │
-                                      │ createdAt, updatedAt    │
-                                      └──────────────────────────┘
-                                                  │
-                                                  ├──────────┐
-                                                  ▼          ▼
-                                      ┌──────────────────┐  ┌──────────────────────┐
-                                      │INTERNSHIP_PHASE  │  │ASSESSMENT_ROUND      │
-                                      │ phaseId (PK)     │  │ roundId (PK)         │
-                                      │ phaseName        │  │ roundName            │
-                                      │ description      │  │ description          │
-                                      │ startDate        │  │ startDate, endDate   │
-                                      │ endDate          │  │ createdAt, updatedAt │
-                                      │ phaseOrder       │  └──────────────────────┘
-                                      │ createdAt        │           │
-                                      │ updatedAt        │           ▼
-                                      └──────────────────┘  ┌──────────────────────┐
-                                                            │ROUND_CRITERIA        │
-                                                            │ roundCriteriaId (PK) │
-                                                            │ roundId (FK)         │
-                                                            │ criterionId (FK)     │
-                                               ┌────────────│ weight/percentage    │
-                                               │            │ createdAt, updatedAt │
-                                               │            └──────────────────────┘
-                                               │                     │
-                                               │                     │
-                                    ┌──────────┴────────────────────┤
-                                    ▼                               │
-                        ┌──────────────────────┐                   │
-                        │EVALUATION_CRITERIA   │                   │
-                        │ criterionId (PK)     │◄──────────────────┘
-                        │ criterionName        │
-                        │ description          │
-                        │ defaultWeight        │
-                        │ createdAt, updatedAt │
-                        └──────────────────────┘
-                                    │
-                                    │ (Multiple criteria per result)
-                                    │
-                                    ▼
-                        ┌──────────────────────────┐
-                        │ASSESSMENT_RESULT        │
-                        │ resultId (PK)           │
-                        │ assignmentId (FK)       │
-                        │ roundId (FK)            │
-                        │ studentId (FK)          │
-                        │ mentorId (FK)           │
-                        │ roundCriteriaId (FK)    │
-                        │ score (float)           │
-                        │ comments                │
-                        │ evaluationDate          │
-                        │ createdAt, updatedAt    │
-                        └──────────────────────────┘
+         │                    │
+         ▼                    ▼
+    ┌────────────┐      ┌─────────┐
+    │  STUDENT   │      │ MENTOR  │
+    │ studentId  │      │ mentorId│
+    │ userId (FK)│      │userId(FK│
+    └────────────┘      └─────────┘
+         │                    │
+         └────────────────────┘
+                    │
+                    ▼
+        ┌──────────────────────────┐
+        │  INTERNSHIP_ASSIGNMENT   │
+        │ assignmentId (PK)        │
+        │ studentId (FK)           │
+        │ mentorId (FK)            │
+        │ phaseId (FK)             │
+        │ status                   │
+        │ startDate, endDate       │
+        └──────────────────────────┘
+                    │
+          ┌─────────┴──────────┐
+          ▼                    ▼
+┌──────────────────┐  ┌──────────────────────┐
+│ INTERNSHIP_PHASE │  │  ASSESSMENT_ROUND    │
+│ phaseId (PK)     │  │ roundId (PK)         │
+│ phaseName        │  │ roundName            │
+│ description      │  │ description          │
+│ startDate        │  │ startDate, endDate   │
+│ endDate          │  └──────────────────────┘
+│ phaseOrder       │           │
+└──────────────────┘           ▼
+                      ┌──────────────────────┐
+                      │   ROUND_CRITERIA     │
+                      │ roundCriteriaId (PK) │
+                      │ roundId (FK)         │
+                      │ criterionId (FK)     │
+                      │ weight/percentage    │
+                      └──────────────────────┘
+                                │
+                                ▼
+                    ┌──────────────────────┐
+                    │ EVALUATION_CRITERIA  │
+                    │ criterionId (PK)     │
+                    │ criterionName        │
+                    │ description          │
+                    │ defaultWeight        │
+                    └──────────────────────┘
+                                │
+                                ▼
+                    ┌──────────────────────────┐
+                    │   ASSESSMENT_RESULT      │
+                    │ resultId (PK)            │
+                    │ assignmentId (FK)        │
+                    │ roundId (FK)             │
+                    │ studentId (FK)           │
+                    │ mentorId (FK)            │
+                    │ roundCriteriaId (FK)     │
+                    │ score (float)            │
+                    │ comments                 │
+                    │ evaluationDate           │
+                    └──────────────────────────┘
 ```
 
 ### Entities Chi Tiết
@@ -244,7 +246,7 @@ Intership-Management-System/
 | Entity | Mô tả | Trường Chính |
 |--------|-------|-------------|
 | **User** | Người dùng hệ thống | userId, username, password, email, role, isActive |
-| **Student** | Sinh viên | studentId, userId (FK), GVHD info |
+| **Student** | Sinh viên | studentId, userId (FK) |
 | **Mentor** | Cố vấn/Hướng dẫn viên | mentorId, userId (FK), department |
 | **InternshipPhase** | Giai đoạn thực tập | phaseId, phaseName, startDate, endDate, phaseOrder |
 | **InternshipAssignment** | Phân công thực tập | assignmentId, studentId (FK), mentorId (FK), phaseId (FK), status |
@@ -268,6 +270,8 @@ Intership-Management-System/
 | `POST` | `/auth/refresh` | Làm mới access token | ❌ |
 | `POST` | `/auth/logout` | Đăng xuất (blacklist token) | ✅ |
 | `GET` | `/auth/me` | Lấy thông tin người dùng hiện tại | ✅ |
+| `POST` | `/auth/forgot-password` | Gửi email đặt lại mật khẩu | ❌ |
+| `POST` | `/auth/reset-password` | Đặt lại mật khẩu bằng token | ❌ |
 
 ### 👥 User Management
 
@@ -366,6 +370,7 @@ Intership-Management-System/
 ### 1️⃣ Quản Lý Người Dùng
 - ✅ Đăng ký tài khoản (STUDENT, MENTOR, ADMIN)
 - ✅ Đăng nhập/Đăng xuất an toàn
+- ✅ Quên mật khẩu & đặt lại mật khẩu qua email
 - ✅ Quản lý thông tin cá nhân
 - ✅ Cấp quyền dựa trên vai trò
 
@@ -400,6 +405,15 @@ Intership-Management-System/
 - ✅ Nhập điểm và nhận xét
 - ✅ Tính toán điểm trung bình
 
+### 7️⃣ Thông Báo & Email
+- ✅ Gửi email qua RabbitMQ (bất đồng bộ)
+- ✅ Email đặt lại mật khẩu kèm link token
+- ✅ Thông báo phân công thực tập
+
+### 8️⃣ Xuất Báo Cáo
+- ✅ Xuất danh sách kết quả đánh giá ra file Excel
+- ✅ Sử dụng Apache POI
+
 ---
 
 ## 🚀 Hướng Dẫn Cài Đặt
@@ -407,20 +421,22 @@ Intership-Management-System/
 ### Yêu Cầu Hệ Thống
 
 - **Java 17+** (cho Backend)
-- **Node.js 16+** (cho Frontend)
+- **Node.js 18+** (cho Frontend)
 - **PostgreSQL 16+** (Cơ sở dữ liệu)
 - **Redis 7+** (Token management)
+- **RabbitMQ** (Message queue cho email)
 - **Docker & Docker Compose** (Tuỳ chọn)
 
-### Bước 1: Clone/Tải Dự Án
+### Bước 1: Clone Dự Án
 
 ```bash
+git clone https://github.com/trung1609/Intership-Management-System.git
 cd Intership-Management-System
 ```
 
 ### Bước 2: Cài Đặt Backend
 
-#### Phương Án A: Sử dụng Docker Compose (Khuyến Nghị)
+### Sử dụng Docker Compose
 
 ```bash
 cd Backend
@@ -432,29 +448,12 @@ docker-compose up -d
 docker-compose ps
 ```
 
-#### Phương Án B: Cài Đặt Manual
+### Cấu hình file application.yml
 
-1. **Cài PostgreSQL**
-   - Tải từ [postgresql.org](https://www.postgresql.org/download/)
-   - Tạo database: `intership_management_system`
-
-2. **Cài Redis**
-   - Tải từ [redis.io](https://redis.io/download)
-   - Chạy Redis server (default: port 6379)
-
-3. **Cấu hình `application.yml`**
-   ```yaml
-   spring:
-     datasource:
-       url: jdbc:postgresql://localhost:5432/intership_management_system
-       username: postgres
-       password: your_password
-     data:
-       redis:
-         host: localhost
-         port: 6379
-         password: your_redis_password
-   ```
+```bash
+ # Sửa lại theo thông tin của bạn (database, JWT secret, email, v.v.)
+  rename application-example.yml to application.yml
+```
 
 ### Bước 3: Cài Đặt Frontend
 
@@ -463,9 +462,6 @@ cd Frontend
 
 # Cài dependencies
 npm install
-
-# Hoặc sử dụng yarn
-yarn install
 ```
 
 ---
@@ -474,17 +470,11 @@ yarn install
 
 ### 🔧 Chạy Backend
 
-#### Phương Án 1: Gradle Wrapper
 ```bash
 cd Backend
+
 ./gradlew.bat bootRun    # Windows
 ./gradlew bootRun        # Linux/Mac
-```
-
-#### Phương Án 2: Gradle
-```bash
-cd Backend
-gradle bootRun
 ```
 
 ℹ️ Backend sẽ khởi động tại: **http://localhost:8080**
@@ -524,16 +514,13 @@ cd Backend
 ./gradlew test         # Linux/Mac
 ```
 
-### 🛑 Dừng Dịch Vụ
+### 🛑 Dừng Dịch Vụ Docker
 
 ```bash
 cd Backend
 
-# Dừng container
-docker-compose down
-
-# Hoặc dừng và xóa data
-docker-compose down -v
+docker-compose down        # Dừng container
+docker-compose down -v     # Dừng và xóa data
 ```
 
 ---
@@ -559,7 +546,7 @@ docker-compose down -v
 #### Refresh Token
 - 📍 **Lưu trữ**: HttpOnly Cookie (an toàn hơn, chống XSS)
 - ⏱️ **Thời hạn**: 7 ngày (tuỳ cấu hình)
-- 🔒 **Flags**: `httpOnly=true`, `secure=true`, `sameSite=Strict`
+- 🔒 **Flags**: `httpOnly=true`, `secure=true`, `sameSite=Lax`
 - 📤 **Gửi qua**: Tự động kèm mỗi request
 
 ### Token Lifecycle
@@ -576,32 +563,27 @@ docker-compose down -v
 │ 3. Response:                                                │
 │    ├─ Status: 200 OK                                        │
 │    ├─ Body: { accessToken, refreshToken }                   │
-│    │─ LocalStorage: accessToken (frontend)                  │
-│    ├─ Cookie: Set-Cookie refreshToken (HttpOnly)            │
-│    └─ Data: user info, roles                                │
+│    ├─ LocalStorage: accessToken (frontend)                  │
+│    └─ Cookie: Set-Cookie refreshToken (HttpOnly)            │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
 │                  AUTHENTICATED REQUEST                      │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. Frontend stores accessToken in memory                    │
-│    (refreshToken stored in HttpOnly cookie)                 │
-│                                                             │
-│ 2. API request:                                             │
+│ 1. Frontend gửi accessToken trong Authorization header      │
 │    GET /api/v1/users/profiles                               │
 │    Header: Authorization: Bearer <accessToken>              │
 │    Cookie: refreshToken=... (automatic)                     │
 │                                                             │
-│ 3. Backend validates token & request                        │
-│    Token valid → Process request                            │
-│    Token expired → Check with refresh token                 │
+│ 2. Backend validates token:                                 │
+│    Token valid    → Process request                         │
+│    Token expired  → Return 401 → Frontend refresh token     │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
 │               REFRESH TOKEN PROCESS                         │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. Access token expires                                     │
-│    (Frontend can detect 401 response)                       │
+│ 1. Access token expires (401 response)                      │
 │                                                             │
 │ 2. POST /api/v1/auth/refresh                                │
 │    Cookie: refreshToken=... (automatic)                     │
@@ -611,7 +593,23 @@ docker-compose down -v
 │ 4. Response:                                                │
 │    ├─ New accessToken                                       │
 │    ├─ New refreshToken                                      │
-│    └─ Updated cookie                                        │
+│    └─ Updated HttpOnly cookie                               │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│               FORGOT PASSWORD PROCESS                       │
+├─────────────────────────────────────────────────────────────┤
+│ 1. POST /api/v1/auth/forgot-password                        │
+│    Request: { email }                                       │
+│                                                             │
+│ 2. Backend tạo reset token, lưu Redis                       │
+│    Gửi email qua RabbitMQ (bất đồng bộ)                    │
+│                                                             │
+│ 3. POST /api/v1/auth/reset-password                         │
+│    Request: { token, newPassword, confirmPassword }         │
+│                                                             │
+│ 4. Backend xác thực token, cập nhật mật khẩu               │
+│    Token bị xóa khỏi Redis sau khi dùng                    │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -622,20 +620,13 @@ docker-compose down -v
 │    Cookie: refreshToken=... (automatic)                     │
 │                                                             │
 │ 2. Backend:                                                 │
-│    ├─ Extract tokens                                        │
-│    ├─ Add to blacklist (Redis)                              │
-│    ├─ Set TTL = token expiration                            │
-│    └─ Clear refreshToken cookie                             │
+│    ├─ Add accessToken to blacklist (Redis)                  │
+│    ├─ Set TTL = thời gian còn lại của token                 │
+│    └─ Clear refreshToken cookie (maxAge=0)                  │
 │                                                             │
-│ 3. Response:                                                │
-│    ├─ Status: 200 OK                                        │
-│    ├─ Message: "Logout successful"                          │
-│    └─ Cookie: Set-Cookie refreshToken="" (maxAge=0)         │
-│                                                             │
-│ 4. Frontend:                                                │
-│    ├─ Clear accessToken from local storage                  │
-│    ├─ Redirect to login                                     │
-│    └─ Browser auto-deletes HttpOnly cookie                  │
+│ 3. Frontend:                                                │
+│    ├─ Clear accessToken từ local storage                    │
+│    └─ Redirect to login                                     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -645,7 +636,7 @@ docker-compose down -v
 - ✅ RefreshToken cũng bị xóa khỏi Redis
 - ✅ TTL tự động = thời gian còn lại của token
 - ✅ Redis tự động cleanup khi token hết hạn
-- ✅ Token không thể tái sử dụng ngay lập tức
+- ✅ Token không thể tái sử dụng sau khi logout
 
 ---
 
@@ -656,43 +647,35 @@ docker-compose down -v
 1. **JWT Secret Key**: Thay đổi trong `application.yml`
    ```yaml
    jwt_secret: your-super-secret-key-here
-   jwt_expire: 86400000  # 24 hours
+   jwt_expire: 86400000  # 24 hours in ms
    ```
 
-2. **Database Password**: Không để password mặc định
-   ```yaml
-   spring:
-     datasource:
-       password: your-secure-password
-   ```
+2. **Gmail App Password**: Sử dụng App Password thay vì password tài khoản
+   - Bật 2-Step Verification trên Google Account
+   - Tạo App Password tại [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
 
-3. **Redis Password**: Bảo vệ Redis instance
-   ```yaml
-   spring:
-     data:
-       redis:
-         password: your-redis-password
-   ```
-
-4. **CORS Configuration**: Cấu hình frontend URLs
+3. **CORS Configuration**: Cấu hình frontend URLs
    - Frontend dev: `http://localhost:5173`
    - Frontend prod: `https://your-domain.com`
 
 ### Performance Tips
 
-1. **Frontend**: Implement request caching
-2. **Backend**: Use pagination for large datasets
+1. **Frontend**: Implement request caching với Axios interceptors
+2. **Backend**: Sử dụng pagination cho các danh sách lớn
 3. **Database**: Index trên các foreign keys
 4. **Redis**: Monitor memory usage
+5. **RabbitMQ**: Monitor queue depth để tránh backlog email
 
 ### Error Handling
 
-- **400 Bad Request**: Dữ liệu đầu vào không hợp lệ
-- **401 Unauthorized**: Token hết hạn hoặc không hợp lệ
-- **403 Forbidden**: Không có quyền truy cập
-- **404 Not Found**: Tài nguyên không tìm thấy
-- **409 Conflict**: Xung đột dữ liệu (username trùng, v.v.)
-- **500 Internal Server Error**: Lỗi server
+| HTTP Status | Ý nghĩa |
+|-------------|---------|
+| **400** Bad Request | Dữ liệu đầu vào không hợp lệ |
+| **401** Unauthorized | Token hết hạn hoặc không hợp lệ |
+| **403** Forbidden | Không có quyền truy cập |
+| **404** Not Found | Tài nguyên không tìm thấy |
+| **409** Conflict | Xung đột dữ liệu (username trùng, v.v.) |
+| **500** Internal Server Error | Lỗi server |
 
 ### Logging
 
@@ -704,15 +687,10 @@ logging:
     root: INFO            # Spring logs
 ```
 
-### Token Expired
-
-- Access token hết hạn chỉ trong 24 giờ
-- Refresh token hết hạn sau 7 ngày
-- Logout xóa token ngay lập tức
-
 ---
+
 ## 📞 Liên Hệ
+
 - **Người phát triển**: Vũ Minh Trung
 - **Github**: [trung1609](https://github.com/trung1609)
 - **Email**: trung8d2005@gmail.com
-
