@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify'; // Import thư viện thông báo
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = 'https://152.42.219.216.nip.io';
 
 const axiosClient = axios.create({
     baseURL: BASE_URL,
