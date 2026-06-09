@@ -7,6 +7,7 @@ import com.trung.exception.InvalidCredentialsException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class PasswordResetService {
     private static final String REDIS_PREFIX = "forgot_password_token:";
     private final EmailService emailService;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     public void createAndSendResetToken(ForgotPasswordRequest request) throws ResourceNotFoundException {
         User user = userRepository.findByEmailAndIsDeletedFalseAndIsActiveTrue(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
@@ -33,7 +37,7 @@ public class PasswordResetService {
         String token = UUID.randomUUID().toString();
         redisTemplate.opsForValue().set(REDIS_PREFIX + token, request.getEmail(), Duration.ofHours(1));
 
-        String resetUrl = "http://localhost:5173/#/reset-password?token=" + token;
+        String resetUrl = frontendUrl + "/#/reset-password?token=" + token;
 
         emailService.sendResetPasswordEmail(request.getEmail(), user.getUsername(), resetUrl);
     }

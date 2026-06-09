@@ -50,3 +50,6 @@ rabbitmq:
     key:
       notification: notification_routing_key
 
+app:
+  frontend:
+    url: "https://trung1609.github.io/Internship-Management-System"

@@ -12,7 +12,7 @@ spring:
     port: 5672
     host: localhost
     username: guest
-    password: guest 
+    password: guest
   datasource:
     driver-class-name: org.postgresql.Driver
     password: 123456
@@ -55,3 +55,6 @@ rabbitmq:
     key:
       notification: notification_routing_key
 
+app:
+  frontend:
+    url: "http://localhost:5173"
