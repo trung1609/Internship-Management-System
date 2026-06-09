@@ -248,7 +248,7 @@ const UsersManagement = () => {
                       {user.fullName}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      @{user.username}
+                      @{user.username} | ID: {user.userId}
                     </Typography>
                   </Box>
                 </Stack>

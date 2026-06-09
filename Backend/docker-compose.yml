@@ -7,6 +7,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: intership_management_system
+      SPRING_PROFILES_ACTIVE: prod
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped

@@ -11,8 +11,8 @@ spring:
   rabbitmq:
     port: 5672
     host: localhost
-    username: admin
-    password: admin123
+    username: guest
+    password: guest 
   datasource:
     driver-class-name: org.postgresql.Driver
     password: 123456

@@ -1,14 +1,16 @@
 import axios from 'axios';
 import { toast } from 'react-toastify'; // Import thư viện thông báo
 
-const BASE_URL = 'https://152.42.219.216.nip.io';
+const BASE_URL = import.meta.env.DEV
+    ? 'http://localhost:8080'
+    : 'https://152.42.219.216.nip.io';
 
 const axiosClient = axios.create({
     baseURL: BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true, 
+    withCredentials: true,
 });
 
 // 1. REQUEST INTERCEPTOR
@@ -47,9 +49,9 @@ axiosClient.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
         if (error.response?.status === 401 && !originalRequest._retry) {
-            
+
             if (isRefreshing) {
-                return new Promise(function(resolve, reject) {
+                return new Promise(function (resolve, reject) {
                     failedQueue.push({ resolve, reject });
                 }).then(token => {
                     originalRequest.headers['Authorization'] = 'Bearer ' + token;
@@ -62,26 +64,26 @@ axiosClient.interceptors.response.use(
 
             try {
                 const res = await axios.post(`${BASE_URL}/api/v1/auth/refresh`, {}, {
-                    withCredentials: true 
+                    withCredentials: true
                 });
 
                 const newAccessToken = res.data.data.accessToken;
                 localStorage.setItem('accessToken', newAccessToken);
-                
+
                 if (originalRequest.headers) {
                     originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
                 }
 
-                
+
                 axiosClient.defaults.headers.common['Authorization'] = 'Bearer ' + newAccessToken;
                 processQueue(null, newAccessToken);
-                
+
                 return axiosClient(originalRequest);
             } catch (err) {
                 processQueue(err, null);
-                
+
                 localStorage.removeItem('accessToken');
-                window.location.href = '#/login'; 
+                window.location.href = '#/login';
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;
@@ -94,7 +96,7 @@ axiosClient.interceptors.response.use(
         if (error.response) {
             const status = error.response.status;
             const errorData = error.response.data; // Đây là object ApiResponse từ backend
-            
+
             const serverMessage = errorData?.message || 'Đã có lỗi xảy ra!';
             const serverError = errorData?.error;
 
@@ -104,18 +106,18 @@ axiosClient.interceptors.response.use(
                     if (serverError && typeof serverError === 'object' && !Array.isArray(serverError)) {
                         // Trích xuất tất cả các câu thông báo lỗi ra thành một mảng
                         const errorMessages = Object.values(serverError);
-                        
+
                         if (errorMessages.length > 0) {
                             // Lấy câu lỗi đầu tiên tìm được để bật Toast
-                            toast.error(errorMessages[0]); 
+                            toast.error(errorMessages[0]);
                         } else {
                             toast.error(serverMessage || 'Dữ liệu không hợp lệ!');
                         }
-                    } 
+                    }
                     // Nếu backend trả về một chuỗi string bình thường
                     else if (typeof serverError === 'string') {
                         toast.error(serverError);
-                    } 
+                    }
                     // Nếu không có error, dùng đỡ message ("VALIDATION_ERROR")
                     else {
                         toast.warning(serverMessage);

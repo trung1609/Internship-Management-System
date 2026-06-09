@@ -33,7 +33,7 @@ public class PasswordResetService {
         String token = UUID.randomUUID().toString();
         redisTemplate.opsForValue().set(REDIS_PREFIX + token, request.getEmail(), Duration.ofHours(1));
 
-        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
+        String resetUrl = "http://localhost:5173/#/reset-password?token=" + token;
 
         emailService.sendResetPasswordEmail(request.getEmail(), user.getUsername(), resetUrl);
     }
