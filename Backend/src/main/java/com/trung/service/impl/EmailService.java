@@ -3,7 +3,6 @@ package com.trung.service.impl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -43,7 +42,7 @@ public class EmailService {
                 + "    .content { padding: 40px; color: #334155; line-height: 1.6; font-size: 16px; }"
                 + "    .content p { margin: 0 0 20px 0; }"
                 + "    .button-container { text-align: center; margin: 35px 0; }"
-                + "    .btn { display: inline-block; padding: 14px 32px; background-color: #f9fafe; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; }"
+                + "    .btn { display: inline-block; padding: 14px 32px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; }"
                 + "    .warning-box { background-color: #f8fafc; border-left: 4px solid #94a3b8; padding: 16px 20px; border-radius: 0 8px 8px 0; font-size: 14px; color: #64748b; margin-top: 30px; }"
                 + "    .footer { padding: 25px 40px; background-color: #f8fafc; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }"
                 + "  </style>"

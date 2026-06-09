@@ -31,14 +31,16 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
   mail:
-    host: smtp.gmail.com
-    port: 465
-    username: trung8d2005@gmail.com
-    password: biekyslbsuuxghpz
+    host: smtp.sendgrid.net
+    port: 2525
+    username: apikey
+    password: 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
     properties:
       mail:
         smtp:
           auth: true
+          starttls:
+            enable: true
 rabbitmq:
   exchange:
     name: intership_exchange
