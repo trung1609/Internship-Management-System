@@ -46,6 +46,7 @@ services:
       - SPRING_RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin123
       - SPRING_PROFILES_ACTIVE=prod
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
     restart: unless-stopped
 
 volumes:
