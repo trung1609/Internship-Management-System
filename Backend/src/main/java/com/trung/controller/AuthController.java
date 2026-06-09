@@ -1,13 +1,16 @@
 package com.trung.controller;
 
+import com.trung.dto.request.ForgotPasswordRequest;
 import com.trung.dto.request.FormLoginRequest;
 import com.trung.dto.request.FormRegisterRequest;
+import com.trung.dto.request.ResetPasswordRequest;
 import com.trung.dto.response.*;
 import com.trung.exception.InvalidCredentialsException;
 import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.service.IAuthService;
+import com.trung.service.impl.PasswordResetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +29,7 @@ import javax.naming.AuthenticationException;
 @RequiredArgsConstructor
 public class AuthController {
     private final IAuthService authService;
+    private final PasswordResetService passwordResetService;
 
     @Value("${jwt_expire}")
     private long expire;
@@ -106,5 +110,21 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) throws ResourceNotFoundException {
+        passwordResetService.createAndSendResetToken(request);
+        return ResponseEntity.ok("Hệ thống đã gửi link đặt lại mật khẩu vào Email của bạn.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) throws InvalidCredentialsException, ResourceNotFoundException {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body("Mật khẩu xác nhận không trùng khớp!");
+        }
+
+        passwordResetService.verifyAndResetPassword(request);
+        return ResponseEntity.ok("Cập nhật mật khẩu mới thành công.");
     }
 }

@@ -8,4 +8,8 @@ export const authApi = {
     getMe: () => axiosClient.get('/api/v1/auth/me'),
     
     logout: () => axiosClient.post('/api/v1/auth/logout'),
+
+    forgotPassword: (payload) => axiosClient.post('/api/v1/auth/forgot-password', payload),
+
+    resetPassword: (data) => axiosClient.post('/api/v1/auth/reset-password', data),
 };

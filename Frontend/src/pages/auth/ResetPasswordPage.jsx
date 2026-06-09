@@ -1,55 +1,71 @@
-import { useState, useContext } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { AuthContext } from "../../context/AuthContext";
+import { authApi } from "../../api/authApi";
 import {
   Box,
   Typography,
   TextField,
   Button,
-  Alert,
   CircularProgress,
   Stack,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
-// --- HIỆU ỨNG ANIMATION ---
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
   },
 };
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-const LoginPage = () => {
-  const { login } = useContext(AuthContext);
+const ResetPasswordPage = () => {
   const navigate = useNavigate();
-  const [errorMsg, setErrorMsg] = useState("");
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Lấy token từ thanh URL
+  const query = new URLSearchParams(location.search);
+  const token = query.get("token");
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
 
   const onSubmit = async (data) => {
+    if (!token) {
+      toast.error("Liên kết xác thực không hợp lệ hoặc bị thiếu!");
+      return;
+    }
+
     setIsLoading(true);
-    setErrorMsg("");
     try {
-      await login(data.username, data.password);
-      navigate("/dashboard");
+      const payload = {
+        token: token,
+        newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
+      };
+
+      await authApi.resetPassword(payload);
+
+      toast.success("Mật khẩu của bạn đã được cập nhật thành công!");
+      setTimeout(() => navigate("/login"), 3000);
     } catch (error) {
-      if (error.response?.status === 401)
-        setErrorMsg("Sai tài khoản hoặc mật khẩu!");
-      else setErrorMsg("Đã xảy ra lỗi, vui lòng thử lại.");
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data ||
+          "Phiên xác thực đã hết hạn. Vui lòng yêu cầu lại.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +80,7 @@ const LoginPage = () => {
         overflow: "hidden",
       }}
     >
-      {/* CỘT TRÁI: ẢNH NỀN VỚI HIỆU ỨNG ZOOM CHẬM */}
+      {/* CỘT TRÁI: ẢNH NỀN MINIMALIST */}
       <Box
         sx={{
           flex: 1.2,
@@ -80,7 +96,7 @@ const LoginPage = () => {
           style={{
             position: "absolute",
             inset: 0,
-            backgroundImage: `url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop')`,
+            backgroundImage: `url('https://images.unsplash.com/photo-1493106819501-66d381c466f1?q=80&w=1200&auto=format&fit=crop')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -100,7 +116,7 @@ const LoginPage = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
           >
             <Typography
               variant="h3"
@@ -111,26 +127,24 @@ const LoginPage = () => {
                 letterSpacing: "-1px",
               }}
             >
-              Nền tảng <br />
-              Thực tập số.
+              Giai đoạn cuối cùng.
             </Typography>
             <Typography
               variant="h6"
               sx={{ color: "#cbd5e1", fontWeight: 400, maxWidth: "500px" }}
             >
-              Đăng nhập để truy cập vào hệ thống đánh giá, nộp báo cáo và tương
-              tác với nhóm của bạn.
+              Thiết lập thông tin bảo mật mới để tiếp tục quy trình làm việc của
+              bạn.
             </Typography>
           </motion.div>
         </Box>
       </Box>
 
-      {/* CỘT PHẢI: FORM ĐĂNG NHẬP */}
+      {/* CỘT PHẢI: FORM */}
       <Box
         component={motion.div}
         initial={{ x: 50, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        exit={{ x: 50, opacity: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         sx={{
           flex: 1,
@@ -147,25 +161,6 @@ const LoginPage = () => {
           animate="visible"
           sx={{ width: "100%", maxWidth: "400px" }}
         >
-          {/* Nút Quay Lại */}
-          <motion.div variants={fadeUpVariant}>
-            <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate("/")}
-              disableRipple
-              sx={{
-                mb: 4,
-                color: "#64748b",
-                fontWeight: 600,
-                textTransform: "none",
-                ml: -1,
-                "&:hover": { bgcolor: "transparent", color: "#0f172a" },
-              }}
-            >
-              Trang chủ
-            </Button>
-          </motion.div>
-
           <motion.div variants={fadeUpVariant}>
             <Typography
               component="h1"
@@ -177,24 +172,18 @@ const LoginPage = () => {
                 letterSpacing: "-1px",
               }}
             >
-              Chào mừng trở lại.
+              Thiết lập mật khẩu.
             </Typography>
           </motion.div>
 
           <motion.div variants={fadeUpVariant}>
             <Typography
               variant="body1"
-              sx={{ color: "#64748b", mb: 5, fontSize: "1.1rem" }}
+              sx={{ color: "#64748b", mb: 4, fontSize: "1.1rem" }}
             >
-              Vui lòng điền thông tin đăng nhập của bạn.
+              Vui lòng tạo một mật khẩu mạnh và không chia sẻ với bất kỳ ai.
             </Typography>
           </motion.div>
-
-          {errorMsg && (
-            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-              {errorMsg}
-            </Alert>
-          )}
 
           <Box
             component={motion.form}
@@ -205,47 +194,39 @@ const LoginPage = () => {
             <Stack spacing={3}>
               <TextField
                 fullWidth
-                label="Tên đăng nhập"
+                label="Mật khẩu mới"
+                type="password"
                 variant="outlined"
                 autoFocus
-                {...register("username", {
-                  required: "Vui lòng nhập tên đăng nhập",
+                {...register("newPassword", {
+                  required: "Vui lòng nhập mật khẩu",
+                  pattern: {
+                    value:
+                      /^(|(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,})$/,
+                    message:
+                      "Bao gồm ít nhất 8 ký tự: chữ hoa, chữ thường, số & ký tự đặc biệt.",
+                  },
                 })}
-                error={!!errors.username}
-                helperText={errors.username?.message}
+                error={!!errors.newPassword}
+                helperText={errors.newPassword?.message}
                 InputProps={{ sx: { borderRadius: "12px" } }}
               />
               <TextField
                 fullWidth
-                label="Mật khẩu"
+                label="Xác nhận mật khẩu mới"
                 type="password"
                 variant="outlined"
-                {...register("password", {
-                  required: "Vui lòng nhập mật khẩu",
+                {...register("confirmPassword", {
+                  required: "Vui lòng xác nhận mật khẩu",
+                  validate: (val) =>
+                    val === watch("newPassword") ||
+                    "Mật khẩu xác nhận không khớp!",
                 })}
-                error={!!errors.password}
-                helperText={errors.password?.message}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword?.message}
                 InputProps={{ sx: { borderRadius: "12px" } }}
               />
             </Stack>
-
-            <Box
-              sx={{ display: "flex", justifyContent: "flex-end", mt: 2, mb: 4 }}
-            >
-              <Typography
-                component={Link}
-                to="/forgot-password"
-                variant="body2"
-                sx={{
-                  color: "#64748b",
-                  textDecoration: "none",
-                  fontWeight: 600,
-                  "&:hover": { color: "#0f172a" },
-                }}
-              >
-                Quên mật khẩu?
-              </Typography>
-            </Box>
 
             <Button
               type="submit"
@@ -254,6 +235,7 @@ const LoginPage = () => {
               disabled={isLoading}
               disableElevation
               sx={{
+                mt: 4,
                 mb: 3,
                 py: 2,
                 fontSize: "1rem",
@@ -268,27 +250,9 @@ const LoginPage = () => {
               {isLoading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                "Đăng nhập"
+                "Xác nhận cập nhật"
               )}
             </Button>
-
-            <Typography
-              variant="body1"
-              align="center"
-              sx={{ color: "#64748b" }}
-            >
-              Chưa có tài khoản?{" "}
-              <Link
-                to="/register"
-                style={{
-                  textDecoration: "none",
-                  color: "#2563eb",
-                  fontWeight: 700,
-                }}
-              >
-                Đăng ký ngay
-              </Link>
-            </Typography>
           </Box>
         </Box>
       </Box>
@@ -296,4 +260,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default ResetPasswordPage;
