@@ -5,7 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  Box, Button, TextField, Typography, Stack, Paper, Divider, Modal, IconButton, Chip, Avatar, Grid, AvatarGroup, Tooltip
+  Box, Button, TextField, Typography, Stack, Paper, Divider, Modal, IconButton, Chip, Avatar, Grid, AvatarGroup, Tooltip, Autocomplete
 } from "@mui/material";
 
 // Import Icons
@@ -33,13 +33,13 @@ const InternshipAssignmentsManagement = () => {
   const [openModal, setOpenModal] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
 
-  // Lưu ý: Đổi studentId thành mảng studentIds để chứa nhiều sinh viên
+  // THAY ĐỔI: studentIds bây giờ là một MẢNG [] thay vì chuỗi ""
   const [formData, setFormData] = useState({
     assignmentTitle: "",
     assignmentDescription: "",
     mentorId: "",
     phaseId: "",
-    studentIds: "",
+    studentIds: [],
     status: "PENDING",
   });
 
@@ -67,14 +67,14 @@ const InternshipAssignmentsManagement = () => {
         assignmentDescription: assignment.assignmentDescription || "",
         mentorId: assignment.mentorId || "",
         phaseId: assignment.phaseId || "",
-        // Convert mảng object students thành chuỗi ID "1,2,3" để dễ sửa tạm
-        studentIds: assignment.students ? assignment.students.map(s => s.id).join(", ") : "",
+        // Lấy thẳng mảng ID ra
+        studentIds: assignment.students ? assignment.students.map(s => s.id) : [],
         status: assignment.status || "PENDING",
       });
     } else {
       setEditingAssignment(null);
       setFormData({
-        assignmentTitle: "", assignmentDescription: "", mentorId: "", phaseId: "", studentIds: "",
+        assignmentTitle: "", assignmentDescription: "", mentorId: "", phaseId: "", studentIds: [],
       });
     }
     setOpenModal(true);
@@ -88,16 +88,13 @@ const InternshipAssignmentsManagement = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      // Tiền xử lý payload: Chuyển chuỗi "1, 2, 3" thành mảng [1, 2, 3]
+      // Payload giờ rất sạch vì studentIds đã là mảng sẵn rồi
       const payload = {
         ...formData,
-        studentIds: formData.studentIds ? formData.studentIds.split(",").map(id => parseInt(id.trim())) : []
       };
 
       if (editingAssignment) {
-        await internshipAssignmentApi.updateAssignmentStatus(editingAssignment.id, {
-          status: payload.status
-        });
+        await internshipAssignmentApi.updateAssignment(editingAssignment.id, payload);
         toast.success("Cập nhật phân công thành công!");
       } else {
         await internshipAssignmentApi.createAssignment(payload);
@@ -121,7 +118,6 @@ const InternshipAssignmentsManagement = () => {
     return <Chip label={status || "PENDING"} size="small" sx={{ bgcolor: '#fff3e0', color: '#ef6c00', fontWeight: 700 }} />;
   };
 
-  // Hàm lấy màu ngẫu nhiên cho Avatar để giao diện sinh động
   const getAvatarColor = (index) => {
     const colors = ['#0ea5e9', '#8b5cf6', '#f43f5e', '#10b981', '#f59e0b'];
     return colors[index % colors.length];
@@ -184,7 +180,6 @@ const InternshipAssignmentsManagement = () => {
                           <GroupIcon fontSize="small" /> Nhóm sinh viên ({assignment.students?.length || 0})
                         </Typography>
 
-                        {/* Khu vực AvatarGroup hiển thị nhiều sinh viên */}
                         <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', fontWeight: 600, borderColor: '#f8fafc' } }}>
                           {assignment.students && assignment.students.length > 0 ? (
                             assignment.students.map((student, sIdx) => (
@@ -226,7 +221,6 @@ const InternshipAssignmentsManagement = () => {
         <Button variant="outlined" disabled={data.length < rowsPerPage} onClick={() => setPage(p => p + 1)} sx={{ borderRadius: '50px', px: 3 }}>Trang sau</Button>
       </Box>
 
-      {/* Modal Thêm sửa giữ nguyên, chỉ đổi text field Student ID thành nhập nhiều ID */}
       <Modal open={openModal} onClose={handleCloseModal} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(3px)' }}>
         <AnimatePresence>
           {openModal && (
@@ -240,7 +234,42 @@ const InternshipAssignmentsManagement = () => {
                   <Stack spacing={3}>
                     <TextField fullWidth label="Tên Đề tài / Công việc" value={formData.assignmentTitle} onChange={(e) => setFormData({ ...formData, assignmentTitle: e.target.value })} />
                     <TextField fullWidth label="Mô tả chi tiết" multiline rows={3} value={formData.assignmentDescription} onChange={(e) => setFormData({ ...formData, assignmentDescription: e.target.value })} />
-                    <TextField fullWidth label="Các ID Sinh viên (Cách nhau dấu phẩy, vd: 1, 2, 5)" value={formData.studentIds} onChange={(e) => setFormData({ ...formData, studentIds: e.target.value })} helperText="Ví dụ: Nhóm 3 người có ID 12, 14, 15 thì nhập 12, 14, 15" />
+
+                    <Autocomplete
+                      multiple
+                      freeSolo
+                      options={[]} // Do chưa gọi API lấy toàn bộ list sinh viên nên tạm để rỗng, dùng freeSolo để nhập thủ công
+                      value={formData.studentIds.map(String)} // Ép kiểu về String để hiển thị
+                      onChange={(event, newValue) => {
+                        // newValue là mảng các chuỗi. Ta loại bỏ các chữ cái, chỉ giữ số ID hợp lệ
+                        const numericIds = newValue
+                          .map((val) => parseInt(val, 10))
+                          .filter((val) => !isNaN(val));
+                        setFormData({ ...formData, studentIds: numericIds });
+                      }}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip
+                            variant="filled"
+                            color="primary"
+                            label={`ID: ${option}`}
+                            {...getTagProps({ index })}
+                            sx={{ fontWeight: 600, borderRadius: 2 }}
+                          />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Thêm thành viên nhóm"
+                          placeholder="Nhập ID Sinh viên..."
+                          helperText="Gõ ID sinh viên và ấn Enter để thêm người vào nhóm"
+                        />
+                      )}
+                    />
+                    {/* ========================================== */}
+
                     <Grid container spacing={2}>
                       <Grid item xs={6}><TextField fullWidth label="ID Mentor" value={formData.mentorId} onChange={(e) => setFormData({ ...formData, mentorId: e.target.value })} /></Grid>
                       <Grid item xs={6}><TextField fullWidth label="ID Giai đoạn" value={formData.phaseId} onChange={(e) => setFormData({ ...formData, phaseId: e.target.value })} /></Grid>

@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   Drawer,
   List,
@@ -11,7 +11,6 @@ import {
   Typography,
   Box,
   IconButton,
-  Divider,
   Chip,
   Paper,
   Dialog,
@@ -91,7 +90,7 @@ const allMenuItems = [
     label: "Quản lý Báo cáo",
     icon: <AssignmentTurnedInIcon />,
     path: "/management/reports",
-    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR"], // ADMIN và MENTOR đều thấy
+    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR"],
   },
   {
     label: "Assessment Management",
@@ -108,7 +107,7 @@ const allMenuItems = [
 export const AppLayout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
-  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // State quản lý Dialog Logout
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useContext(AuthContext);
@@ -121,6 +120,33 @@ export const AppLayout = ({ children }) => {
 
   const filteredMenuItems = getFilteredMenuItems();
 
+  // ĐOẠN CODE MỚI: Lắng nghe URL và tự động bung menu tương ứng
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const newExpandedItems = { ...expandedItems };
+    let hasChanges = false;
+
+    filteredMenuItems.forEach((item, index) => {
+      if (item.children) {
+        // Kiểm tra xem URL hiện tại có chứa đường dẫn của bất kỳ mục con nào không
+        const isChildActive = item.children.some((child) =>
+          currentPath.includes(child.path)
+        );
+
+        // Nếu có và menu đang đóng, thì tự động mở nó ra
+        if (isChildActive && !newExpandedItems[index]) {
+          newExpandedItems[index] = true;
+          hasChanges = true;
+        }
+      }
+    });
+
+    if (hasChanges) {
+      setExpandedItems(newExpandedItems);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]); // Trigger mỗi khi chuyển trang
+
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
   const handleMenuToggle = (index) => {
@@ -132,17 +158,14 @@ export const AppLayout = ({ children }) => {
     setMobileOpen(false);
   };
 
-  // Mở popup xác nhận
   const handleOpenLogoutDialog = () => {
     setLogoutDialogOpen(true);
   };
 
-  // Đóng popup
   const handleCloseLogoutDialog = () => {
     setLogoutDialogOpen(false);
   };
 
-  // Xử lý khi bấm nút "Đăng xuất" trong popup
   const confirmLogout = async () => {
     await logout();
     window.location.href = "/Internship-Management-System/#/";
@@ -419,7 +442,6 @@ export const AppLayout = ({ children }) => {
         slotProps={{
           backdrop: {
             sx: {
-              // Hiệu ứng Glassmorphism làm mờ toàn bộ màn hình phía sau
               backgroundColor: "rgba(15, 23, 42, 0.4)",
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
@@ -428,7 +450,7 @@ export const AppLayout = ({ children }) => {
         }}
         PaperProps={{
           sx: {
-            borderRadius: "24px", // Bo góc mềm mại
+            borderRadius: "24px",
             padding: "24px 16px",
             boxShadow: "0 24px 48px rgba(0,0,0,0.2)",
             minWidth: { xs: "320px", sm: "400px" },
@@ -447,7 +469,7 @@ export const AppLayout = ({ children }) => {
               justifyContent: "center",
               alignItems: "center",
               margin: "0 auto 24px",
-              boxShadow: "0 0 0 8px rgba(255, 235, 238, 0.5)", // Glow effect
+              boxShadow: "0 0 0 8px rgba(255, 235, 238, 0.5)",
             }}
           >
             <WarningIcon sx={{ fontSize: 40, color: "#d32f2f" }} />
@@ -483,7 +505,7 @@ export const AppLayout = ({ children }) => {
               px: 4,
               py: 1.2,
               fontWeight: 700,
-              background: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)", // Nút bấm gradient đỏ
+              background: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)",
               boxShadow: "0 8px 16px rgba(225, 29, 72, 0.25)",
               "&:hover": {
                 background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",

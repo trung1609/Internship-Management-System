@@ -138,6 +138,34 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             ValidationErrorUtil.addError(errorList, "status", "Invalid status value");
             throw new ResourceBadRequestException("Validation failed", errorList);
         }
+        if (request.getAssignmentTitle() != null) {
+            internshipAssignment.setAssignmentTitle(request.getAssignmentTitle());
+        }
+        if (request.getAssignmentDescription() != null) {
+            internshipAssignment.setAssignmentDescription(request.getAssignmentDescription());
+        }
+
+        if (request.getMentorId() != null && !request.getMentorId().equals(internshipAssignment.getMentor().getMentorId())) {
+            Mentor mentor = iMentorRepository.findByMentorId(request.getMentorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Mentor not found with id: " + request.getMentorId()));
+            internshipAssignment.setMentor(mentor);
+        }
+
+        if (request.getPhaseId() != null && !request.getPhaseId().equals(internshipAssignment.getPhase().getPhaseId())) {
+            InternshipPhase phase = internshipPhaseRepository.findByPhaseIdAndIsDeletedFalse(request.getPhaseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Internship phase not found with id: " + request.getPhaseId()));
+            internshipAssignment.setPhase(phase);
+        }
+
+        if (request.getStudentIds() != null) {
+            List<Student> newStudentList = iStudentRepository.findAllByStudentId(request.getStudentIds());
+
+            if (newStudentList.size() != request.getStudentIds().size()) {
+                throw new ResourceNotFoundException("One or more students not found with the provided IDs");
+            }
+
+            internshipAssignment.setStudents(newStudentList);
+        }
         internshipAssignmentRepository.save(internshipAssignment);
         return new ApiResponse<>(
                 InternshipAssignmentMapper.toDto(internshipAssignment),

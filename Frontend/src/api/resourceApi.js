@@ -107,7 +107,7 @@ export const internshipAssignmentApi = {
 
   // Update assignment
   updateAssignment: (assignmentId, data) =>
-    axiosClient.put(`/api/v1/internship-assignments/${assignmentId}`, data),
+    axiosClient.put(`/api/v1/internship-assignments/${assignmentId}/status`, data),
 
   // Update assignment status
   updateAssignmentStatus: (assignmentId, data) =>
