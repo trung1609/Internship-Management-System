@@ -9,7 +9,14 @@ import {
   Button,
   CircularProgress,
   Stack,
+  InputAdornment,
+  IconButton,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  FormHelperText,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 
@@ -31,7 +38,10 @@ const ResetPasswordPage = () => {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Lấy token từ thanh URL
+  // State quản lý ẩn/hiện mật khẩu
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const query = new URLSearchParams(location.search);
   const token = query.get("token");
 
@@ -41,6 +51,11 @@ const ResetPasswordPage = () => {
     watch,
     formState: { errors },
   } = useForm();
+
+  // Chặn hành vi copy/paste
+  const preventCopyPaste = (e) => {
+    e.preventDefault();
+  };
 
   const onSubmit = async (data) => {
     if (!token) {
@@ -133,7 +148,7 @@ const ResetPasswordPage = () => {
               variant="h6"
               sx={{ color: "#cbd5e1", fontWeight: 400, maxWidth: "500px" }}
             >
-              Thiết lập thông tin bảo mật mới để tiếp tục quy trình làm việc của
+              Thiết lập thôngত্তি bảo mật mới để tiếp tục quy trình làm việc của
               bạn.
             </Typography>
           </motion.div>
@@ -192,40 +207,100 @@ const ResetPasswordPage = () => {
             noValidate
           >
             <Stack spacing={3}>
-              <TextField
+              <FormControl
                 fullWidth
-                label="Mật khẩu mới"
-                type="password"
                 variant="outlined"
-                autoFocus
-                {...register("newPassword", {
-                  required: "Vui lòng nhập mật khẩu",
-                  pattern: {
-                    value:
-                      /^(|(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,})$/,
-                    message:
-                      "Bao gồm ít nhất 8 ký tự: chữ hoa, chữ thường, số & ký tự đặc biệt.",
-                  },
-                })}
                 error={!!errors.newPassword}
-                helperText={errors.newPassword?.message}
-                InputProps={{ sx: { borderRadius: "12px" } }}
-              />
-              <TextField
+              >
+                <InputLabel htmlFor="outlined-adornment-new-password">
+                  Mật khẩu mới
+                </InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-new-password"
+                  type={showNewPassword ? "text" : "password"}
+                  onCopy={preventCopyPaste}
+                  onPaste={preventCopyPaste}
+                  onCut={preventCopyPaste}
+                  {...register("newPassword", {
+                    required: "Vui lòng nhập mật khẩu",
+                    pattern: {
+                      value:
+                        /^(|(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,})$/,
+                      message:
+                        "Bao gồm ít nhất 8 ký tự: chữ hoa, chữ thường, số & ký tự đặc biệt.",
+                    },
+                  })}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        edge="end"
+                        sx={{ color: "#64748b" }}
+                      >
+                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Mật khẩu mới"
+                  sx={{ borderRadius: "12px" }}
+                />
+                {errors.newPassword && (
+                  <FormHelperText error>
+                    {errors.newPassword?.message}
+                  </FormHelperText>
+                )}
+              </FormControl>
+
+              <FormControl
                 fullWidth
-                label="Xác nhận mật khẩu mới"
-                type="password"
                 variant="outlined"
-                {...register("confirmPassword", {
-                  required: "Vui lòng xác nhận mật khẩu",
-                  validate: (val) =>
-                    val === watch("newPassword") ||
-                    "Mật khẩu xác nhận không khớp!",
-                })}
                 error={!!errors.confirmPassword}
-                helperText={errors.confirmPassword?.message}
-                InputProps={{ sx: { borderRadius: "12px" } }}
-              />
+              >
+                <InputLabel htmlFor="outlined-adornment-confirm-password">
+                  Xác nhận mật khẩu mới
+                </InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  onCopy={preventCopyPaste}
+                  onPaste={preventCopyPaste}
+                  onCut={preventCopyPaste}
+                  {...register("confirmPassword", {
+                    required: "Vui lòng xác nhận mật khẩu",
+                    validate: (val) =>
+                      val === watch("newPassword") ||
+                      "Mật khẩu xác nhận không khớp!",
+                  })}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle confirm password visibility"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        onMouseDown={(e) => e.preventDefault()}
+                        edge="end"
+                        sx={{ color: "#64748b" }}
+                      >
+                        {showConfirmPassword ? (
+                          <VisibilityOff />
+                        ) : (
+                          <Visibility />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Xác nhận mật khẩu mới"
+                  sx={{ borderRadius: "12px" }}
+                />
+                {errors.confirmPassword && (
+                  <FormHelperText error>
+                    {errors.confirmPassword?.message}
+                  </FormHelperText>
+                )}
+              </FormControl>
             </Stack>
 
             <Button

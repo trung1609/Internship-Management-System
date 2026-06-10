@@ -10,11 +10,18 @@ import {
   Alert,
   CircularProgress,
   Stack,
+  InputAdornment,
+  IconButton,
+  FormHelperText,
+  OutlinedInput,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { motion } from "framer-motion";
 
-// --- HIỆU ỨNG ANIMATION ---
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
@@ -34,11 +41,19 @@ const LoginPage = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // State quản lý hiển thị mật khẩu
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  // Chặn copy/paste
+  const preventCopyPaste = (e) => {
+    e.preventDefault();
+  };
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -147,7 +162,6 @@ const LoginPage = () => {
           animate="visible"
           sx={{ width: "100%", maxWidth: "400px" }}
         >
-          {/* Nút Quay Lại */}
           <motion.div variants={fadeUpVariant}>
             <Button
               startIcon={<ArrowBackIcon />}
@@ -215,18 +229,45 @@ const LoginPage = () => {
                 helperText={errors.username?.message}
                 InputProps={{ sx: { borderRadius: "12px" } }}
               />
-              <TextField
+              <FormControl
                 fullWidth
-                label="Mật khẩu"
-                type="password"
                 variant="outlined"
-                {...register("password", {
-                  required: "Vui lòng nhập mật khẩu",
-                })}
                 error={!!errors.password}
-                helperText={errors.password?.message}
-                InputProps={{ sx: { borderRadius: "12px" } }}
-              />
+              >
+                <InputLabel htmlFor="outlined-adornment-password">
+                  Mật khẩu
+                </InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-password"
+                  type={showPassword ? "text" : "password"}
+                  onCopy={preventCopyPaste}
+                  onPaste={preventCopyPaste}
+                  onCut={preventCopyPaste}
+                  {...register("password", {
+                    required: "Vui lòng nhập mật khẩu",
+                  })}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword(!showPassword)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        edge="end"
+                        sx={{ color: "#64748b" }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Mật khẩu"
+                  sx={{ borderRadius: "12px" }}
+                />
+                {errors.password && (
+                  <FormHelperText error>
+                    {errors.password?.message}
+                  </FormHelperText>
+                )}
+              </FormControl>
             </Stack>
 
             <Box
