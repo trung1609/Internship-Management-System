@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -42,6 +43,8 @@ public class ReportServiceImpl implements IReportService {
     private final CurrentUserUtil currentUserUtil;
     private final InternshipAssignmentRepository internshipAssignmentRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final FileUploadService fileUploadService;
 
     @Value("${rabbitmq.exchange.name}")
     private String exchangeName;
@@ -52,12 +55,12 @@ public class ReportServiceImpl implements IReportService {
     @Override
     public ApiResponse<ReportResponse> processAndSaveReport(MultipartFile file, String title) {
         try {
-            String storedFileName = fileStorageService.storeFile(file);
+            String fileUrl = fileUploadService.uploadFile(file);
 
             Report report = Report.builder()
                     .title(title)
                     .originalFileName(file.getOriginalFilename())
-                    .storedFileName(storedFileName)
+                    .fileUrl(fileUrl)
                     .uploadTime(LocalDateTime.now())
                     .user(currentUserUtil.getCurrentUser().getStudent().getUser())
                     .build();
@@ -154,23 +157,21 @@ public class ReportServiceImpl implements IReportService {
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
             for (ReportResponse report : reports) {
                 try {
-                    // Lấy file vật lý từ hệ thống
-                    Resource resource = this.getReportFileAsResource(report.getStoredFileName());
+                    byte[] fileBytes = restTemplate.getForObject(report.getFileUrl(), byte[].class);
 
-                    if (resource != null && resource.exists()) {
+                    if (fileBytes != null) {
                         String entryName = report.getStudentCode() + "_" + report.getOriginalFileName();
                         ZipEntry zipEntry = new ZipEntry(entryName);
                         zos.putNextEntry(zipEntry);
-
-                        StreamUtils.copy(resource.getInputStream(), zos);
+                        zos.write(fileBytes);
                         zos.closeEntry();
                     }
                 } catch (Exception e) {
-                    System.err.println("Không thể nén file: " + report.getStoredFileName() + " - " + e.getMessage());
+                    System.err.println("Không thể nén file: " + report.getFileUrl() + " - " + e.getMessage());
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi trong quá trình khởi tạo file ZIP: " + e.getMessage());
+            throw new RuntimeException("Lỗi nén file ZIP: " + e.getMessage());
         }
 
         return new ByteArrayInputStream(baos.toByteArray());

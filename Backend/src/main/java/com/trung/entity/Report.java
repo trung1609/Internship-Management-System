@@ -22,13 +22,13 @@ public class Report {
 
     private String originalFileName;
 
-    private String storedFileName;
-
     private LocalDateTime uploadTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private User user;
+
+    private String fileUrl;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

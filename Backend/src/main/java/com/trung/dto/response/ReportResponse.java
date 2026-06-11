@@ -13,7 +13,7 @@ public class ReportResponse {
     private Long reportId;
     private String title;
     private String originalFileName;
-    private String storedFileName;
+    private String fileUrl;
 
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime uploadTime;
