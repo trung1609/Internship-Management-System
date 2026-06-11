@@ -184,8 +184,8 @@ const InternshipAssignmentsManagement = () => {
                           {assignment.students && assignment.students.length > 0 ? (
                             assignment.students.map((student, sIdx) => (
                               <Tooltip title={`${student.name} - ${student.code}`} key={student.id} placement="top">
-                                <Avatar sx={{ bgcolor: getAvatarColor(sIdx) }}>
-                                  {student.name.charAt(0).toUpperCase()}
+                                <Avatar src={student.avatarUrl} sx={{ bgcolor: getAvatarColor(sIdx) }}>
+                                  {!student.avatarUrl && student.name?.charAt(0).toUpperCase()}
                                 </Avatar>
                               </Tooltip>
                             ))

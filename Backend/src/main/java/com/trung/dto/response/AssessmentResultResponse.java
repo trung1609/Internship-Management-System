@@ -28,6 +28,7 @@ public class AssessmentResultResponse {
     private String comments;
     private Long evaluatorId;
     private String evaluatorName;
+    private String evaluatorAvatarUrl;
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate evaluationDate;
@@ -35,5 +36,6 @@ public class AssessmentResultResponse {
     private Long studentId;
     private String studentName;
     private String studentCode;
+    private String studentAvatarUrl;
     private String contribution;
 }

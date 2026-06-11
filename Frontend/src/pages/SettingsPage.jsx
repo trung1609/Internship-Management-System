@@ -19,6 +19,7 @@ import {
   FormHelperText,
   Avatar,
   Chip,
+  Badge,
 } from "@mui/material";
 import {
   Visibility,
@@ -28,12 +29,15 @@ import {
   Edit,
   LockReset,
   Settings as SettingsIcon,
+  ArrowBack,
+  PhotoCamera,
 } from "@mui/icons-material";
 import { authApi } from "../api/authApi"; // Đảm bảo bạn đã thêm API updateProfile và changePassword vào đây
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import { userApi } from "../api/resourceApi";
+import { useNavigate } from "react-router-dom";
 
 // Component hỗ trợ chuyển Tab
 function CustomTabPanel(props) {
@@ -57,14 +61,17 @@ function CustomTabPanel(props) {
 
 const SettingsPage = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   // States cho form đổi mật khẩu
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loadingAvatar, setLoadingAvatar] = useState(false);
 
   // Form Cập nhật thông tin
   const {
@@ -106,6 +113,31 @@ const SettingsPage = () => {
 
   const preventCopyPaste = (e) => e.preventDefault();
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const objectUrl = URL.createObjectURL(file);
+    setAvatarPreview(objectUrl);
+    const currentUserId = user?.userId || user?.id;
+    if (!currentUserId) {
+      toast.error("Không tìm thấy ID người dùng!");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      setLoadingAvatar(true);
+      await userApi.uploadAvatar(currentUserId, formData);
+      toast.success("Upload ảnh đại diện thành công!");
+      await fetchProfile();
+    } catch (error) {
+      toast.error("Lỗi upload ảnh đại diện!");
+    } finally {
+      setLoadingAvatar(false);
+    }
+  };
+
   // Xử lý Cập nhật thông tin
   const onUpdateProfile = async (data) => {
     setIsLoading(true);
@@ -127,8 +159,7 @@ const SettingsPage = () => {
       if (responseData?.error && typeof responseData.error === "object") {
         const errorMessages = Object.values(responseData.error).join(" | ");
         toast.error(errorMessages);
-      }
-      else {
+      } else {
         toast.error("Cập nhật thất bại. Vui lòng kiểm tra lại dữ liệu!");
       }
     } finally {
@@ -148,8 +179,7 @@ const SettingsPage = () => {
       toast.success("Đổi mật khẩu thành công!");
       resetPasswordForm();
     } catch (error) {
-      const errMsg =
-        error.response?.error?.message;
+      const errMsg = error.response?.error?.message;
       toast.error(errMsg);
     } finally {
       setIsLoading(false);
@@ -158,6 +188,18 @@ const SettingsPage = () => {
 
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", p: { xs: 2, md: 4 } }}>
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => navigate(-1)} // Navigate(-1) quay lại đúng trang trước đó
+        sx={{
+          mb: 2,
+          color: "#64748b",
+          fontWeight: 600,
+          "&:hover": { backgroundColor: "#f1f5f9" },
+        }}
+      >
+        Quay lại
+      </Button>
       <Typography
         variant="h4"
         sx={{
@@ -221,18 +263,59 @@ const SettingsPage = () => {
               alignItems: "center",
             }}
           >
-            <Avatar
-              sx={{
-                width: 120,
-                height: 120,
-                bgcolor: "#e0e7ff",
-                color: "#3b82f6",
-                fontSize: "3rem",
-                fontWeight: 800,
-              }}
-            >
-              {profileData?.username?.charAt(0).toUpperCase() || "U"}
-            </Avatar>
+            <Box sx={{ position: "relative" }}>
+              <input
+                accept="image/*"
+                style={{ display: "none" }}
+                id="avatar-upload-input"
+                type="file"
+                onChange={handleAvatarChange}
+              />
+              <label htmlFor="avatar-upload-input">
+                <Badge
+                  overlap="circular"
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  badgeContent={
+                    <IconButton
+                      component="span"
+                      sx={{
+                        bgcolor: "#2563eb",
+                        color: "white",
+                        width: 40,
+                        height: 40,
+                        "&:hover": { bgcolor: "#1d4ed8" },
+                      }}
+                    >
+                      {loadingAvatar ? (
+                        <CircularProgress size={20} color="inherit" />
+                      ) : (
+                        <PhotoCamera fontSize="small" />
+                      )}
+                    </IconButton>
+                  }
+                >
+                  <Avatar
+                    // Ưu tiên hiển thị ảnh vừa chọn, sau đó đến ảnh từ DB
+                    src={avatarPreview || profileData?.avatarUrl}
+                    sx={{
+                      width: 130,
+                      height: 130,
+                      bgcolor: "#e0e7ff",
+                      color: "#3b82f6",
+                      fontSize: "3.5rem",
+                      fontWeight: 800,
+                      border: "4px solid white",
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                    }}
+                  >
+                    {/* Chỉ hiện chữ cái khi không có ảnh */}
+                    {!avatarPreview &&
+                      !profileData?.avatarUrl &&
+                      profileData?.username?.charAt(0).toUpperCase()}
+                  </Avatar>
+                </Badge>
+              </label>
+            </Box>
             <Box sx={{ flex: 1, width: "100%" }}>
               <Stack spacing={2}>
                 <Box>

@@ -58,7 +58,8 @@ const AssignmentDetail = () => {
   const [rounds, setRounds] = useState([]);
   const [criteria, setCriteria] = useState([]);
   const { user } = useContext(AuthContext);
-  const isRoleNotAllowed = role => ["ROLE_STUDENT", "ROLE_ADMIN"].includes(role);
+  const isRoleNotAllowed = (role) =>
+    ["ROLE_STUDENT", "ROLE_ADMIN"].includes(role);
 
   // State lưu trữ dữ liệu chấm điểm của từng sinh viên
   const [grades, setGrades] = useState({});
@@ -758,6 +759,7 @@ const AssignmentDetail = () => {
                     }}
                   >
                     <Avatar
+                      src={student.avatarUrl}
                       sx={{
                         bgcolor: index % 2 === 0 ? "#3b82f6" : "#8b5cf6",
                         width: 50,
@@ -765,7 +767,8 @@ const AssignmentDetail = () => {
                         fontWeight: 700,
                       }}
                     >
-                      {student.name.charAt(0)}
+                      {!student.avatarUrl &&
+                        student.name?.charAt(0).toUpperCase()}
                     </Avatar>
                     <Box>
                       <Typography

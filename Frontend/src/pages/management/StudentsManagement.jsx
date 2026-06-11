@@ -205,8 +205,8 @@ const StudentsManagement = () => {
                 }} />
 
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ position: 'relative', zIndex: 1, mb: 2 }}>
-                  <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main', fontWeight: 'bold' }}>
-                    {student.fullName ? student.fullName.charAt(0).toUpperCase() : <SchoolIcon />}
+                  <Avatar src={student.avatarUrl} sx={{ width: 56, height: 56, bgcolor: 'primary.main', fontWeight: 'bold' }}>
+                    {!student.avatarUrl && student.fullName?.charAt(0).toUpperCase()}
                   </Avatar>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>

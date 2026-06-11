@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -81,5 +82,18 @@ public class UserController {
                     LocalDateTime.now()));
         }
         return ResponseEntity.ok(userService.changePassword(request));
+    }
+
+    @PutMapping("/{userId}/avatar")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_MENTOR', 'ROLE_STUDENT')")
+    public ResponseEntity<ApiResponse<String>> uploadAvatar(
+            @PathVariable Long userId,
+            @RequestParam("file") MultipartFile file) throws Exception {
+
+        if (file.isEmpty()) {
+            throw new ResourceBadRequestException("File is empty", null);
+        }
+
+        return ResponseEntity.ok(userService.uploadAvatar(userId, file));
     }
 }

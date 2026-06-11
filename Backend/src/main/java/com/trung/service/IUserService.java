@@ -8,6 +8,9 @@ import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceForbiddenException;
 import com.trung.exception.ResourceNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 public interface IUserService {
     PageResponseDTO<UserResponse> getAllProfile(String role, PageRequestDTO pageRequestDTO) throws ResourceConflictException, ResourceBadRequestException;
@@ -18,4 +21,5 @@ public interface IUserService {
     ApiResponse<UserResponse> updateRole(Long id, UpdateRoleRequest request) throws ResourceConflictException, ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException;
     ApiResponse<String> deleteProfile(Long id) throws ResourceConflictException, ResourceNotFoundException;
     ApiResponse<String> changePassword(ChangePasswordRequest request) throws ResourceBadRequestException;
+    ApiResponse<String> uploadAvatar(Long userId, MultipartFile file) throws ResourceNotFoundException, IOException;
 }

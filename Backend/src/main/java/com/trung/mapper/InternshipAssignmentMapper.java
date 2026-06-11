@@ -22,6 +22,7 @@ public class InternshipAssignmentMapper {
                             .name(s.getUser().getFullName())
                             .code(s.getStudentCode())
                             .major(s.getMajor())
+                            .avatarUrl(s.getUser().getAvatarUrl())
                             .build())
                     .toList();
         }

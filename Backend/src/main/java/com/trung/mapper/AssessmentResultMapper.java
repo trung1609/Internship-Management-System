@@ -15,6 +15,7 @@ public class AssessmentResultMapper {
                 .studentId(entity.getStudent().getStudentId())
                 .studentName(entity.getStudent().getUser().getFullName())
                 .studentCode(entity.getStudent().getStudentCode())
+                .studentAvatarUrl(entity.getStudent().getUser().getAvatarUrl())
 
                 .roundId(entity.getRound().getRoundId())
                 .roundName(entity.getRound().getRoundName())
@@ -28,6 +29,7 @@ public class AssessmentResultMapper {
                 .comments(entity.getComment()) // Nhớ lấy đúng trường comment trong entity
                 .evaluatorId(entity.getEvaluationId().getUserId())
                 .evaluatorName(entity.getEvaluationId().getFullName())
+                .evaluatorAvatarUrl(entity.getEvaluationId().getAvatarUrl())
                 .evaluationDate(entity.getEvaluationDate())
                 .build();
     }

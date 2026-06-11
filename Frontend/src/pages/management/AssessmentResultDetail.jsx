@@ -158,6 +158,7 @@ const AssessmentResultDetail = () => {
                 }}
               >
                 <Avatar
+                  src={result?.studentAvatarUrl}
                   sx={{
                     width: 56,
                     height: 56,
@@ -166,7 +167,7 @@ const AssessmentResultDetail = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  {result?.studentName?.charAt(0) || "S"}
+                  {result?.studentAvatarUrl ? null : <PersonOutlineIcon />}
                 </Avatar>
                 <Box>
                   <Typography
@@ -207,6 +208,7 @@ const AssessmentResultDetail = () => {
                 }}
               >
                 <Avatar
+                  src={result?.evaluatorAvatarUrl}
                   sx={{
                     width: 56,
                     height: 56,
@@ -215,7 +217,7 @@ const AssessmentResultDetail = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  <PersonOutlineIcon />
+                  {result?.evaluatorAvatarUrl ? null : <PersonOutlineIcon />}
                 </Avatar>
                 <Box>
                   <Typography

@@ -206,8 +206,8 @@ const MentorsManagement = () => {
                 }} />
 
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ position: 'relative', zIndex: 1, mb: 2 }}>
-                  <Avatar sx={{ width: 56, height: 56, bgcolor: 'warning.main', fontWeight: 'bold' }}>
-                    {mentor.fullName ? mentor.fullName.charAt(0).toUpperCase() : <WorkspacePremiumIcon />}
+                  <Avatar src={mentor.avatarUrl} sx={{ width: 56, height: 56, bgcolor: 'warning.main', fontWeight: 'bold' }}>
+                    {!mentor.avatarUrl && mentor.fullName ? mentor.fullName.charAt(0) : <WorkspacePremiumIcon />}
                   </Avatar>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>

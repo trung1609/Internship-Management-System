@@ -66,7 +66,18 @@ export const userApi = {
   // Delete user (Admin) - returns ApiResponse
   deleteUser: (userId) => axiosClient.delete(`/api/v1/users/${userId}`),
 
-  changePassword: (data) => axiosClient.post("/api/v1/users/change-password", data),
+  changePassword: (data) =>
+    axiosClient.post("/api/v1/users/change-password", data),
+
+  uploadAvatar: (userId, formData) => {
+    return axiosClient.put(`api/v1/users/${userId}/avatar`, formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
+      }
+    );
+  },
 };
 
 export const internshipPhaseApi = {
@@ -109,7 +120,10 @@ export const internshipAssignmentApi = {
 
   // Update assignment
   updateAssignment: (assignmentId, data) =>
-    axiosClient.put(`/api/v1/internship-assignments/${assignmentId}/status`, data),
+    axiosClient.put(
+      `/api/v1/internship-assignments/${assignmentId}/status`,
+      data,
+    ),
 
   // Update assignment status
   updateAssignmentStatus: (assignmentId, data) =>
@@ -183,11 +197,11 @@ export const assessmentResultApi = {
   // Update result
   updateResult: (resultId, data) =>
     axiosClient.put(`/api/v1/assessment-results/${resultId}`, data),
-  saveBulkGrades: (data) => axiosClient.post("/api/v1/assessment-results/bulk", data),
+  saveBulkGrades: (data) =>
+    axiosClient.post("/api/v1/assessment-results/bulk", data),
 };
 export const reportApi = {
   uploadReport: (file, title) => {
-    // Phải dùng FormData để đóng gói file
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
@@ -205,7 +219,7 @@ export const reportApi = {
 
   downloadReport: (fileName) => {
     return axiosClient.get(`/api/v1/reports/download/${fileName}`, {
-      responseType: 'blob',
+      responseType: "blob",
     });
   },
   getMyReports: () => {
@@ -214,12 +228,12 @@ export const reportApi = {
   exportExcel: (search = "", page = 0, size = 10) =>
     axiosClient.get(`/api/v1/reports/export-excel`, {
       params: { search, page, size },
-      responseType: 'blob',
+      responseType: "blob",
     }),
   exportZip: (search = "", page = 0, size = 100) =>
     axiosClient.get(`/api/v1/reports/export-zip`, {
       params: { search, page, size },
-      responseType: 'blob',
+      responseType: "blob",
     }),
 };
 
@@ -230,5 +244,6 @@ export const notificationApi = {
   markAsRead: (id) => {
     return axiosClient.put(`/api/v1/notifications/${id}/read`);
   },
-  markAllAsRead: () => axiosClient.put("/api/v1/notifications/mark-all-as-read")
+  markAllAsRead: () =>
+    axiosClient.put("/api/v1/notifications/mark-all-as-read"),
 };

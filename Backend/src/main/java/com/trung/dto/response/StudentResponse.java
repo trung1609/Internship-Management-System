@@ -23,6 +23,8 @@ public class StudentResponse {
 
     public String studentCode;
 
+    private String avatarUrl;
+
     public String major;
 
     public String classRoom;

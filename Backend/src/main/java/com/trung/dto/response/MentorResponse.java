@@ -14,4 +14,5 @@ public class MentorResponse {
     private String phoneNumber;
     private String department;
     private String academicRank;
+    private String avatarUrl;
 }

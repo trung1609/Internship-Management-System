@@ -15,6 +15,7 @@ public class MentorMapper {
                 .fullName(mentor.getUser().getFullName())
                 .email(mentor.getUser().getEmail())
                 .phoneNumber(mentor.getUser().getPhoneNumber())
+                .avatarUrl(mentor.getUser().getAvatarUrl())
                 .build();
     }
 

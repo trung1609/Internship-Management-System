@@ -14,6 +14,7 @@ public class UserMapper {
                 .email(users.getEmail())
                 .role(users.getRole().name())
                 .phoneNumber(users.getPhoneNumber())
+                .avatarUrl(users.getAvatarUrl())
                 .isActive(users.isActive())
                 .createdAt(users.getCreatedAt())
                 .updatedAt(users.getUpdatedAt())

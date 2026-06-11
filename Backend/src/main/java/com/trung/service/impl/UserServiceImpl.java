@@ -21,7 +21,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -31,6 +33,7 @@ public class UserServiceImpl implements IUserService {
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CurrentUserUtil currentUserUtil;
+    private final FileUploadService fileUploadService;
 
     @Override
     public PageResponseDTO<UserResponse> getAllProfile(String role, PageRequestDTO pageRequestDTO) throws ResourceBadRequestException {
@@ -166,7 +169,7 @@ public class UserServiceImpl implements IUserService {
     public ApiResponse<String> changePassword(ChangePasswordRequest request) throws ResourceBadRequestException {
         User user = currentUserUtil.getCurrentUser();
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
-        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             errorList.put("oldPassword", "Old password is incorrect");
             throw new ResourceBadRequestException("Old password is incorrect", errorList);
         }
@@ -174,5 +177,18 @@ public class UserServiceImpl implements IUserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
         return new ApiResponse<>("Password changed successfully", true, "SUCCESS", null, LocalDateTime.now());
+    }
+
+    @Override
+    public ApiResponse<String> uploadAvatar(Long userId, MultipartFile file) throws ResourceNotFoundException, IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        String avatarUrl = fileUploadService.uploadFile(file);
+
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+
+        return new ApiResponse<>(avatarUrl, true, "Upload avatar successfully", null, LocalDateTime.now());
     }
 }

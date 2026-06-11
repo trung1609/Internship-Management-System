@@ -37,5 +37,6 @@ public class InternshipAssignmentResponse {
         private String name;
         private String code;
         private String major;
+        private String avatarUrl;
     }
 }

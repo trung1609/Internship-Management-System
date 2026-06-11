@@ -14,6 +14,7 @@ public class StudentMapper {
                 .major(student.getMajor())
                 .classRoom(student.getClassRoom())
                 .dateOfBirth(student.getDateOfBirth())
+                .avatarUrl(student.getUser().getAvatarUrl())
                 .address(student.getAddress())
                 .fullName(student.getUser().getFullName())
                 .email(student.getUser().getEmail())

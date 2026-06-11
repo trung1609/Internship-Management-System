@@ -155,6 +155,7 @@ const AssessmentResultsManagement = () => {
                     sx={{ position: "relative", zIndex: 1, mb: 3 }}
                   >
                     <Avatar
+                      src={result?.studentAvatarUrl}
                       sx={{
                         bgcolor: "#1e3c72",
                         width: 56,
@@ -164,9 +165,9 @@ const AssessmentResultsManagement = () => {
                         boxShadow: "0 4px 10px rgba(30,60,114,0.3)",
                       }}
                     >
-                      {result.studentName
+                      {!result?.studentAvatarUrl && result?.studentName
                         ? result.studentName.charAt(0).toUpperCase()
-                        : "S"}
+                        : null}
                     </Avatar>
                     <Box sx={{ ml: 1 }}>
                       <Typography
@@ -174,7 +175,7 @@ const AssessmentResultsManagement = () => {
                         sx={{
                           fontWeight: 800,
                           color: "#0f172a",
-                          lineHeight: 1.2
+                          lineHeight: 1.2,
                         }}
                       >
                         {result.studentName || "Chưa có tên sinh viên"}

@@ -73,6 +73,7 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of("http://localhost:5174", "http://localhost:5173", "https://trung1609.github.io"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

@@ -54,6 +54,8 @@ public class User {
     @OneToOne(mappedBy = "user")
     private Mentor mentor;
 
+    private String avatarUrl;
+
     private boolean isDeleted = false;
 
 }

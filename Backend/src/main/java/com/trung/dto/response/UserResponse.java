@@ -15,6 +15,7 @@ public class UserResponse {
     private String phoneNumber;
     private String email;
     private String role;
+    private String avatarUrl;
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
