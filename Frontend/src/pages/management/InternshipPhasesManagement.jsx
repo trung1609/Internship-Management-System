@@ -282,7 +282,10 @@ const InternshipPhasesManagement = () => {
                   {phase.description || "Chưa có mô tả chi tiết."}
                 </Typography>
 
-                <Stack spacing={1.5} sx={{ mb: 3, position: 'relative', zIndex: 1, bgcolor: '#f8f9fa', p: 2, borderRadius: 3 }}>
+                <Stack spacing={1.5} sx={{ mb: 2, position: 'relative', zIndex: 1, bgcolor: '#f8f9fa', p: 1, borderRadius: 3 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#070707'}}>
+                    ID: <span style={{ fontWeight: 400 }}>{phase.id || 'N/A'}</span>
+                  </Typography>
                   <Stack direction="row" alignItems="center" gap={1.5}>
                     <CalendarMonthIcon sx={{ color: '#757575', fontSize: 20 }} />
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>

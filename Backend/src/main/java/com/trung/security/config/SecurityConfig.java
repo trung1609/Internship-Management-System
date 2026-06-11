@@ -37,11 +37,8 @@ public class SecurityConfig {
             "/api/v1/auth/**"
     };
 
-    private static final String[] ADMIN_ENDPOINTS = {
-            "/api/v1/users/**"
-    };
-
     private static final String[] COMMON_ENDPOINTS = {
+            "/api/v1/users/**",
             "/api/v1/students/**",
             "/api/v1/mentors/**",
             "/api/v1/internship-phases/**",
@@ -59,7 +56,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(ADMIN_ENDPOINTS).hasAuthority("ROLE_ADMIN")
                         .requestMatchers(COMMON_ENDPOINTS).hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
                         .anyRequest().authenticated()
                 )

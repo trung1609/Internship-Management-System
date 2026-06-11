@@ -225,6 +225,7 @@ const MentorsManagement = () => {
                 </Stack>
 
                 <Stack spacing={1} sx={{ position: 'relative', zIndex: 1, mb: 3, flexGrow: 1 }}>
+                  <Typography variant="body2"><strong>ID:</strong> {mentor.id || 'N/A'}</Typography>
                   <Typography variant="body2"><strong>SĐT:</strong> {mentor.phoneNumber || 'N/A'}</Typography>
                   <Typography variant="body2"><strong>Khoa/Phòng:</strong> {mentor.department || 'N/A'}</Typography>
                   <Typography variant="body2"><strong>Học hàm/vị:</strong> {mentor.academicRank || 'N/A'}</Typography>

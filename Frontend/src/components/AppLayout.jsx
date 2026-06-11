@@ -47,7 +47,14 @@ const allMenuItems = [
     label: "Dashboard",
     icon: <DashboardIcon />,
     path: "/dashboard",
-    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR", "STUDENT", "ROLE_STUDENT"],
+    roles: [
+      "ADMIN",
+      "ROLE_ADMIN",
+      "MENTOR",
+      "ROLE_MENTOR",
+      "STUDENT",
+      "ROLE_STUDENT",
+    ],
   },
   {
     label: "My Mentor",
@@ -80,7 +87,14 @@ const allMenuItems = [
   {
     label: "Internship Management",
     icon: <SchoolIcon />,
-    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR", "STUDENT", "ROLE_STUDENT"],
+    roles: [
+      "ADMIN",
+      "ROLE_ADMIN",
+      "MENTOR",
+      "ROLE_MENTOR",
+      "STUDENT",
+      "ROLE_STUDENT",
+    ],
     children: [
       { label: "Internship Phases", path: "/management/phases" },
       { label: "Internship Assignments", path: "/management/assignments" },
@@ -95,7 +109,14 @@ const allMenuItems = [
   {
     label: "Assessment Management",
     icon: <RateReviewIcon />,
-    roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR", "STUDENT", "ROLE_STUDENT"],
+    roles: [
+      "ADMIN",
+      "ROLE_ADMIN",
+      "MENTOR",
+      "ROLE_MENTOR",
+      "STUDENT",
+      "ROLE_STUDENT",
+    ],
     children: [
       { label: "Evaluation Criteria", path: "/management/evaluation-criteria" },
       { label: "Assessment Rounds", path: "/management/assessment-rounds" },
@@ -130,7 +151,7 @@ export const AppLayout = ({ children }) => {
       if (item.children) {
         // Kiểm tra xem URL hiện tại có chứa đường dẫn của bất kỳ mục con nào không
         const isChildActive = item.children.some((child) =>
-          currentPath.includes(child.path)
+          currentPath.includes(child.path),
         );
 
         // Nếu có và menu đang đóng, thì tự động mở nó ra
@@ -190,7 +211,14 @@ export const AppLayout = ({ children }) => {
   };
 
   const DrawerContent = () => (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "#fafafa" }}>
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "#fafafa",
+      }}
+    >
       <Box
         sx={{
           p: 2.5,
@@ -200,7 +228,10 @@ export const AppLayout = ({ children }) => {
           zIndex: 1,
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: "800", mb: 0.5, letterSpacing: "0.5px" }}>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "800", mb: 0.5, letterSpacing: "0.5px" }}
+        >
           📚 Internship System
         </Typography>
         <Typography variant="caption" sx={{ opacity: 0.9, fontWeight: 500 }}>
@@ -213,7 +244,10 @@ export const AppLayout = ({ children }) => {
           <Box key={index} sx={{ mb: 0.5 }}>
             {item.children ? (
               <>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
                   <ListItem
                     component="div"
                     onClick={() => handleMenuToggle(index)}
@@ -221,8 +255,12 @@ export const AppLayout = ({ children }) => {
                       cursor: "pointer",
                       borderRadius: "12px",
                       mb: 0.5,
-                      backgroundColor: expandedItems[index] ? "#ffffff" : "transparent",
-                      boxShadow: expandedItems[index] ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
+                      backgroundColor: expandedItems[index]
+                        ? "#ffffff"
+                        : "transparent",
+                      boxShadow: expandedItems[index]
+                        ? "0 4px 12px rgba(0,0,0,0.05)"
+                        : "none",
                       transition: "all 0.3s ease",
                       "&:hover": {
                         backgroundColor: "#ffffff",
@@ -230,9 +268,21 @@ export const AppLayout = ({ children }) => {
                       },
                     }}
                   >
-                    <ListItemIcon sx={{ color: "#1976d2", minWidth: 42 }}>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 600, color: "#333" }} />
-                    {expandedItems[index] ? <ExpandLess sx={{ color: "#1976d2" }} /> : <ExpandMore sx={{ color: "#999" }} />}
+                    <ListItemIcon sx={{ color: "#1976d2", minWidth: 42 }}>
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        fontWeight: 600,
+                        color: "#333",
+                      }}
+                    />
+                    {expandedItems[index] ? (
+                      <ExpandLess sx={{ color: "#1976d2" }} />
+                    ) : (
+                      <ExpandMore sx={{ color: "#999" }} />
+                    )}
                   </ListItem>
                 </motion.div>
 
@@ -249,7 +299,9 @@ export const AppLayout = ({ children }) => {
                             py: 1.2,
                             borderRadius: "10px",
                             mb: 0.5,
-                            backgroundColor: isActive(child.path) ? "rgba(25, 118, 210, 0.08)" : "transparent",
+                            backgroundColor: isActive(child.path)
+                              ? "rgba(25, 118, 210, 0.08)"
+                              : "transparent",
                             color: isActive(child.path) ? "#1976d2" : "#555",
                             "&:hover": {
                               backgroundColor: "rgba(25, 118, 210, 0.05)",
@@ -257,7 +309,12 @@ export const AppLayout = ({ children }) => {
                             },
                           }}
                         >
-                          <ListItemText primary={child.label} primaryTypographyProps={{ fontWeight: isActive(child.path) ? 700 : 500 }} />
+                          <ListItemText
+                            primary={child.label}
+                            primaryTypographyProps={{
+                              fontWeight: isActive(child.path) ? 700 : 500,
+                            }}
+                          />
                         </ListItem>
                       </motion.div>
                     ))}
@@ -265,16 +322,25 @@ export const AppLayout = ({ children }) => {
                 </Collapse>
               </>
             ) : (
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <ListItem
                   component="div"
                   onClick={() => handleNavigate(item.path)}
                   sx={{
                     cursor: "pointer",
                     borderRadius: "12px",
-                    backgroundColor: isActive(item.path) ? "#ffffff" : "transparent",
-                    boxShadow: isActive(item.path) ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
-                    borderLeft: isActive(item.path) ? "4px solid #1976d2" : "4px solid transparent",
+                    backgroundColor: isActive(item.path)
+                      ? "#ffffff"
+                      : "transparent",
+                    boxShadow: isActive(item.path)
+                      ? "0 4px 12px rgba(0,0,0,0.05)"
+                      : "none",
+                    borderLeft: isActive(item.path)
+                      ? "4px solid #1976d2"
+                      : "4px solid transparent",
                     transition: "all 0.3s ease",
                     "&:hover": {
                       backgroundColor: "#ffffff",
@@ -282,8 +348,21 @@ export const AppLayout = ({ children }) => {
                     },
                   }}
                 >
-                  <ListItemIcon sx={{ color: isActive(item.path) ? "#1976d2" : "#777", minWidth: 42 }}>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: isActive(item.path) ? 700 : 500, color: isActive(item.path) ? "#1976d2" : "#333" }} />
+                  <ListItemIcon
+                    sx={{
+                      color: isActive(item.path) ? "#1976d2" : "#777",
+                      minWidth: 42,
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontWeight: isActive(item.path) ? 700 : 500,
+                      color: isActive(item.path) ? "#1976d2" : "#333",
+                    }}
+                  />
                 </ListItem>
               </motion.div>
             )}
@@ -291,7 +370,14 @@ export const AppLayout = ({ children }) => {
         ))}
       </List>
 
-      <Box sx={{ p: 2.5, background: "#ffffff", borderTop: "1px solid #f0f0f0", boxShadow: "0 -4px 15px rgba(0,0,0,0.02)" }}>
+      <Box
+        sx={{
+          p: 2.5,
+          background: "#ffffff",
+          borderTop: "1px solid #f0f0f0",
+          boxShadow: "0 -4px 15px rgba(0,0,0,0.02)",
+        }}
+      >
         <Paper
           elevation={0}
           sx={{
@@ -300,17 +386,35 @@ export const AppLayout = ({ children }) => {
             background: "linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)",
             border: "1px solid #e0e0e0",
             borderRadius: "12px",
-            boxShadow: "inset 0 2px 4px rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.04)",
+            boxShadow:
+              "inset 0 2px 4px rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.04)",
           }}
         >
-          <Typography variant="caption" sx={{ display: "block", mb: 0.5, color: "#757575", fontWeight: 600 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              mb: 0.5,
+              color: "#757575",
+              fontWeight: 600,
+            }}
+          >
             Tài khoản hiện tại
           </Typography>
-          <Typography variant="body2" sx={{ fontWeight: "800", mb: 1, color: "#2c3e50" }}>
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: "800", mb: 1, color: "#2c3e50" }}
+          >
             {user?.fullName || user?.username}
           </Typography>
           <Chip
-            label={user?.role?.includes("ADMIN") ? "Administrator" : user?.role?.includes("MENTOR") ? "Mentor" : "Student"}
+            label={
+              user?.role?.includes("ADMIN")
+                ? "Administrator"
+                : user?.role?.includes("MENTOR")
+                  ? "Mentor"
+                  : "Student"
+            }
             size="small"
             sx={{
               backgroundColor: getRoleColor(user?.role),
@@ -342,7 +446,10 @@ export const AppLayout = ({ children }) => {
             <ListItemIcon sx={{ color: "#d32f2f", minWidth: 40 }}>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary="Đăng xuất" primaryTypographyProps={{ fontWeight: 700 }} />
+            <ListItemText
+              primary="Đăng xuất"
+              primaryTypographyProps={{ fontWeight: 700 }}
+            />
           </ListItem>
         </motion.div>
       </Box>
@@ -362,24 +469,39 @@ export const AppLayout = ({ children }) => {
           }}
         >
           <Toolbar>
-            <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: "none" } }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2, display: { sm: "none" } }}
+            >
               {mobileOpen ? <CloseIcon /> : <MenuIcon />}
             </IconButton>
-            <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "700", letterSpacing: "0.5px" }}>
+            <Typography
+              variant="h6"
+              sx={{ flexGrow: 1, fontWeight: "700", letterSpacing: "0.5px" }}
+            >
               Internship Management System
             </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <NotificationBell />
 
-              <IconButton color="inherit" size="large">
+              <IconButton
+                color="inherit"
+                size="large"
+                onClick={() => navigate("/settings")}
+              >
                 <SettingsIcon />
               </IconButton>
             </Box>
           </Toolbar>
         </AppBar>
 
-        <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+        <Box
+          component="nav"
+          sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        >
           <Drawer
             variant="temporary"
             open={mobileOpen}
@@ -387,7 +509,10 @@ export const AppLayout = ({ children }) => {
             ModalProps={{ keepMounted: true }}
             sx={{
               display: { xs: "block", sm: "none" },
-              "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: drawerWidth,
+              },
             }}
           >
             <DrawerContent />
@@ -474,7 +599,10 @@ export const AppLayout = ({ children }) => {
           >
             <WarningIcon sx={{ fontSize: 40, color: "#d32f2f" }} />
           </Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: "#1e293b", mb: 1.5 }}>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: 800, color: "#1e293b", mb: 1.5 }}
+          >
             Xác nhận đăng xuất
           </Typography>
           <Typography variant="body1" sx={{ color: "#64748b", mb: 2 }}>

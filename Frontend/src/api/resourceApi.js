@@ -65,6 +65,8 @@ export const userApi = {
 
   // Delete user (Admin) - returns ApiResponse
   deleteUser: (userId) => axiosClient.delete(`/api/v1/users/${userId}`),
+
+  changePassword: (data) => axiosClient.post("/api/v1/users/change-password", data),
 };
 
 export const internshipPhaseApi = {

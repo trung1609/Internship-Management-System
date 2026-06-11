@@ -213,17 +213,18 @@ const StudentsManagement = () => {
                       {student.fullName || "Chưa cập nhật"}
                     </Typography>
                     <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
-                      {student.studentCode}
+                      {`MSSV: ${student.studentCode }`}
                     </Typography>
                   </Box>
                 </Stack>
 
                 <Stack direction="row" spacing={1} sx={{ mb: 2, position: 'relative', zIndex: 1 }}>
                   {student.classRoom && <Chip label={`Lớp: ${student.classRoom}`} size="small" color="info" variant="outlined" />}
-                  {student.major && <Chip label={student.major} size="small" color="success" variant="outlined" />}
+                  {student.major && <Chip label={`Ngành học: ${student.major}`} size="small" color="success" variant="outlined" />}
                 </Stack>
 
                 <Stack spacing={1} sx={{ position: 'relative', zIndex: 1, mb: 3, flexGrow: 1 }}>
+                  <Typography variant="body2"><strong>ID:</strong> {student.studentId || 'N/A'}</Typography>
                   <Typography variant="body2"><strong>Email:</strong> {student.email || 'N/A'}</Typography>
                   <Typography variant="body2"><strong>SĐT:</strong> {student.phoneNumber || 'N/A'}</Typography>
                   <Typography variant="body2"><strong>Ngày sinh:</strong> {student.dateOfBirth || 'N/A'}</Typography>

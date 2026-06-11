@@ -31,6 +31,7 @@ import { AnimatePresence } from "framer-motion";
 import AssignmentDetail from "./pages/AssignmentDetail";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   const location = useLocation();
@@ -184,6 +185,14 @@ function App() {
               element={
                 <AppLayout>
                   <AssignmentDetail />
+                </AppLayout>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <AppLayout>
+                  <SettingsPage />
                 </AppLayout>
               }
             />

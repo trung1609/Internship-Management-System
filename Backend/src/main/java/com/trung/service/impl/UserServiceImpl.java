@@ -1,11 +1,9 @@
 package com.trung.service.impl;
 
+import com.trung.dto.request.*;
 import com.trung.entity.User;
+import com.trung.util.CurrentUserUtil;
 import com.trung.util.enums.Role;
-import com.trung.dto.request.PageRequestDTO;
-import com.trung.dto.request.UpdateRoleRequest;
-import com.trung.dto.request.UserCreateRequest;
-import com.trung.dto.request.UserUpdateRequest;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.UserResponse;
@@ -32,6 +30,7 @@ import java.util.Map;
 public class UserServiceImpl implements IUserService {
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CurrentUserUtil currentUserUtil;
 
     @Override
     public PageResponseDTO<UserResponse> getAllProfile(String role, PageRequestDTO pageRequestDTO) throws ResourceBadRequestException {
@@ -107,8 +106,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public ApiResponse<UserResponse> updateProfile(Long id, UserUpdateRequest userUpdateRequest) throws ResourceConflictException, ResourceNotFoundException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
-        User existingUser = userRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        User existingUser = currentUserUtil.getCurrentUser();
         if (userRepository.existsByUsernameAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(userUpdateRequest.getUsername(), id)) {
             errorList.put("username", "Username already exists");
         }
@@ -162,5 +160,19 @@ public class UserServiceImpl implements IUserService {
         users.setActive(false);
         userRepository.save(users);
         return new ApiResponse<>("User deleted successfully", true, "SUCCESS", null, LocalDateTime.now());
+    }
+
+    @Override
+    public ApiResponse<String> changePassword(ChangePasswordRequest request) throws ResourceBadRequestException {
+        User user = currentUserUtil.getCurrentUser();
+        Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())){
+            errorList.put("oldPassword", "Old password is incorrect");
+            throw new ResourceBadRequestException("Old password is incorrect", errorList);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        return new ApiResponse<>("Password changed successfully", true, "SUCCESS", null, LocalDateTime.now());
     }
 }

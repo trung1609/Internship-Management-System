@@ -1,9 +1,6 @@
 package com.trung.service;
 
-import com.trung.dto.request.UpdateRoleRequest;
-import com.trung.dto.request.UserCreateRequest;
-import com.trung.dto.request.PageRequestDTO;
-import com.trung.dto.request.UserUpdateRequest;
+import com.trung.dto.request.*;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.UserResponse;
@@ -20,4 +17,5 @@ public interface IUserService {
     ApiResponse<UserResponse> updateStatus(Long id) throws ResourceConflictException, ResourceNotFoundException;
     ApiResponse<UserResponse> updateRole(Long id, UpdateRoleRequest request) throws ResourceConflictException, ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException;
     ApiResponse<String> deleteProfile(Long id) throws ResourceConflictException, ResourceNotFoundException;
+    ApiResponse<String> changePassword(ChangePasswordRequest request) throws ResourceBadRequestException;
 }
