@@ -332,7 +332,7 @@ const StudentReportSubmit = () => {
                       edge="end"
                       color="primary"
                       onClick={() =>
-                        handleDownload(report.storedFileName, report.title)
+                        handleDownload(report)
                       }
                     >
                       <DownloadIcon />
