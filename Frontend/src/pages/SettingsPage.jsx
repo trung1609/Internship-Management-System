@@ -1,572 +1,284 @@
-import { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
-  Box,
-  Typography,
-  Paper,
-  Tabs,
-  Tab,
-  Button,
-  Stack,
-  TextField,
-  CircularProgress,
-  Alert,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
-  InputAdornment,
-  IconButton,
-  FormHelperText,
-  Avatar,
-  Chip,
-  Badge,
+  Box, Typography, Paper, Button, Stack, TextField, CircularProgress,
+  FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton,
+  FormHelperText, Avatar, Chip, Badge, Grid, Divider
 } from "@mui/material";
 import {
-  Visibility,
-  VisibilityOff,
-  Security,
-  Person,
-  Edit,
-  LockReset,
-  Settings as SettingsIcon,
-  ArrowBack,
-  PhotoCamera,
+  Visibility, VisibilityOff, Security, Person, Edit, LockReset,
+  ArrowBack, PhotoCamera, EmailOutlined, PhoneIphoneOutlined,
+  BadgeOutlined, VerifiedUserOutlined, WorkspacePremium
 } from "@mui/icons-material";
-import { authApi } from "../api/authApi"; // Đảm bảo bạn đã thêm API updateProfile và changePassword vào đây
+import { authApi } from "../api/authApi";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import { userApi } from "../api/resourceApi";
 import { useNavigate } from "react-router-dom";
+import { styled, keyframes } from "@mui/system";
 
-// Component hỗ trợ chuyển Tab
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index} {...other}>
-      {value === index && (
-        <Box sx={{ py: 3 }}>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {children}
-          </motion.div>
-        </Box>
-      )}
-    </div>
-  );
-}
+// Hiệu ứng vòng sáng nhịp thở cho Avatar
+const pulseGlow = keyframes`
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+`;
+
+// Nút Menu Sidebar tùy chỉnh
+const SidebarButton = styled(Button)(({ theme, active }) => ({
+  justifyContent: 'flex-start',
+  padding: '12px 20px',
+  borderRadius: '12px',
+  color: active ? '#2563eb' : '#64748b',
+  backgroundColor: active ? '#eff6ff' : 'transparent',
+  fontWeight: active ? 700 : 600,
+  textTransform: 'none',
+  fontSize: '0.95rem',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  '&:hover': {
+    backgroundColor: active ? '#eff6ff' : '#f8fafc',
+    transform: 'translateX(4px)'
+  },
+  '& .MuiButton-startIcon': {
+    color: active ? '#2563eb' : '#94a3b8',
+    transition: 'all 0.3s',
+  }
+}));
+
+// Thẻ hiển thị thông tin Bento Grid
+const BentoCard = ({ icon, label, value }) => (
+  <Box
+    component={motion.div}
+    whileHover={{ y: -4, boxShadow: '0 12px 24px -10px rgba(37,99,235,0.2)' }}
+    sx={{
+      p: 2.5,
+      borderRadius: 4,
+      bgcolor: 'rgba(255, 255, 255, 0.6)',
+      backdropFilter: 'blur(20px)',
+      border: '1px solid rgba(255,255,255,0.8)',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 2,
+    }}
+  >
+    <Box sx={{ p: 1.2, borderRadius: 2.5, bgcolor: '#ffffff', color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+      {icon}
+    </Box>
+    <Box>
+      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, letterSpacing: '0.5px' }}>
+        {label}
+      </Typography>
+      <Typography variant="body1" sx={{ fontWeight: 700, color: '#1e293b', mt: 0.5 }}>
+        {value || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>Trống</span>}
+      </Typography>
+    </Box>
+  </Box>
+);
 
 const SettingsPage = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [tabValue, setTabValue] = useState(0);
+  const [activeMenu, setActiveMenu] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [loadingAvatar, setLoadingAvatar] = useState(false);
 
-  // States cho form đổi mật khẩu
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loadingAvatar, setLoadingAvatar] = useState(false);
 
-  // Form Cập nhật thông tin
-  const {
-    register: regProfile,
-    handleSubmit: handleProfileSubmit,
-    reset: resetProfile,
-    formState: { errors: profileErrors },
-  } = useForm();
-
-  // Form Đổi mật khẩu
-  const {
-    register: regPassword,
-    handleSubmit: handlePasswordSubmit,
-    watch,
-    reset: resetPasswordForm,
-    formState: { errors: passwordErrors },
-  } = useForm();
+  const { register: regProfile, handleSubmit: handleProfileSubmit, reset: resetProfile, formState: { errors: profileErrors } } = useForm();
+  const { register: regPassword, handleSubmit: handlePasswordSubmit, watch, reset: resetPasswordForm, formState: { errors: passwordErrors } } = useForm();
 
   const fetchProfile = async () => {
     try {
       const res = await authApi.getMe();
-
       setProfileData(res.data);
-
       resetProfile({
         username: res.data.username || "",
         fullName: res.data.fullName || "",
         email: res.data.email || "",
         phoneNumber: res.data.phoneNumber || "",
       });
-    } catch (error) {
-      toast.error("Không thể tải thông tin cá nhân");
-    }
+    } catch (error) { toast.error("Không thể tải thông tin cá nhân"); }
   };
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const preventCopyPaste = (e) => e.preventDefault();
+  useEffect(() => { fetchProfile(); }, []);
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const objectUrl = URL.createObjectURL(file);
-    setAvatarPreview(objectUrl);
+    setAvatarPreview(URL.createObjectURL(file));
     const currentUserId = user?.userId || user?.id;
-    if (!currentUserId) {
-      toast.error("Không tìm thấy ID người dùng!");
-      return;
-    }
     const formData = new FormData();
     formData.append("file", file);
     try {
       setLoadingAvatar(true);
       await userApi.uploadAvatar(currentUserId, formData);
-      toast.success("Upload ảnh đại diện thành công!");
+      toast.success("Cập nhật ảnh đại diện đỉnh cao!");
       await fetchProfile();
-    } catch (error) {
-      toast.error("Lỗi upload ảnh đại diện!");
-    } finally {
-      setLoadingAvatar(false);
-    }
+    } catch (error) { toast.error("Lỗi upload ảnh đại diện!"); }
+    finally { setLoadingAvatar(false); }
   };
 
-  // Xử lý Cập nhật thông tin
   const onUpdateProfile = async (data) => {
     setIsLoading(true);
     try {
-      const currentUserId = user?.userId || user?.id;
-
-      if (!currentUserId) {
-        toast.error("Không tìm thấy ID người dùng!");
-        return;
-      }
-
-      await userApi.updateUser(currentUserId, data);
-      toast.success("Cập nhật thông tin thành công!");
-
+      await userApi.updateUser(user?.userId || user?.id, data);
+      toast.success("Lưu thông tin thành công!");
       await fetchProfile();
-    } catch (error) {
-      const responseData = error.response?.data;
-
-      if (responseData?.error && typeof responseData.error === "object") {
-        const errorMessages = Object.values(responseData.error).join(" | ");
-        toast.error(errorMessages);
-      } else {
-        toast.error("Cập nhật thất bại. Vui lòng kiểm tra lại dữ liệu!");
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    } catch (error) { toast.error("Cập nhật thất bại!"); }
+    finally { setIsLoading(false); }
   };
 
-  // Xử lý Đổi mật khẩu
   const onChangePassword = async (data) => {
     setIsLoading(true);
     try {
-      await userApi.changePassword({
-        oldPassword: data.oldPassword,
-        newPassword: data.newPassword,
-        confirmPassword: data.confirmPassword,
-      });
-      toast.success("Đổi mật khẩu thành công!");
+      await userApi.changePassword(data);
+      toast.success("Bảo mật tài khoản thành công!");
       resetPasswordForm();
-    } catch (error) {
-      const errMsg = error.response?.error?.message;
-      toast.error(errMsg);
-    } finally {
-      setIsLoading(false);
+    } catch (error) { toast.error("Đổi mật khẩu thất bại"); }
+    finally { setIsLoading(false); }
+  };
+
+  // Ánh xạ Component theo Menu
+  const renderContent = () => {
+    switch (activeMenu) {
+      case 'profile':
+        return (
+          <Box component={motion.div} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <WorkspacePremium sx={{ color: '#fbbf24', fontSize: 28 }} />
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1e293b' }}>Hồ Sơ Của Tôi</Typography>
+            </Box>
+            <Grid container spacing={2.5}>
+              <Grid item xs={12} sm={6}><BentoCard icon={<BadgeOutlined />} label="Tên đăng nhập" value={profileData?.username} /></Grid>
+              <Grid item xs={12} sm={6}><BentoCard icon={<Person />} label="Họ và tên" value={profileData?.fullName} /></Grid>
+              <Grid item xs={12} sm={6}><BentoCard icon={<EmailOutlined />} label="Email" value={profileData?.email} /></Grid>
+              <Grid item xs={12} sm={6}><BentoCard icon={<PhoneIphoneOutlined />} label="Số điện thoại" value={profileData?.phoneNumber} /></Grid>
+            </Grid>
+          </Box>
+        );
+      case 'edit':
+        return (
+          <Box component={motion.div} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+            <Box sx={{ mb: 4 }}><Typography variant="h6" sx={{ fontWeight: 800, color: '#1e293b' }}>Chỉnh Sửa Thông Tin</Typography></Box>
+            <Box component="form" onSubmit={handleProfileSubmit(onUpdateProfile)}>
+              <Stack spacing={3}>
+                <TextField fullWidth label="Tên đăng nhập" {...regProfile("username")} disabled sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#f8fafc', borderRadius: 3 } }} />
+                <TextField fullWidth label="Họ và Tên" {...regProfile("fullName", { required: "Bắt buộc" })} error={!!profileErrors.fullName} helperText={profileErrors.fullName?.message} sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 3 } }} />
+                <TextField fullWidth label="Email" type="email" {...regProfile("email", { required: "Bắt buộc" })} error={!!profileErrors.email} helperText={profileErrors.email?.message} sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 3 } }} />
+                <TextField fullWidth label="Số điện thoại" {...regProfile("phoneNumber")} error={!!profileErrors.phoneNumber} helperText={profileErrors.phoneNumber?.message} sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 3 } }} />
+                <Button type="submit" variant="contained" disabled={isLoading} sx={{ py: 1.5, borderRadius: 3, fontWeight: 700, background: 'linear-gradient(to right, #2563eb, #3b82f6)', boxShadow: '0 8px 16px rgba(37,99,235,0.2)' }}>
+                  {isLoading ? <CircularProgress size={24} color="inherit" /> : "Lưu Thay Đổi"}
+                </Button>
+              </Stack>
+            </Box>
+          </Box>
+        );
+      case 'security':
+        return (
+          <Box component={motion.div} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+            <Box sx={{ mb: 4 }}><Typography variant="h6" sx={{ fontWeight: 800, color: '#1e293b' }}>Bảo Mật Tài Khoản</Typography></Box>
+            <Box component="form" onSubmit={handlePasswordSubmit(onChangePassword)}>
+              <Stack spacing={3}>
+                <FormControl fullWidth variant="outlined" error={!!passwordErrors.oldPassword}>
+                  <InputLabel>Mật khẩu hiện tại</InputLabel>
+                  <OutlinedInput type={showOldPassword ? "text" : "password"} {...regPassword("oldPassword", { required: "Bắt buộc" })} endAdornment={<InputAdornment position="end"><IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">{showOldPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>} label="Mật khẩu hiện tại" sx={{ borderRadius: 3, bgcolor: '#fff' }} />
+                </FormControl>
+                <FormControl fullWidth variant="outlined" error={!!passwordErrors.newPassword}>
+                  <InputLabel>Mật khẩu mới</InputLabel>
+                  <OutlinedInput type={showNewPassword ? "text" : "password"} {...regPassword("newPassword", { required: "Bắt buộc" })} endAdornment={<InputAdornment position="end"><IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">{showNewPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>} label="Mật khẩu mới" sx={{ borderRadius: 3, bgcolor: '#fff' }} />
+                </FormControl>
+                <FormControl fullWidth variant="outlined" error={!!passwordErrors.confirmPassword}>
+                  <InputLabel>Xác nhận mật khẩu</InputLabel>
+                  <OutlinedInput type={showConfirmPassword ? "text" : "password"} {...regPassword("confirmPassword", { validate: (val) => val === watch("newPassword") || "Mật khẩu không khớp" })} endAdornment={<InputAdornment position="end"><IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">{showConfirmPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>} label="Xác nhận mật khẩu" sx={{ borderRadius: 3, bgcolor: '#fff' }} />
+                  {passwordErrors.confirmPassword && <FormHelperText error>{passwordErrors.confirmPassword.message}</FormHelperText>}
+                </FormControl>
+                <Button type="submit" variant="contained" color="error" disabled={isLoading} startIcon={<LockReset />} sx={{ py: 1.5, borderRadius: 3, fontWeight: 700, background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', boxShadow: '0 8px 16px rgba(239,68,68,0.2)' }}>
+                  {isLoading ? <CircularProgress size={24} color="inherit" /> : "Cập Nhật Mật Khẩu"}
+                </Button>
+              </Stack>
+            </Box>
+          </Box>
+        );
+      default: return null;
     }
   };
 
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", p: { xs: 2, md: 4 } }}>
-      <Button
-        startIcon={<ArrowBack />}
-        onClick={() => navigate(-1)} // Navigate(-1) quay lại đúng trang trước đó
-        sx={{
-          mb: 2,
-          color: "#64748b",
-          fontWeight: 600,
-          "&:hover": { backgroundColor: "#f1f5f9" },
-        }}
-      >
-        Quay lại
-      </Button>
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: 800,
-          color: "#1e293b",
-          mb: 4,
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        <SettingsIcon fontSize="large" sx={{ color: "#2563eb" }} /> Cài đặt Tài
-        khoản
-      </Typography>
+    <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)', py: { xs: 4, md: 8 }, px: { xs: 2, md: 4 }, position: 'relative', overflow: 'hidden' }}>
+      {/* Background Orbs */}
+      <Box sx={{ position: 'absolute', top: '-10%', left: '-5%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(37,99,235,0.05) 0%, rgba(255,255,255,0) 70%)', zIndex: 0 }} />
+      <Box sx={{ position: 'absolute', bottom: '-10%', right: '-5%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(239,68,68,0.03) 0%, rgba(255,255,255,0) 70%)', zIndex: 0 }} />
 
-      <Paper
-        sx={{
-          borderRadius: 4,
-          overflow: "hidden",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-        }}
-      >
-        <Box
-          sx={{ borderBottom: 1, borderColor: "divider", bgcolor: "#f8fafc" }}
-        >
-          <Tabs
-            value={tabValue}
-            onChange={(e, newValue) => setTabValue(newValue)}
-            variant="fullWidth"
-          >
-            <Tab
-              icon={<Person />}
-              iconPosition="start"
-              label="Hồ sơ của tôi"
-              sx={{ fontWeight: 600, py: 2.5 }}
-            />
-            <Tab
-              icon={<Edit />}
-              iconPosition="start"
-              label="Cập nhật thông tin"
-              sx={{ fontWeight: 600, py: 2.5 }}
-            />
-            <Tab
-              icon={<Security />}
-              iconPosition="start"
-              label="Đổi mật khẩu"
-              sx={{ fontWeight: 600, py: 2.5 }}
-            />
-          </Tabs>
-        </Box>
+      <Box sx={{ maxWidth: 1100, mx: "auto", position: 'relative', zIndex: 1 }}>
+        <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 4, color: '#64748b', fontWeight: 600, bgcolor: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', borderRadius: 3, px: 2, py: 1 }}>
+          Quay lại Hệ Thống
+        </Button>
 
-        {/* TAB 1: XEM THÔNG TIN */}
-        <CustomTabPanel value={tabValue} index={0}>
-          <Box
-            sx={{
-              px: 4,
-              py: 2,
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              gap: 4,
-              alignItems: "center",
-            }}
-          >
-            <Box sx={{ position: "relative" }}>
-              <input
-                accept="image/*"
-                style={{ display: "none" }}
-                id="avatar-upload-input"
-                type="file"
-                onChange={handleAvatarChange}
-              />
-              <label htmlFor="avatar-upload-input">
-                <Badge
-                  overlap="circular"
-                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                  badgeContent={
-                    <IconButton
-                      component="span"
-                      sx={{
-                        bgcolor: "#2563eb",
-                        color: "white",
-                        width: 40,
-                        height: 40,
-                        "&:hover": { bgcolor: "#1d4ed8" },
-                      }}
-                    >
-                      {loadingAvatar ? (
-                        <CircularProgress size={20} color="inherit" />
-                      ) : (
-                        <PhotoCamera fontSize="small" />
-                      )}
-                    </IconButton>
-                  }
-                >
-                  <Avatar
-                    // Ưu tiên hiển thị ảnh vừa chọn, sau đó đến ảnh từ DB
-                    src={avatarPreview || profileData?.avatarUrl}
-                    sx={{
-                      width: 130,
-                      height: 130,
-                      bgcolor: "#e0e7ff",
-                      color: "#3b82f6",
-                      fontSize: "3.5rem",
-                      fontWeight: 800,
-                      border: "4px solid white",
-                      boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                    }}
+        <Paper sx={{ borderRadius: 6, bgcolor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.8)', boxShadow: '0 24px 48px -12px rgba(0,0,0,0.08)', overflow: "hidden", display: 'flex', flexDirection: { xs: 'column', md: 'row' }, minHeight: 600 }}>
+
+          {/* CỘT TRÁI: SIDEBAR & AVATAR */}
+          <Box sx={{ width: { xs: '100%', md: 320 }, bgcolor: 'rgba(255, 255, 255, 0.5)', borderRight: { md: '1px solid rgba(0,0,0,0.04)' }, borderBottom: { xs: '1px solid rgba(0,0,0,0.04)', md: 'none' }, p: 4, display: 'flex', flexDirection: 'column' }}>
+
+            {/* Khối Avatar Tương tác cao */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 5 }}>
+              <Box sx={{ position: "relative" }}>
+                <input accept="image/*" style={{ display: "none" }} id="avatar-upload-input" type="file" onChange={handleAvatarChange} />
+                <label htmlFor="avatar-upload-input">
+                  <Badge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    badgeContent={
+                      <motion.div whileHover={{ scale: 1.1, rotate: 15 }} whileTap={{ scale: 0.9 }}>
+                        <IconButton component="span" sx={{ bgcolor: "#2563eb", color: "white", width: 40, height: 40, border: '3px solid #fff', boxShadow: '0 4px 10px rgba(37,99,235,0.3)', "&:hover": { bgcolor: "#1d4ed8" } }}>
+                          {loadingAvatar ? <CircularProgress size={20} color="inherit" /> : <PhotoCamera fontSize="small" />}
+                        </IconButton>
+                      </motion.div>
+                    }
                   >
-                    {/* Chỉ hiện chữ cái khi không có ảnh */}
-                    {!avatarPreview &&
-                      !profileData?.avatarUrl &&
-                      profileData?.username?.charAt(0).toUpperCase()}
-                  </Avatar>
-                </Badge>
-              </label>
+                    <motion.div
+                      whileHover={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                      style={{ cursor: 'pointer', borderRadius: '50%', animation: `${pulseGlow} 3s infinite` }}
+                    >
+                      <Avatar
+                        src={avatarPreview || profileData?.avatarUrl}
+                        sx={{ width: 140, height: 140, bgcolor: "#e2e8f0", color: "#3b82f6", fontSize: "3.5rem", fontWeight: 800, border: "4px solid white", boxShadow: "inset 0 4px 10px rgba(0,0,0,0.1)" }}
+                      >
+                        {!avatarPreview && !profileData?.avatarUrl && profileData?.username?.charAt(0).toUpperCase()}
+                      </Avatar>
+                    </motion.div>
+                  </Badge>
+                </label>
+              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, mt: 2, color: '#1e293b' }}>
+                {profileData?.fullName || profileData?.username}
+              </Typography>
+              <Chip icon={<VerifiedUserOutlined sx={{ fontSize: 16 }} />} label={profileData?.role?.replace('ROLE_', '') || 'USER'} size="small" sx={{ mt: 1, bgcolor: 'rgba(37,99,235,0.1)', color: '#2563eb', fontWeight: 700, borderRadius: 2 }} />
             </Box>
-            <Box sx={{ flex: 1, width: "100%" }}>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Tên đăng nhập
-                  </Typography>
-                  <Typography variant="h6" fontWeight="700">
-                    {profileData?.username}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Họ và Tên
-                  </Typography>
-                  <Typography variant="body1" fontWeight="600">
-                    {profileData?.fullName || "Chưa cập nhật"}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Email
-                  </Typography>
-                  <Typography variant="body1" fontWeight="600">
-                    {profileData?.email}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Số điện thoại
-                  </Typography>
-                  <Typography variant="body1" fontWeight="600">
-                    {profileData?.phoneNumber || "Chưa cập nhật"}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Vai trò hệ thống
-                  </Typography>
-                  <Box sx={{ mt: 0.5 }}>
-                    <Chip
-                      label={profileData?.role}
-                      color="primary"
-                      size="small"
-                      sx={{ fontWeight: 700 }}
-                    />
-                  </Box>
-                </Box>
-              </Stack>
-            </Box>
-          </Box>
-        </CustomTabPanel>
 
-        {/* TAB 2: SỬA THÔNG TIN */}
-        <CustomTabPanel value={tabValue} index={1}>
-          <Box
-            component="form"
-            onSubmit={handleProfileSubmit(onUpdateProfile)}
-            sx={{ px: { xs: 2, md: 4 } }}
-          >
-            <Stack spacing={3}>
-              <TextField
-                fullWidth
-                label="Tên đăng nhập"
-                {...regProfile("username")}
-                disabled
-              />
-              <TextField
-                fullWidth
-                label="Họ và Tên"
-                {...regProfile("fullName", {
-                  required: "Vui lòng nhập họ tên",
-                })}
-                error={!!profileErrors.fullName}
-                helperText={profileErrors.fullName?.message}
-              />
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                {...regProfile("email", { required: "Vui lòng nhập Email" })}
-                error={!!profileErrors.email}
-                helperText={profileErrors.email?.message}
-              />
-              <TextField
-                fullWidth
-                label="Số điện thoại"
-                {...regProfile("phoneNumber")}
-                error={!!profileErrors.phoneNumber}
-                helperText={profileErrors.phoneNumber?.message}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={isLoading}
-                sx={{ py: 1.5, fontWeight: 700, borderRadius: 2 }}
-              >
-                {isLoading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Lưu Thay Đổi"
-                )}
-              </Button>
+            {/* Menu Điều Hướng */}
+            <Stack spacing={1} sx={{ flexGrow: 1 }}>
+              <SidebarButton active={activeMenu === 'profile'} onClick={() => setActiveMenu('profile')} startIcon={<Person />}>Thông tin chung</SidebarButton>
+              <SidebarButton active={activeMenu === 'edit'} onClick={() => setActiveMenu('edit')} startIcon={<Edit />}>Cập nhật hồ sơ</SidebarButton>
+              <SidebarButton active={activeMenu === 'security'} onClick={() => setActiveMenu('security')} startIcon={<Security />}>Bảo mật</SidebarButton>
             </Stack>
           </Box>
-        </CustomTabPanel>
 
-        {/* TAB 3: ĐỔI MẬT KHẨU */}
-        <CustomTabPanel value={tabValue} index={2}>
-          <Box
-            component="form"
-            onSubmit={handlePasswordSubmit(onChangePassword)}
-            sx={{ px: { xs: 2, md: 4 }, maxWidth: 500, mx: "auto" }}
-          >
-            <Stack spacing={3}>
-              {/* Mật khẩu cũ */}
-              <FormControl
-                fullWidth
-                variant="outlined"
-                error={!!passwordErrors.oldPassword}
-              >
-                <InputLabel>Mật khẩu hiện tại</InputLabel>
-                <OutlinedInput
-                  type={showOldPassword ? "text" : "password"}
-                  {...regPassword("oldPassword", {
-                    required: "Vui lòng nhập mật khẩu hiện tại",
-                  })}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowOldPassword(!showOldPassword)}
-                        onMouseDown={(e) => e.preventDefault()}
-                        edge="end"
-                      >
-                        {showOldPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Mật khẩu hiện tại"
-                  sx={{ borderRadius: 2 }}
-                />
-                {passwordErrors.oldPassword && (
-                  <FormHelperText error>
-                    {passwordErrors.oldPassword.message}
-                  </FormHelperText>
-                )}
-              </FormControl>
-
-              {/* Mật khẩu mới */}
-              <FormControl
-                fullWidth
-                variant="outlined"
-                error={!!passwordErrors.newPassword}
-              >
-                <InputLabel>Mật khẩu mới</InputLabel>
-                <OutlinedInput
-                  type={showNewPassword ? "text" : "password"}
-                  onCopy={preventCopyPaste}
-                  onPaste={preventCopyPaste}
-                  onCut={preventCopyPaste}
-                  {...regPassword("newPassword", {
-                    required: "Vui lòng nhập mật khẩu mới",
-                    pattern: {
-                      value:
-                        /^(|(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,})$/,
-                      message:
-                        "Mật khẩu yếu. Yêu cầu 8 ký tự gồm chữ hoa, thường, số, ký tự đặc biệt.",
-                    },
-                  })}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                        onMouseDown={(e) => e.preventDefault()}
-                        edge="end"
-                      >
-                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Mật khẩu mới"
-                  sx={{ borderRadius: 2 }}
-                />
-                {passwordErrors.newPassword && (
-                  <FormHelperText error>
-                    {passwordErrors.newPassword.message}
-                  </FormHelperText>
-                )}
-              </FormControl>
-
-              {/* Xác nhận mật khẩu mới */}
-              <FormControl
-                fullWidth
-                variant="outlined"
-                error={!!passwordErrors.confirmPassword}
-              >
-                <InputLabel>Xác nhận mật khẩu mới</InputLabel>
-                <OutlinedInput
-                  type={showConfirmPassword ? "text" : "password"}
-                  onCopy={preventCopyPaste}
-                  onPaste={preventCopyPaste}
-                  onCut={preventCopyPaste}
-                  {...regPassword("confirmPassword", {
-                    required: "Vui lòng xác nhận mật khẩu",
-                    validate: (val) =>
-                      val === watch("newPassword") || "Mật khẩu không khớp",
-                  })}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                        onMouseDown={(e) => e.preventDefault()}
-                        edge="end"
-                      >
-                        {showConfirmPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Xác nhận mật khẩu mới"
-                  sx={{ borderRadius: 2 }}
-                />
-                {passwordErrors.confirmPassword && (
-                  <FormHelperText error>
-                    {passwordErrors.confirmPassword.message}
-                  </FormHelperText>
-                )}
-              </FormControl>
-
-              <Button
-                type="submit"
-                variant="contained"
-                color="error"
-                disabled={isLoading}
-                startIcon={<LockReset />}
-                sx={{ py: 1.5, fontWeight: 700, borderRadius: 2 }}
-              >
-                {isLoading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Cập Nhật Mật Khẩu"
-                )}
-              </Button>
-            </Stack>
+          {/* CỘT PHẢI: NỘI DUNG ĐỘNG */}
+          <Box sx={{ flex: 1, p: { xs: 3, sm: 5, md: 6 }, bgcolor: 'rgba(255,255,255,0.2)' }}>
+            <AnimatePresence mode="wait">
+              {renderContent()}
+            </AnimatePresence>
           </Box>
-        </CustomTabPanel>
-      </Paper>
+
+        </Paper>
+      </Box>
     </Box>
   );
 };

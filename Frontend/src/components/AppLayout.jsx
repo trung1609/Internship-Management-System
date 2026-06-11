@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Avatar,
 } from "@mui/material";
 import {
   ExpandLess,
@@ -378,52 +379,99 @@ export const AppLayout = ({ children }) => {
           boxShadow: "0 -4px 15px rgba(0,0,0,0.02)",
         }}
       >
-        <Paper
-          elevation={0}
-          sx={{
-            p: 1.5,
-            mb: 2,
-            background: "linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)",
-            border: "1px solid #e0e0e0",
-            borderRadius: "12px",
-            boxShadow:
-              "inset 0 2px 4px rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.04)",
-          }}
-        >
-          <Typography
-            variant="caption"
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+          <Paper
+            elevation={0}
             sx={{
-              display: "block",
-              mb: 0.5,
-              color: "#757575",
-              fontWeight: 600,
+              p: 1.5,
+              mb: 2,
+              background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+              border: "1px solid #e2e8f0",
+              borderRadius: "16px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
+                borderColor: "#cbd5e1",
+              },
             }}
           >
-            Tài khoản hiện tại
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: "800", mb: 1, color: "#2c3e50" }}
-          >
-            {user?.fullName || user?.username}
-          </Typography>
-          <Chip
-            label={
-              user?.role?.includes("ADMIN")
-                ? "Administrator"
-                : user?.role?.includes("MENTOR")
-                  ? "Mentor"
-                  : "Student"
-            }
-            size="small"
-            sx={{
-              backgroundColor: getRoleColor(user?.role),
-              color: "white",
-              fontWeight: "700",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-            }}
-          />
-        </Paper>
+            {/* Cột trái: Avatar */}
+            <Avatar
+              src={user?.avatarUrl} // Lấy ảnh từ Cloudinary nếu có
+              sx={{
+                width: 48,
+                height: 48,
+                border: "2px solid #ffffff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                bgcolor: getRoleColor(user?.role), // Lấy màu nền theo Role
+                color: "#ffffff",
+                fontWeight: 800,
+                fontSize: "1.2rem",
+              }}
+            >
+              {/* Fallback chữ cái đầu nếu không có ảnh */}
+              {!user?.avatarUrl &&
+                (user?.fullName?.charAt(0).toUpperCase() ||
+                  user?.username?.charAt(0).toUpperCase())}
+            </Avatar>
+
+            {/* Cột phải: Text */}
+            <Box sx={{ overflow: "hidden", flex: 1 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "block",
+                  mb: 0.2,
+                  color: "#64748b",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Tài khoản của bạn
+              </Typography>
+
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: "800",
+                  color: "#1e293b",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis", // Cắt chữ "..." nếu tên quá dài
+                  mb: 0.5,
+                  fontSize: "0.95rem",
+                }}
+              >
+                {user?.fullName || user?.username}
+              </Typography>
+
+              <Chip
+                label={
+                  user?.role?.includes("ADMIN")
+                    ? "Administrator"
+                    : user?.role?.includes("MENTOR")
+                      ? "Mentor"
+                      : "Student"
+                }
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: "0.7rem",
+                  backgroundColor: `${getRoleColor(user?.role)}15`, // Thêm '15' để tạo màu nền trong suốt (opacity)
+                  color: getRoleColor(user?.role),
+                  fontWeight: "800",
+                  border: `1px solid ${getRoleColor(user?.role)}40`, // Viền mờ
+                }}
+              />
+            </Box>
+          </Paper>
+        </motion.div>
 
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
           <ListItem
