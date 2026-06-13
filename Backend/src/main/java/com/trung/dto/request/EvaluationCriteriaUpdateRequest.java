@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 @Builder
 public class EvaluationCriteriaUpdateRequest {
 
-    @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Criterion name must contain only letters and numbers, and cannot have leading or trailing spaces")
     private String criterionName;
 
     private String description;

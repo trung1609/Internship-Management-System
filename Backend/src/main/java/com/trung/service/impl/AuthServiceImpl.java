@@ -1,7 +1,11 @@
 package com.trung.service.impl;
 
 import com.trung.dto.request.ForgotPasswordRequest;
+import com.trung.entity.Mentor;
+import com.trung.entity.Student;
 import com.trung.entity.User;
+import com.trung.repository.IMentorRepository;
+import com.trung.repository.IStudentRepository;
 import com.trung.util.enums.Role;
 import com.trung.dto.request.FormLoginRequest;
 import com.trung.dto.request.FormRegisterRequest;
@@ -40,6 +44,8 @@ public class AuthServiceImpl implements IAuthService {
     private final AuthenticationManager authenticationManager;
     private final TokenBlacklistService tokenBlacklistService;
     private final RefreshTokenService refreshTokenService;
+    private final IStudentRepository iStudentRepository;
+    private final IMentorRepository iMentorRepository;
 
     @Value("${jwt_expire}")
     private long expire;
@@ -77,10 +83,18 @@ public class AuthServiceImpl implements IAuthService {
         users.setFullName(request.getFullName());
         users.setEmail(request.getEmail());
         users.setPhoneNumber(request.getPhoneNumber());
-
-
         userRepository.save(users);
 
+        if (users.getRole() == Role.ROLE_STUDENT) {
+            Student student = new Student();
+            student.setUser(users);
+            student.setStudentCode("STU" + String.format("%04d", users.getUserId()));
+            iStudentRepository.save(student);
+        }else if (users.getRole() == Role.ROLE_MENTOR) {
+            Mentor mentor = new Mentor();
+            mentor.setUser(users);
+            iMentorRepository.save(mentor);
+        }
         RegisterResponse response = RegisterResponse.builder()
                 .message("Register successfully")
                 .user(UserMapper.toDto(users))

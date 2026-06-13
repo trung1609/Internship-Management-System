@@ -40,6 +40,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import NotificationBell from "../pages/NotificationBell";
+import { toast } from "react-toastify";
 
 const drawerWidth = 280;
 
@@ -141,6 +142,28 @@ export const AppLayout = ({ children }) => {
   };
 
   const filteredMenuItems = getFilteredMenuItems();
+
+  useEffect(() => {
+    if (user && user.role !== "ROLE_ADMIN") {
+      const isMissingInfo = 
+        !user.fullName || 
+        !user.phoneNumber || 
+        (user.role === "ROLE_STUDENT" && (!user.student?.major || !user.student?.classRoom)) ||
+        (user.role === "ROLE_MENTOR" && (!user.mentor?.department));
+
+      if (isMissingInfo && location.pathname !== "/settings") {
+        toast.warning("Vui lòng cập nhật đầy đủ Hồ sơ cá nhân để tiếp tục!", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        navigate("/settings"); // Ép văng về trang settings
+      }
+    }
+  }, [location.pathname, user, navigate]);
 
   // ĐOẠN CODE MỚI: Lắng nghe URL và tự động bung menu tương ứng
   useEffect(() => {

@@ -23,7 +23,6 @@ public class AssessmentRoundCreateRequest {
     private Long phaseId;
 
     @NotBlank(message = "Round name is required.")
-    @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Round name must contain only letters and numbers, and cannot have leading or trailing spaces")
     private String roundName;
 
     @NotNull(message = "Start date is required.")

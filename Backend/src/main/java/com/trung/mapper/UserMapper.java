@@ -6,8 +6,9 @@ import com.trung.entity.User;
 import com.trung.util.enums.Role;
 
 public class UserMapper {
-    public static UserResponse toDto(User users){
-        return UserResponse.builder()
+    public static UserResponse toDto(User users) {
+        if (users == null) return null;
+        UserResponse response = UserResponse.builder()
                 .userId(users.getUserId())
                 .username(users.getUsername())
                 .fullName(users.getFullName())
@@ -19,10 +20,17 @@ public class UserMapper {
                 .createdAt(users.getCreatedAt())
                 .updatedAt(users.getUpdatedAt())
                 .build();
+
+        if (users.getRole() == Role.ROLE_STUDENT && users.getStudent() != null) {
+            response.setStudent(StudentMapper.toDto(users.getStudent()));
+        } else if (users.getRole() == Role.ROLE_MENTOR && users.getMentor() != null) {
+            response.setMentor(MentorMapper.toDto(users.getMentor()));
+        }
+        return response;
     }
 
-    public static void updateFromDto(User users, UserUpdateRequest userUpdateRequest){
-        if (userUpdateRequest.getUsername() != null && !userUpdateRequest.getUsername().isBlank()){
+    public static void updateFromDto(User users, UserUpdateRequest userUpdateRequest) {
+        if (userUpdateRequest.getUsername() != null && !userUpdateRequest.getUsername().isBlank()) {
             users.setUsername(userUpdateRequest.getUsername());
         }
         if (userUpdateRequest.getFullName() != null && !userUpdateRequest.getFullName().isBlank()) {
@@ -34,7 +42,7 @@ public class UserMapper {
         if (userUpdateRequest.getPhoneNumber() != null && !userUpdateRequest.getPhoneNumber().isBlank()) {
             users.setPhoneNumber(userUpdateRequest.getPhoneNumber());
         }
-        if (userUpdateRequest.getRole() != null && !userUpdateRequest.getRole().isBlank()){
+        if (userUpdateRequest.getRole() != null && !userUpdateRequest.getRole().isBlank()) {
             users.setRole(Role.valueOf(userUpdateRequest.getRole()));
         }
     }

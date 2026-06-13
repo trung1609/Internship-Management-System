@@ -16,6 +16,8 @@ import {
   InputLabel,
   OutlinedInput,
   FormHelperText,
+  Select,      // Đã thêm
+  MenuItem,    // Đã thêm
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -48,9 +50,13 @@ const RegisterPage = () => {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setError,
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      role: "ROLE_STUDENT" // Thiết lập giá trị mặc định là Sinh viên
+    }
+  });
 
   // Chặn copy/paste
   const preventCopyPaste = (e) => {
@@ -211,6 +217,25 @@ const RegisterPage = () => {
                 InputProps={{ sx: { borderRadius: "12px" } }}
               />
 
+              {/* KHỐI CHỌN VAI TRÒ MỚI THÊM VÀO ĐÂY */}
+              <FormControl fullWidth variant="outlined" error={!!errors.role}>
+                <InputLabel id="role-select-label">Bạn là ai?</InputLabel>
+                <Select
+                  labelId="role-select-label"
+                  id="role-select"
+                  label="Bạn là ai?"
+                  defaultValue="ROLE_STUDENT"
+                  {...register("role", { required: "Vui lòng chọn vai trò" })}
+                  sx={{ borderRadius: "12px", textAlign: "left" }}
+                >
+                  <MenuItem value="ROLE_STUDENT">Sinh viên thực tập</MenuItem>
+                  <MenuItem value="ROLE_MENTOR">Giảng viên / Cố vấn (Mentor)</MenuItem>
+                </Select>
+                {errors.role && (
+                  <FormHelperText error>{errors.role?.message}</FormHelperText>
+                )}
+              </FormControl>
+
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5}>
                 <FormControl
                   fullWidth
@@ -304,7 +329,7 @@ const RegisterPage = () => {
               type="submit"
               fullWidth
               variant="contained"
-              disabled={isLoading}
+              disabled={isLoading || isSubmitting}
               disableElevation
               sx={{
                 mt: 4,
@@ -319,7 +344,7 @@ const RegisterPage = () => {
                 "&:hover": { bgcolor: "#334155" },
               }}
             >
-              {isLoading ? (
+              {isLoading || isSubmitting ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
                 "Đăng ký tài khoản"

@@ -15,10 +15,8 @@ public class MentorCreateRequest {
     private Long userId;
 
     @NotBlank(message = "Department is required")
-    @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Department must contain only letters and numbers separated by single spaces")
     private String department;
 
     @NotBlank(message = "Academic rank is required")
-    @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Academic rank must contain only letters and numbers separated by single spaces")
     private String academicRank;
 }

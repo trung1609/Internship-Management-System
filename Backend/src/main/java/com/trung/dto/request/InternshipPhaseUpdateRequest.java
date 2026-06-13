@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @ValidDateRange(startDateField = "startDate", endDateField = "endDate")
 public class InternshipPhaseUpdateRequest {
 
-    @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Phase name must contain only letters and numbers, and cannot have leading or trailing spaces")
     private String phaseName;
 
     @JsonFormat(pattern = "yyyy-MM-dd")

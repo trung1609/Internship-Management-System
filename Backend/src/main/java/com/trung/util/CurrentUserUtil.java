@@ -13,7 +13,20 @@ public class CurrentUserUtil {
 
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        return userPrincipal.getUsers();
+
+        // 1. Nếu chưa có xác thực hoặc chưa đăng nhập thì trả về null
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        // 2. Lấy principal ra kiểm tra
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserPrincipal) {
+            UserPrincipal userPrincipal = (UserPrincipal) principal;
+            return userPrincipal.getUsers(); // Trả về entity User của bạn
+        }
+
+        return null;
     }
 }

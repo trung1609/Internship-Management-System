@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 @Builder
 public class EvaluationCriteriaCreateRequest {
     @NotBlank(message = "Criterion name is required")
-    @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Criterion name must contain only letters and numbers separated by single spaces")
     private String criterionName;
 
     private String description;

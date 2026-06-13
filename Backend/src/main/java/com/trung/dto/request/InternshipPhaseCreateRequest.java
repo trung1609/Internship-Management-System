@@ -17,7 +17,6 @@ import java.time.LocalDate;
 @ValidDateRange(startDateField = "startDate", endDateField = "endDate")
 public class InternshipPhaseCreateRequest {
     @NotBlank(message = "Phase name is required")
-    @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Phase name must contain only letters and numbers, and cannot have leading or trailing spaces")
     private String phaseName;
 
     @NotNull(message = "Start date is required")

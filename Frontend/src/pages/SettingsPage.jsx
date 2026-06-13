@@ -8,13 +8,15 @@ import {
 import {
   Visibility, VisibilityOff, Security, Person, Edit, LockReset,
   ArrowBack, PhotoCamera, EmailOutlined, PhoneIphoneOutlined,
-  BadgeOutlined, VerifiedUserOutlined, WorkspacePremium
+  BadgeOutlined, VerifiedUserOutlined, WorkspacePremium,
+  SchoolOutlined, ClassOutlined, CakeOutlined, LocationOnOutlined, // Các Icon cho Sinh viên
+  BusinessOutlined, StarBorder,// Các Icon cho Mentor
 } from "@mui/icons-material";
 import { authApi } from "../api/authApi";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
-import { userApi } from "../api/resourceApi";
+import { mentorApi, studentApi, userApi } from "../api/resourceApi";
 import { useNavigate } from "react-router-dom";
 import { styled, keyframes } from "@mui/system";
 
@@ -26,7 +28,7 @@ const pulseGlow = keyframes`
 `;
 
 // Nút Menu Sidebar tùy chỉnh
-const SidebarButton = styled(Button)(({ theme, active }) => ({
+const SidebarButton = styled(Button, { shouldForwardProp: (prop) => prop !== 'active', })(({ theme, active }) => ({
   justifyContent: 'flex-start',
   padding: '12px 20px',
   borderRadius: '12px',
@@ -46,7 +48,7 @@ const SidebarButton = styled(Button)(({ theme, active }) => ({
   }
 }));
 
-// Thẻ hiển thị thông tin Bento Grid
+// Thẻ hiển thị thông tin Bento Grid (Đã nâng cấp UI xử lý chữ dài)
 const BentoCard = ({ icon, label, value }) => (
   <Box
     component={motion.div}
@@ -61,24 +63,25 @@ const BentoCard = ({ icon, label, value }) => (
       display: 'flex',
       alignItems: 'flex-start',
       gap: 2,
+      height: '100%'
     }}
   >
-    <Box sx={{ p: 1.2, borderRadius: 2.5, bgcolor: '#ffffff', color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+    <Box sx={{ p: 1.2, borderRadius: 2.5, bgcolor: '#ffffff', color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {icon}
     </Box>
-    <Box>
+    <Box sx={{ flex: 1, overflow: 'hidden' }}>
       <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, letterSpacing: '0.5px' }}>
         {label}
       </Typography>
-      <Typography variant="body1" sx={{ fontWeight: 700, color: '#1e293b', mt: 0.5 }}>
-        {value || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>Trống</span>}
+      <Typography variant="body1" sx={{ fontWeight: 700, color: '#1e293b', mt: 0.5, wordBreak: 'break-word', lineHeight: 1.4 }}>
+        {value || <span style={{ color: '#cbd5e1', fontStyle: 'italic', fontWeight: 500 }}>Chưa cập nhật</span>}
       </Typography>
     </Box>
   </Box>
 );
 
 const SettingsPage = () => {
-  const { user } = useContext(AuthContext);
+  const { user, fetchUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
@@ -93,6 +96,16 @@ const SettingsPage = () => {
   const { register: regProfile, handleSubmit: handleProfileSubmit, reset: resetProfile, formState: { errors: profileErrors } } = useForm();
   const { register: regPassword, handleSubmit: handlePasswordSubmit, watch, reset: resetPasswordForm, formState: { errors: passwordErrors } } = useForm();
 
+  const formatToISO = (dateStr) => {
+    if (!dateStr) return "";
+    if (dateStr.includes("-")) return dateStr;
+    if (dateStr.includes("/")) {
+      const [day, month, year] = dateStr.split("/");
+      return `${year}-${month}-${day}`;
+    }
+    return dateStr;
+  };
+
   const fetchProfile = async () => {
     try {
       const res = await authApi.getMe();
@@ -102,6 +115,13 @@ const SettingsPage = () => {
         fullName: res.data.fullName || "",
         email: res.data.email || "",
         phoneNumber: res.data.phoneNumber || "",
+        studentCode: res.data.student?.studentCode || "",
+        major: res.data.student?.major || "",
+        classRoom: res.data.student?.classRoom || "",
+        address: res.data.student?.address || "",
+        dateOfBirth: formatToISO(res.data.student?.dateOfBirth) || "",
+        department: res.data.mentor?.department || "",
+        academicRank: res.data.mentor?.academicRank || "",
       });
     } catch (error) { toast.error("Không thể tải thông tin cá nhân"); }
   };
@@ -127,11 +147,26 @@ const SettingsPage = () => {
   const onUpdateProfile = async (data) => {
     setIsLoading(true);
     try {
-      await userApi.updateUser(user?.userId || user?.id, data);
+      const currentRole = profileData?.role;
+
+      if (currentRole.includes("STUDENT")) {
+        await studentApi.updateStudent(profileData.student.studentId, data);
+      } else if (currentRole.includes("MENTOR")) {
+        await mentorApi.updateMentor(profileData.mentor.id, data);
+      } else {
+        await userApi.updateUser(profileData.userId, data);
+      }
+
       toast.success("Lưu thông tin thành công!");
       await fetchProfile();
-    } catch (error) { toast.error("Cập nhật thất bại!"); }
-    finally { setIsLoading(false); }
+      if (fetchUser) {
+        await fetchUser();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Cập nhật thất bại!");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onChangePassword = async (data) => {
@@ -144,7 +179,6 @@ const SettingsPage = () => {
     finally { setIsLoading(false); }
   };
 
-  // Ánh xạ Component theo Menu
   const renderContent = () => {
     switch (activeMenu) {
       case 'profile':
@@ -154,14 +188,46 @@ const SettingsPage = () => {
               <WorkspacePremium sx={{ color: '#fbbf24', fontSize: 28 }} />
               <Typography variant="h6" sx={{ fontWeight: 800, color: '#1e293b' }}>Hồ Sơ Của Tôi</Typography>
             </Box>
+
+            {/* THÔNG TIN TÀI KHOẢN CHUNG */}
             <Grid container spacing={2.5}>
               <Grid item xs={12} sm={6}><BentoCard icon={<BadgeOutlined />} label="Tên đăng nhập" value={profileData?.username} /></Grid>
               <Grid item xs={12} sm={6}><BentoCard icon={<Person />} label="Họ và tên" value={profileData?.fullName} /></Grid>
               <Grid item xs={12} sm={6}><BentoCard icon={<EmailOutlined />} label="Email" value={profileData?.email} /></Grid>
               <Grid item xs={12} sm={6}><BentoCard icon={<PhoneIphoneOutlined />} label="Số điện thoại" value={profileData?.phoneNumber} /></Grid>
             </Grid>
+
+            {/* THÔNG TIN CHI TIẾT SINH VIÊN */}
+            {profileData?.role?.includes("STUDENT") && (
+              <>
+                <Divider sx={{ my: 4, '&::before, &::after': { borderColor: 'rgba(0,0,0,0.08)' } }}>
+                  <Chip label="Thông tin Học vấn & Liên hệ" sx={{ fontWeight: 700, color: '#475569', bgcolor: '#f1f5f9', letterSpacing: '0.5px' }} />
+                </Divider>
+                <Grid container spacing={2.5}>
+                  <Grid item xs={12} sm={6} md={4}><BentoCard icon={<BadgeOutlined />} label="Mã sinh viên" value={profileData?.student?.studentCode} /></Grid>
+                  <Grid item xs={12} sm={6} md={4}><BentoCard icon={<SchoolOutlined />} label="Ngành học" value={profileData?.student?.major} /></Grid>
+                  <Grid item xs={12} sm={6} md={4}><BentoCard icon={<ClassOutlined />} label="Lớp" value={profileData?.student?.classRoom} /></Grid>
+                  <Grid item xs={12} sm={6} md={4}><BentoCard icon={<CakeOutlined />} label="Ngày sinh" value={profileData?.student?.dateOfBirth} /></Grid>
+                  <Grid item xs={12} md={8}><BentoCard icon={<LocationOnOutlined />} label="Địa chỉ" value={profileData?.student?.address} /></Grid>
+                </Grid>
+              </>
+            )}
+
+            {/* THÔNG TIN CHI TIẾT GIẢNG VIÊN */}
+            {profileData?.role?.includes("MENTOR") && (
+              <>
+                <Divider sx={{ my: 4, '&::before, &::after': { borderColor: 'rgba(0,0,0,0.08)' } }}>
+                  <Chip label="Thông tin Chuyên môn" sx={{ fontWeight: 700, color: '#475569', bgcolor: '#f1f5f9', letterSpacing: '0.5px' }} />
+                </Divider>
+                <Grid container spacing={2.5}>
+                  <Grid item xs={12} sm={6}><BentoCard icon={<BusinessOutlined />} label="Khoa / Phòng ban" value={profileData?.mentor?.department} /></Grid>
+                  <Grid item xs={12} sm={6}><BentoCard icon={<StarBorder />} label="Học hàm / Học vị" value={profileData?.mentor?.academicRank} /></Grid>
+                </Grid>
+              </>
+            )}
           </Box>
         );
+
       case 'edit':
         return (
           <Box component={motion.div} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -169,9 +235,41 @@ const SettingsPage = () => {
             <Box component="form" onSubmit={handleProfileSubmit(onUpdateProfile)}>
               <Stack spacing={3}>
                 <TextField fullWidth label="Tên đăng nhập" {...regProfile("username")} disabled sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#f8fafc', borderRadius: 3 } }} />
-                <TextField fullWidth label="Họ và Tên" {...regProfile("fullName", { required: "Bắt buộc" })} error={!!profileErrors.fullName} helperText={profileErrors.fullName?.message} sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 3 } }} />
-                <TextField fullWidth label="Email" type="email" {...regProfile("email", { required: "Bắt buộc" })} error={!!profileErrors.email} helperText={profileErrors.email?.message} sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 3 } }} />
-                <TextField fullWidth label="Số điện thoại" {...regProfile("phoneNumber")} error={!!profileErrors.phoneNumber} helperText={profileErrors.phoneNumber?.message} sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 3 } }} />
+                <TextField fullWidth label="Họ và Tên" {...regProfile("fullName", { required: "Bắt buộc" })} error={!!profileErrors.fullName} helperText={profileErrors.fullName?.message} />
+                <TextField fullWidth label="Email" type="email" {...regProfile("email")} />
+                <TextField fullWidth label="Số điện thoại" {...regProfile("phoneNumber")} />
+
+                {profileData?.role?.includes("STUDENT") && (
+                  <>
+                    <Divider sx={{ my: 2 }}>Thông tin Sinh viên</Divider>
+                    <TextField fullWidth label="Mã sinh viên" {...regProfile("studentCode")} disabled />
+                    <TextField fullWidth label="Ngành học (*)" {...regProfile("major", { required: "Vui lòng nhập ngành học" })} error={!!profileErrors.major} helperText={profileErrors.major?.message} />
+                    <TextField fullWidth label="Lớp (*)" {...regProfile("classRoom", { required: "Vui lòng nhập lớp" })} error={!!profileErrors.classRoom} helperText={profileErrors.classRoom?.message} />
+                    <TextField fullWidth label="Địa chỉ" {...regProfile("address")} />
+                    <TextField
+                      fullWidth
+                      label="Ngày sinh"
+                      type={regProfile("dateOfBirth") ? "date" : "text"}
+                      {...regProfile("dateOfBirth")}
+                      onFocus={(e) => (e.target.type = "date")}
+                      onBlur={(e) => { if (!e.target.value) e.target.type = "text" }}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 3 }
+                      }}
+                    />
+                  </>
+                )}
+
+                {profileData?.role?.includes("MENTOR") && (
+                  <>
+                    <Divider sx={{ my: 2 }}>Thông tin Giảng viên</Divider>
+                    <TextField fullWidth label="Khoa / Phòng ban (*)" {...regProfile("department", { required: "Vui lòng nhập khoa" })} error={!!profileErrors.department} helperText={profileErrors.department?.message} />
+                    <TextField fullWidth label="Học hàm / Học vị" {...regProfile("academicRank")} />
+                  </>
+                )}
                 <Button type="submit" variant="contained" disabled={isLoading} sx={{ py: 1.5, borderRadius: 3, fontWeight: 700, background: 'linear-gradient(to right, #2563eb, #3b82f6)', boxShadow: '0 8px 16px rgba(37,99,235,0.2)' }}>
                   {isLoading ? <CircularProgress size={24} color="inherit" /> : "Lưu Thay Đổi"}
                 </Button>
@@ -179,6 +277,7 @@ const SettingsPage = () => {
             </Box>
           </Box>
         );
+
       case 'security':
         return (
           <Box component={motion.div} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -256,7 +355,7 @@ const SettingsPage = () => {
                   </Badge>
                 </label>
               </Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, mt: 2, color: '#1e293b' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mt: 2, color: '#1e293b', textAlign: 'center' }}>
                 {profileData?.fullName || profileData?.username}
               </Typography>
               <Chip icon={<VerifiedUserOutlined sx={{ fontSize: 16 }} />} label={profileData?.role?.replace('ROLE_', '') || 'USER'} size="small" sx={{ mt: 1, bgcolor: 'rgba(37,99,235,0.1)', color: '#2563eb', fontWeight: 700, borderRadius: 2 }} />

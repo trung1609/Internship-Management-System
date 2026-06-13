@@ -17,7 +17,6 @@ import java.util.List;
 @ValidDateRange(startDateField = "startDate", endDateField = "endDate")
 public class AssessmentRoundUpdateRequest {
 
-    @Pattern(regexp = "^(|[\\p{L}0-9]+( [\\p{L}0-9]+)*)$", message = "Round name must contain only letters and numbers, and cannot have leading or trailing spaces")
     private String roundName;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
