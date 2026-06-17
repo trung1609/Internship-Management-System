@@ -27,9 +27,9 @@ const AssignedMentor = () => {
         const fetchMyMentors = async () => {
             try {
                 const response = await axiosClient.get('/api/v1/mentors', {
-                    params: { page: 0, size: 10 } 
+                    params: { page: 0, size: 10 }
                 });
-                
+
                 const mentorList = response?.content || response?.data?.content || [];
                 setMentors(mentorList);
 
@@ -76,9 +76,9 @@ const AssignedMentor = () => {
             <Grid container spacing={4}>
                 {mentors.map((mentor) => (
                     <Grid item xs={12} sm={6} lg={4} key={mentor.id}>
-                        <Card 
-                            sx={{ 
-                                borderRadius: 4, 
+                        <Card
+                            sx={{
+                                borderRadius: 4,
                                 overflow: 'visible', // Để avatar có thể nổi lên trên nếu cần
                                 boxShadow: '0 12px 40px rgba(0,0,0,0.06)',
                                 border: '1px solid #f0f0f0',
@@ -90,8 +90,8 @@ const AssignedMentor = () => {
                             }}
                         >
                             {/* Dải Banner phía trên Card */}
-                            <Box sx={{ 
-                                height: 110, 
+                            <Box sx={{
+                                height: 110,
                                 background: 'linear-gradient(135deg, #1e88e5 0%, #1565c0 100%)',
                                 borderTopLeftRadius: 16,
                                 borderTopRightRadius: 16,
@@ -101,32 +101,33 @@ const AssignedMentor = () => {
                             <Box sx={{ px: 3, pb: 4, pt: 0, position: 'relative', textAlign: 'center' }}>
                                 {/* Avatar nổi (Floating Avatar) */}
                                 <Avatar
+                                    src={mentor.avatarUrl}
                                     sx={{
-                                        width: 96, 
-                                        height: 96, 
+                                        width: 96,
+                                        height: 96,
                                         margin: '-48px auto 16px', // Kéo avatar lên cắt ngang banner
                                         fontSize: 36,
-                                        bgcolor: '#ffffff', 
-                                        color: '#1565c0', 
+                                        bgcolor: '#ffffff',
+                                        color: '#1565c0',
                                         fontWeight: 'bold',
-                                        border: '4px solid #ffffff', 
+                                        border: '4px solid #ffffff',
                                         boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
                                     }}
                                 >
-                                    {getInitials(mentor.fullName)}
+                                    {!mentor.avatarUrl && getInitials(mentor.fullName)}
                                 </Avatar>
 
                                 <Typography variant="h5" sx={{ fontWeight: 800, color: '#2c3e50', mb: 0.5 }}>
                                     {mentor.fullName}
                                 </Typography>
-                                
-                                <Chip 
-                                    icon={<SchoolIcon fontSize="small" />} 
-                                    label={mentor.academicRank || 'Giảng viên'} 
+
+                                <Chip
+                                    icon={<SchoolIcon fontSize="small" />}
+                                    label={mentor.academicRank || 'Giảng viên'}
                                     size="small"
-                                    sx={{ 
-                                        bgcolor: 'rgba(21, 101, 192, 0.08)', 
-                                        color: '#1565c0', 
+                                    sx={{
+                                        bgcolor: 'rgba(21, 101, 192, 0.08)',
+                                        color: '#1565c0',
                                         fontWeight: 700,
                                         mb: 3,
                                         px: 1
@@ -138,11 +139,11 @@ const AssignedMentor = () => {
                                 {/* Danh sách thông tin */}
                                 <Stack spacing={2.5} sx={{ textAlign: 'left' }}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        <Box sx={{ 
-                                            p: 1.2, 
-                                            borderRadius: 2.5, 
+                                        <Box sx={{
+                                            p: 1.2,
+                                            borderRadius: 2.5,
                                             bgcolor: '#f5f7fa',
-                                            display: 'flex', 
+                                            display: 'flex',
                                             color: '#546e7a'
                                         }}>
                                             <BadgeIcon fontSize="small" />
@@ -158,11 +159,11 @@ const AssignedMentor = () => {
                                     </Box>
 
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        <Box sx={{ 
-                                            p: 1.2, 
-                                            borderRadius: 2.5, 
+                                        <Box sx={{
+                                            p: 1.2,
+                                            borderRadius: 2.5,
                                             bgcolor: '#f5f7fa',
-                                            display: 'flex', 
+                                            display: 'flex',
                                             color: '#546e7a'
                                         }}>
                                             <BusinessIcon fontSize="small" />
