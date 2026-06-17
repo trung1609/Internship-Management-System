@@ -25,6 +25,7 @@ public class MentorMapper {
                 .department(mentor.getDepartment())
                 .academicRank(mentor.getAcademicRank())
                 .fullName(mentor.getUser().getFullName())
+                .avatarUrl(mentor.getUser().getAvatarUrl())
                 .build();
     }
 

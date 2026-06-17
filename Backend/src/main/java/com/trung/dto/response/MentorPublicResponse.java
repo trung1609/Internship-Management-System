@@ -12,4 +12,5 @@ public class MentorPublicResponse {
     private String fullName;
     private String department;
     private String academicRank;
+    private String avatarUrl;
 }
