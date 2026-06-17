@@ -254,16 +254,26 @@ const AssignmentDetail = () => {
         })),
       };
 
-      console.log("Dữ liệu chấm điểm chuẩn bị gửi:", payload);
-
       await assessmentResultApi.saveBulkGrades(payload);
 
-      // Giả lập delay
       await new Promise((resolve) => setTimeout(resolve, 800));
       toast.success("Đã lưu điểm cho toàn bộ nhóm thành công!");
+
     } catch (error) {
       console.error("Lỗi lưu điểm:", error);
-      toast.error("Không thể lưu điểm, vui lòng kiểm tra lại.");
+
+      const backendMessage = error.response?.data?.message;
+      const backendErrors = error.response?.data?.error;
+
+      if (backendMessage && backendMessage !== "Validation failed") {
+        toast.error(`❌ Lỗi: ${backendMessage}`, { autoClose: 5000 });
+      } else if (backendErrors && Object.keys(backendErrors).length > 0) {
+        // Nếu lỗi là kiểu Map (errorList), lấy lỗi đầu tiên hiển thị
+        const firstError = Object.values(backendErrors)[0];
+        toast.error(`❌ Cảnh báo: ${firstError}`, { autoClose: 5000 });
+      } else {
+        toast.error("❌ Không thể lưu điểm, vui lòng kiểm tra lại.");
+      }
     } finally {
       setSavingGrades(false);
     }
@@ -283,6 +293,10 @@ const AssignmentDetail = () => {
     );
 
   const statusStyle = getStatusInfo(detail.status);
+  const currentCriterion = criteria.find(
+    (c) => (c.criterionId || c.id) === parseInt(selectedCriterionId)
+  );
+  const maxScoreAllowed = currentCriterion?.maxScore || 10;
 
   return (
     <Box
@@ -357,8 +371,10 @@ const AssignmentDetail = () => {
 
               <Stack direction="row" spacing={4} sx={{ mb: 4 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <Avatar sx={{ bgcolor: "#eff6ff", color: "#3b82f6" }}>
-                    <SupervisorAccountIcon />
+                  <Avatar
+                    src={detail.mentorAvatarUrl}
+                    sx={{ bgcolor: "#eff6ff", color: "#3b82f6" }}>
+                    {!detail.mentorAvatarUrl && <SupervisorAccountIcon />}
                   </Avatar>
                   <Box>
                     <Typography
@@ -617,17 +633,17 @@ const AssignmentDetail = () => {
                           ) : (
                             <TextField
                               size="small"
-                              placeholder="0-10"
+                              placeholder={`0-${maxScoreAllowed}`}
                               type="number"
-                              inputProps={{ min: 0, max: 10, step: 0.5 }}
+                              inputProps={{ min: 0, max: maxScoreAllowed, step: 0.5 }}
                               value={grades[student.id]?.score || ""}
-                              onChange={(e) =>
-                                handleGradeChange(
-                                  student.id,
-                                  "score",
-                                  e.target.value,
-                                )
-                              }
+                              onChange={(e) => {
+                                let val = parseFloat(e.target.value);
+                                if (val > maxScoreAllowed) {
+                                  toast.warning(`Điểm tối đa của tiêu chí này chỉ là ${maxScoreAllowed}`, { toastId: 'maxScoreWarning' });
+                                }
+                                handleGradeChange(student.id, "score", e.target.value);
+                              }}
                               sx={{
                                 bgcolor: "#fff",
                                 "& input": {

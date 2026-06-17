@@ -165,7 +165,12 @@ const InternshipAssignmentsManagement = () => {
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Stack direction="row" alignItems="center" spacing={1.5}>
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: '#fce7f3', color: '#db2777' }}><SupervisorAccountIcon fontSize="small" /></Avatar>
+                        <Avatar
+                          src={assignment.mentorAvatarUrl}
+                          sx={{ width: 32, height: 32, bgcolor: '#fce7f3', color: '#db2777' }}
+                        >
+                          {!assignment.mentorAvatarUrl && <SupervisorAccountIcon fontSize="small" />}
+                        </Avatar>
                         <Box>
                           <Typography variant="caption" sx={{ color: '#64748b', display: 'block', lineHeight: 1 }}>Mentor Hướng dẫn</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 700, color: '#0f172a' }}>{assignment.mentorName}</Typography>

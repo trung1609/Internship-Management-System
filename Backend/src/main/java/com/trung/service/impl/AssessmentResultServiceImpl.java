@@ -84,6 +84,10 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                         ValidationErrorUtil.addError(errorList, "criterionIds", "This criteria has id " + req.getCriterionId() + " already been evaluated for this assignment");
                         throw new RuntimeException(new ResourceConflictException("Validation failed", errorList));
                     }
+                    if (req.getScore().compareTo(BigDecimal.ZERO) < 0 || req.getScore().compareTo(criteria.getMaxScore()) > 0) {
+                        ValidationErrorUtil.addError(errorList, "score", "Score for criterion ID " + req.getCriterionId() + " must be between 0 and " + criteria.getMaxScore());
+                        throw new RuntimeException(new ResourceConflictException("Validation failed", errorList));
+                    }
 
                     return AssessmentResult.builder()
                             .assignment(assignment)
@@ -156,7 +160,8 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     }
 
     @Override
-    public ApiResponse<AssessmentResultResponse> updateAssessmentResult(Long id, AssessmentResultUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException {
+    public ApiResponse<AssessmentResultResponse> updateAssessmentResult(Long id, AssessmentResultUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException {
+        Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         AssessmentResult assessmentResult = assessmentResultRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment result not found with id: " + id));
 
@@ -164,6 +169,15 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
 
         if (!assessmentResultRepository.existsByResultIdAndEvaluationId_UserId(id, user.getMentor().getMentorId())) {
             throw new ResourceForbiddenException("You do not have permission to update this assessment result");
+        }
+        EvaluationCriteria criteria = iEvaluationCriteriaRepository.findById(assessmentResult.getCriterion().getCriterionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Evaluation criteria not found with id: " + assessmentResult.getCriterion().getCriterionId()));
+
+        if (request.getScore() != null && (request.getScore().compareTo(BigDecimal.ZERO) < 0 || request.getScore().compareTo(criteria.getMaxScore()) > 0)) {
+            throw new ResourceConflictException("Score must be between 0 and " + criteria.getMaxScore(), errorList);
+        }
+        if (ValidationErrorUtil.hasErrors(errorList)) {
+            throw new ResourceConflictException("Validation failed", errorList);
         }
 
         AssessmentResultMapper.updateFromDto(assessmentResult, request);
@@ -187,7 +201,8 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void saveBulkGrades(BulkAssessmentSaveRequest request) throws ResourceNotFoundException {
+    public void saveBulkGrades(BulkAssessmentSaveRequest request) throws ResourceNotFoundException, ResourceConflictException {
+        Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User currentUser = currentUserUtil.getCurrentUser();
 
         InternshipAssignment assignment = internshipAssignmentRepository.findById(request.getAssignmentId())
@@ -210,6 +225,9 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
                     .findByAssignment_AssignmentIdAndStudent_StudentIdAndRound_RoundIdAndCriterion_CriterionId(
                             assignment.getAssignmentId(), student.getStudent().getStudentId(), round.getRoundId(), criterion.getCriterionId()
                     ).orElse(new AssessmentResult());
+            if (eval.getScore() != null && (eval.getScore().compareTo(BigDecimal.ZERO) < 0 || eval.getScore().compareTo(criterion.getMaxScore()) > 0)) {
+                throw new ResourceConflictException("Điểm số cho sinh viên ID: " + eval.getStudentId() + " phải nằm trong khoảng từ 0 đến " + criterion.getMaxScore(), errorList);
+            }
 
             result.setAssignment(assignment);
             result.setStudent(student.getStudent());
@@ -222,6 +240,9 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
             result.setEvaluationDate(LocalDate.now());
 
             resultsToSave.add(result);
+        }
+        if (ValidationErrorUtil.hasErrors(errorList)) {
+            throw new ResourceConflictException("Validation failed", errorList);
         }
 
         assessmentResultRepository.saveAll(resultsToSave);

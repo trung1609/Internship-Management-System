@@ -32,6 +32,7 @@ public class InternshipAssignmentMapper {
                 .assignmentDescription(entity.getAssignmentDescription())
                 .mentorId(entity.getMentor().getMentorId())
                 .mentorName(entity.getMentor().getUser().getFullName())
+                .mentorAvatarUrl(entity.getMentor().getUser().getAvatarUrl())
                 .phaseId(entity.getPhase().getPhaseId())
                 .phaseName(entity.getPhase().getPhaseName())
                 .assignedDate(entity.getAssignedDate())

@@ -18,6 +18,7 @@ public class InternshipAssignmentResponse {
     private String assignmentDescription;
     private Long mentorId;
     private String mentorName;
+    private String mentorAvatarUrl;
     private Long phaseId;
     private String phaseName;
 

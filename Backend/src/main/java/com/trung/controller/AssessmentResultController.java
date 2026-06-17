@@ -52,7 +52,7 @@ public class AssessmentResultController {
 
     @PostMapping("/bulk")
      @PreAuthorize("hasAuthority('ROLE_MENTOR')")
-    public ResponseEntity<ApiResponse<Void>> saveBulkGrades(@RequestBody @Valid BulkAssessmentSaveRequest request) throws ResourceNotFoundException {
+    public ResponseEntity<ApiResponse<Void>> saveBulkGrades(@RequestBody @Valid BulkAssessmentSaveRequest request) throws ResourceNotFoundException, ResourceConflictException {
 
         assessmentResultService.saveBulkGrades(request);
 

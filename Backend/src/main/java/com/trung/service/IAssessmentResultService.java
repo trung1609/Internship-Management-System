@@ -18,9 +18,9 @@ public interface IAssessmentResultService {
 
     PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(String search, Long assignmentId, PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException;
 
-    ApiResponse<AssessmentResultResponse> updateAssessmentResult(Long id, AssessmentResultUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException;
+    ApiResponse<AssessmentResultResponse> updateAssessmentResult(Long id, AssessmentResultUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException;
 
     ApiResponse<AssessmentResultResponse> getAssessmentResultById(Long resultId) throws ResourceNotFoundException;
 
-    void saveBulkGrades(BulkAssessmentSaveRequest request) throws ResourceNotFoundException;
+    void saveBulkGrades(BulkAssessmentSaveRequest request) throws ResourceNotFoundException, ResourceConflictException;
 }
