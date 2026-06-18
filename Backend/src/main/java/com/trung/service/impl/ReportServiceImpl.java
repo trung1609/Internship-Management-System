@@ -8,6 +8,7 @@ import com.trung.entity.InternshipAssignment;
 import com.trung.entity.Report;
 import com.trung.entity.User;
 import com.trung.event.NotificationEventDTO;
+import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.ReportMapper;
 import com.trung.repository.IReportRepository;
 import com.trung.repository.InternshipAssignmentRepository;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -39,7 +42,6 @@ import java.util.zip.ZipOutputStream;
 @RequiredArgsConstructor
 public class ReportServiceImpl implements IReportService {
     private final IReportRepository reportRepository;
-    private final FileStorageService fileStorageService;
     private final CurrentUserUtil currentUserUtil;
     private final InternshipAssignmentRepository internshipAssignmentRepository;
     private final RabbitTemplate rabbitTemplate;
@@ -125,8 +127,34 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
-    public Resource getReportFileAsResource(String storedFileName) {
-        return fileStorageService.loadFileAsResource(storedFileName);
+    public Resource getReportFileAsResource(String cloudinaryUrl) {
+        try {
+            Resource resource = new UrlResource(cloudinaryUrl);
+
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Không thể đọc file từ Cloudinary!");
+            }
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException("Lỗi định dạng URL: " + cloudinaryUrl, ex);
+        }
+    }
+
+    @Override
+    public ApiResponse<ReportResponse> getReportById(Long reportId) throws ResourceNotFoundException {
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy báo cáo với ID: " + reportId));
+
+        ReportResponse reportResponse = ReportMapper.toDTO(report);
+
+        return ApiResponse.<ReportResponse>builder()
+                .data(reportResponse)
+                .success(true)
+                .message("Lấy thông tin báo cáo thành công")
+                .error(null)
+                .timestamp(LocalDateTime.now())
+                .build();
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.ReportResponse;
+import com.trung.exception.ResourceNotFoundException;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +16,8 @@ public interface IReportService {
     PageResponseDTO<ReportResponse> getAllReport(String search, PageRequestDTO pageRequestDTO);
 
     Resource getReportFileAsResource(String storedFileName);
+
+    ApiResponse<ReportResponse> getReportById(Long reportId) throws ResourceNotFoundException;
 
     PageResponseDTO<ReportResponse> getMyReport(String search, PageRequestDTO pageRequestDTO);
 

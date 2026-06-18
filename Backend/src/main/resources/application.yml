@@ -4,8 +4,10 @@ jwt_secret: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmF
 spring:
   application:
     name: Intership-Management-System
-file:
-  upload-dir: uploads
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}

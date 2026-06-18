@@ -77,28 +77,42 @@ const ReportManagement = () => {
   }, []);
 
   const handleDownload = async (report) => {
-    // Thay vì dựa vào URL để đoán tên, hãy dùng thuộc tính originalFileName từ DB
-    const fileName = report.originalFileName;
+    const toastId = toast.loading("Đang xử lý tải file, vui lòng đợi...");
 
     try {
-      const response = await fetch(report.fileUrl);
+      if (!report.fileUrl) {
+        toast.update(toastId, { render: "Không tìm thấy đường dẫn file!", type: "error", isLoading: false, autoClose: 3000 });
+        return;
+      }
+
+      const response = await fetch(report.fileUrl, {
+        method: "GET",
+        mode: "cors"
+      });
+
+      if (!response.ok) throw new Error("Lỗi mạng");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
 
+      const fileExtension = report.fileUrl.split('.').pop();
+      const fallbackName = `Bao_cao_so_${report.reportId}.${fileExtension}`;
+
       const link = document.createElement("a");
       link.href = url;
-
-      // Đặt tên file chính xác là tên gốc
-      link.setAttribute("download", fileName);
+      link.setAttribute("download", report.originalFileName || fallbackName);
 
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
+
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.success("Tải xuống thành công!");
+      toast.update(toastId, { render: "Tải xuống thành công!", type: "success", isLoading: false, autoClose: 3000 });
+
     } catch (error) {
-      toast.error("Tải xuống thất bại.");
+      console.error("Lỗi khi tải file:", error);
+      toast.update(toastId, { render: "Tải xuống thất bại. Vui lòng thử lại!", type: "error", isLoading: false, autoClose: 3000 });
     }
   };
 
@@ -322,6 +336,12 @@ const ReportManagement = () => {
                             color: "#1a237e",
                             lineHeight: 1.2,
                             mb: 0.5,
+                            wordBreak: "break-word", 
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2, 
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
                           }}
                         >
                           {report.title}

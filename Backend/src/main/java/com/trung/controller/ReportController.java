@@ -4,6 +4,8 @@ import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
 import com.trung.dto.response.ReportResponse;
+import com.trung.entity.Report;
+import com.trung.exception.ResourceNotFoundException;
 import com.trung.service.impl.ReportServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -49,25 +52,17 @@ public class ReportController {
         return new ResponseEntity<>(reportService.getAllReport(search, pageRequestDTO), HttpStatus.OK);
     }
 
-    @GetMapping("/download/{fileName}")
-    public ResponseEntity<Resource> downloadReportFile(@PathVariable String fileName, HttpServletRequest request) {
-        Resource resource = reportService.getReportFileAsResource(fileName);
+    @GetMapping("/download/{reportId}")
+    public ResponseEntity<Void> downloadReportFile(@PathVariable Long reportId) throws ResourceNotFoundException {
+        // 1. Lấy URL từ DB
+        ReportResponse report = reportService.getReportById(reportId).getData();
+        String fileUrl = report.getFileUrl();
 
-        String contentType = null;
-        try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        } catch (Exception ex) {
-            System.out.println("Không thể xác định loại file tự động.");
-        }
+        String downloadUrl = fileUrl.replace("/upload/", "/upload/fl_attachment/");
 
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(downloadUrl))
+                .build();
     }
 
     @GetMapping("/my-reports")

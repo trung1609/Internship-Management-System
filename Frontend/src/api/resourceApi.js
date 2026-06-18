@@ -217,9 +217,9 @@ export const reportApi = {
       params: { search, page, size },
     }),
 
-  downloadReport: (fileName) => {
-    return axiosClient.get(`/api/v1/reports/download/${fileName}`, {
-      responseType: "blob",
+  downloadReport: (reportId) => {
+    return axiosClient.get(`/api/v1/reports/download/${reportId}`, {
+      responseType: "blob", 
     });
   },
   getMyReports: () => {
