@@ -157,6 +157,7 @@ const MentorDashboard = () => {
               transition={{ delay: 0.2, type: "spring" }}
             >
               <Avatar
+                src={mentorInfo?.data?.avatarUrl || ""}
                 sx={{
                   width: 100,
                   height: 100,
@@ -168,7 +169,7 @@ const MentorDashboard = () => {
                   color: "#fff",
                 }}
               >
-                {mentorInfo?.data?.fullName?.charAt(0).toUpperCase() || "M"}
+                {!mentorInfo?.data?.avatarUrl && mentorInfo?.data?.fullName?.charAt(0).toUpperCase()}
               </Avatar>
             </motion.div>
 
