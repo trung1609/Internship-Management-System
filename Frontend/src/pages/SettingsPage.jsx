@@ -138,7 +138,8 @@ const SettingsPage = () => {
     try {
       setLoadingAvatar(true);
       await userApi.uploadAvatar(currentUserId, formData);
-      toast.success("Cập nhật ảnh đại diện đỉnh cao!");
+      toast.success("Cập nhật ảnh đại diện thành công!");
+      if (fetchUser) { await fetchUser(); }
       await fetchProfile();
     } catch (error) { toast.error("Lỗi upload ảnh đại diện!"); }
     finally { setLoadingAvatar(false); }

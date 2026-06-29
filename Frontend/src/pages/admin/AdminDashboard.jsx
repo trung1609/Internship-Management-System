@@ -136,6 +136,7 @@ const AdminDashboard = () => {
             sx={{ position: "relative", zIndex: 1 }}
           >
             <Avatar
+              src={adminInfo?.data?.avatarUrl}
               sx={{
                 width: 100,
                 height: 100,
@@ -145,7 +146,7 @@ const AdminDashboard = () => {
                 border: "3px solid rgba(255,255,255,0.2)",
               }}
             >
-              {adminInfo?.data?.username?.charAt(0).toUpperCase() || "A"}
+              {!adminInfo?.data?.avatarUrl && (adminInfo?.data?.username?.charAt(0).toUpperCase() || "A")}
             </Avatar>
             <Box textAlign={{ xs: "center", sm: "left" }}>
               <Chip

@@ -157,6 +157,7 @@ const StudentDashboard = () => {
               transition={{ delay: 0.2, type: "spring" }}
             >
               <Avatar
+                src={studentInfo?.data?.avatarUrl}
                 sx={{
                   width: 100,
                   height: 100,
@@ -168,9 +169,10 @@ const StudentDashboard = () => {
                   color: "#fff",
                 }}
               >
-                {studentInfo?.data?.fullName?.charAt(0).toUpperCase() ||
-                  user?.username?.charAt(0).toUpperCase() ||
-                  "S"}
+                {!studentInfo?.data?.avatarUrl &&
+                  (studentInfo?.data?.fullName?.charAt(0).toUpperCase() ||
+                    user?.username?.charAt(0).toUpperCase() ||
+                    "S")}
               </Avatar>
             </motion.div>
 
