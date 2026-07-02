@@ -34,9 +34,13 @@ Một hệ thống quản lý thực tập toàn diện, xây dựng bằng **Sp
 - ✅ Định nghĩa các giai đoạn thực tập (`InternshipPhase`) với thời gian cụ thể
 - ✅ Vòng đánh giá (`AssessmentRound`) gắn với từng giai đoạn, mỗi vòng có nhiều tiêu chí có trọng số
 - ✅ Đánh giá sinh viên theo từng tiêu chí, có điểm đóng góp (`contribution`) và nhận xét
-- ✅ Chấm điểm hàng loạt (bulk grading) cho mentor
+- ✅ Chấm điểm hàng loạt (bulk grading) cho mentor theo assignment / nhóm sinh viên
 - ✅ Sinh viên nộp báo cáo (`Report` — upload file), mentor/admin tải xuống, xuất Excel & ZIP
+- ✅ Quản lý báo cáo sinh viên: tìm kiếm, tải file, xuất Excel, xuất ZIP, chấm điểm báo cáo
 - ✅ Hệ thống **Notification** real-time: backend publish event qua RabbitMQ → lưu DB + có thể gửi email
+- ✅ Trang thông báo có badge số lượng chưa đọc, đánh dấu đã đọc từng thông báo hoặc toàn bộ
+- ✅ Bảng điều khiển thống kê theo vai trò (Admin / Mentor)
+- ✅ Trang cài đặt hồ sơ cá nhân, đổi ảnh đại diện và đổi mật khẩu
 - ✅ Quên mật khẩu & đặt lại mật khẩu qua email (token lưu Redis, gửi qua RabbitMQ + Gmail/SendGrid)
 - ✅ Xác thực JWT (Access + Refresh token, blacklist qua Redis)
 - ✅ Phân quyền dựa trên vai trò (`ROLE_ADMIN`, `ROLE_MENTOR`, `ROLE_STUDENT`) qua `@PreAuthorize`
@@ -298,17 +302,26 @@ Internship-Management-System/
 - **Local**: `http://localhost:8080/api/v1`
 - **Production**: cấu hình qua biến môi trường `VITE_API_BASE_URL` ở Frontend, trỏ đến IP/Domain của DigitalOcean Droplet (ví dụ: `http://<droplet-ip>:8080/api/v1`).
 
+> Ghi chú: một số API làm việc với file upload/download (`multipart/form-data`, Excel, ZIP, avatar) nên frontend cần gửi đúng `Content-Type` tương ứng.
+
 ### 🔐 Authentication Endpoints
 
 | Method | Endpoint | Mô tả | Auth |
 |--------|----------|-------|------|
 | `POST` | `/auth/register` | Đăng ký tài khoản mới | ❌ |
-| `POST` | `/auth/login` | Đăng nhập (nhận JWT token) | ❌ |
-| `POST` | `/auth/refresh` | Làm mới access token | ❌ |
-| `POST` | `/auth/logout` | Đăng xuất (blacklist token) | ✅ |
+| `POST` | `/auth/login` | Đăng nhập (nhận access token + refresh token) | ❌ |
+| `POST` | `/auth/refresh` | Làm mới access token bằng refresh token cookie | ❌ |
+| `POST` | `/auth/logout` | Đăng xuất (blacklist token, xóa refresh cookie) | ✅ |
 | `GET` | `/auth/me` | Lấy thông tin người dùng hiện tại | ✅ |
 | `POST` | `/auth/forgot-password` | Gửi email đặt lại mật khẩu | ❌ |
 | `POST` | `/auth/reset-password` | Đặt lại mật khẩu bằng token | ❌ |
+
+### 🧾 User Profile Utilities
+
+| Method | Endpoint | Mô tả | Auth | Role |
+|--------|----------|-------|------|------|
+| `POST` | `/users/change-password` | Đổi mật khẩu tài khoản hiện tại | ✅ | ADMIN, MENTOR, STUDENT |
+| `PUT` | `/users/{userId}/avatar` | Upload ảnh đại diện người dùng | ✅ | ADMIN, MENTOR, STUDENT |
 
 ### 👥 User Management
 
@@ -361,6 +374,13 @@ Internship-Management-System/
 | `GET` | `/internship-assignments/{assignmentId}` | Lấy thông tin phân công | ✅ | - |
 | `PUT` | `/internship-assignments/{assignmentId}/status` | Cập nhật trạng thái phân công | ✅ | ADMIN |
 
+### 📊 Dashboard Statistics
+
+| Method | Endpoint | Mô tả | Auth | Role |
+|--------|----------|-------|------|------|
+| `GET` | `/dashboards/stats` | Thống kê tổng quan hệ thống | ✅ | ADMIN |
+| `GET` | `/dashboards/mentor-stats` | Thống kê cá nhân cho mentor | ✅ | MENTOR |
+
 ### ⭐ Assessment Round Management
 
 | Method | Endpoint | Mô tả | Auth | Role |
@@ -399,6 +419,27 @@ Internship-Management-System/
 | `GET` | `/assessment-results` | Lấy danh sách kết quả đánh giá | ✅ | - |
 | `GET` | `/assessment-results/{resultId}` | Lấy thông tin kết quả | ✅ | - |
 | `PUT` | `/assessment-results/{resultId}` | Cập nhật kết quả đánh giá | ✅ | MENTOR |
+| `POST` | `/assessment-results/bulk` | Lưu điểm hàng loạt cho một nhóm/sinh viên | ✅ | MENTOR |
+
+### 📑 Report Management
+
+| Method | Endpoint | Mô tả | Auth | Role |
+|--------|----------|-------|------|------|
+| `POST` | `/reports/upload` | Upload báo cáo sinh viên (`multipart/form-data`) | ✅ | STUDENT |
+| `GET` | `/reports` | Lấy danh sách báo cáo (phân trang, có search) | ✅ | ADMIN, MENTOR |
+| `GET` | `/reports/download/{reportId}` | Chuyển hướng đến URL tải file báo cáo | ✅ | - |
+| `GET` | `/reports/my-reports` | Lấy danh sách báo cáo của sinh viên hiện tại | ✅ | STUDENT |
+| `GET` | `/reports/export-excel` | Xuất danh sách báo cáo ra Excel | ✅ | ADMIN, MENTOR |
+| `GET` | `/reports/export-zip` | Xuất toàn bộ file báo cáo ra ZIP | ✅ | ADMIN, MENTOR |
+| `PUT` | `/reports/{reportId}/grade` | Chấm điểm & phản hồi cho báo cáo | ✅ | MENTOR |
+
+### 🔔 Notification Management
+
+| Method | Endpoint | Mô tả | Auth | Role |
+|--------|----------|-------|------|------|
+| `GET` | `/notifications/my-notifications` | Lấy danh sách thông báo của tôi | ✅ | - |
+| `PUT` | `/notifications/{id}/read` | Đánh dấu một thông báo là đã đọc | ✅ | - |
+| `PUT` | `/notifications/mark-all-as-read` | Đánh dấu toàn bộ thông báo là đã đọc | ✅ | - |
 
 ---
 
@@ -408,7 +449,7 @@ Internship-Management-System/
 - ✅ Đăng ký tài khoản (STUDENT, MENTOR, ADMIN)
 - ✅ Đăng nhập/Đăng xuất an toàn
 - ✅ Quên mật khẩu & đặt lại mật khẩu qua email
-- ✅ Quản lý thông tin cá nhân
+- ✅ Quản lý thông tin cá nhân, đổi mật khẩu, cập nhật avatar
 - ✅ Cấp quyền dựa trên vai trò
 
 ### 2️⃣ Quản Lý Sinh Viên
@@ -428,6 +469,7 @@ Internship-Management-System/
 - ✅ Gán sinh viên + cố vấn + giai đoạn
 - ✅ Theo dõi trạng thái (NOT_STARTED, IN_PROGRESS, COMPLETED, CANCELLED)
 - ✅ Cập nhật và xóa phân công
+- ✅ Xem chi tiết phân công, chọn vòng đánh giá, chọn tiêu chí và nhập điểm theo nhóm
 
 ### 5️⃣ Quản Lý Giai Đoạn Thực Tập
 - ✅ Định nghĩa giai đoạn (ví dụ: Giai đoạn 1, 2, 3)
@@ -441,15 +483,63 @@ Internship-Management-System/
 - ✅ Gán trọng số cho tiêu chí
 - ✅ Nhập điểm và nhận xét
 - ✅ Tính toán điểm trung bình
+- ✅ Chấm điểm hàng loạt cho toàn bộ sinh viên trong một assignment
 
-### 7️⃣ Thông Báo & Email
+### 7️⃣ Quản Lý Báo Cáo
+- ✅ Sinh viên upload báo cáo theo file
+- ✅ Mentor/Admin tìm kiếm, xem danh sách và tải báo cáo
+- ✅ Xuất dữ liệu ra Excel hoặc ZIP
+- ✅ Chấm điểm báo cáo và gửi thông báo cho sinh viên
+
+### 8️⃣ Thông Báo & Email
 - ✅ Gửi email qua RabbitMQ (bất đồng bộ)
 - ✅ Email đặt lại mật khẩu kèm link token
 - ✅ Thông báo phân công thực tập
+- ✅ Danh sách thông báo cá nhân, badge số chưa đọc, đánh dấu đã đọc từng cái hoặc tất cả
 
-### 8️⃣ Xuất Báo Cáo
-- ✅ Xuất danh sách kết quả đánh giá ra file Excel
+### 9️⃣ Dashboard & Tài Khoản Cá Nhân
+- ✅ Dashboard tự động đổi theo vai trò Admin / Mentor / Student
+- ✅ Trang cài đặt hồ sơ cá nhân riêng biệt
+- ✅ Cập nhật ảnh đại diện và đổi mật khẩu ngay trên UI
+
+### 10️⃣ Xuất Báo Cáo
+- ✅ Xuất danh sách kết quả đánh giá và báo cáo ra file Excel
+- ✅ Xuất toàn bộ file báo cáo thành ZIP
 - ✅ Sử dụng Apache POI
+
+---
+
+## 🖥️ Frontend Routes & Pages
+
+### Route chính
+- `/` — Landing page
+- `/login`, `/register` — Đăng nhập / đăng ký
+- `/forgot-password`, `/reset-password` — Quên và đặt lại mật khẩu
+- `/dashboard` — Dashboard theo vai trò, tự chuyển sang Admin / Mentor / Student
+- `/settings` — Cập nhật hồ sơ, avatar và mật khẩu
+
+### Trang quản lý & nghiệp vụ
+- `/management/users`
+- `/management/students`
+- `/management/mentors`
+- `/management/phases`
+- `/management/assignments`
+- `/management/reports`
+- `/management/evaluation-criteria`
+- `/management/assessment-rounds`
+- `/management/assessment-results`
+
+### Trang chi tiết & tác vụ đặc biệt
+- `/assignments/:id` — Xem chi tiết phân công, load round/criteria và chấm điểm theo nhóm
+- `/my-mentor` — Sinh viên xem mentor đang phụ trách
+- `/my-students` — Mentor xem sinh viên được giao
+- `/submit-report` — Sinh viên nộp báo cáo
+- `/admin/assessment-rounds/:id` — Chi tiết vòng đánh giá
+- `/admin/assessment-results/:id` — Chi tiết kết quả đánh giá
+
+### Hành vi UI đáng chú ý
+- Notification bell hiển thị số chưa đọc và tự refresh định kỳ
+- Nếu hồ sơ chưa đầy đủ, người dùng không phải admin sẽ được chuyển về `/settings`
 
 ---
 

@@ -1,15 +1,13 @@
 package com.trung.repository;
 
 import com.trung.entity.Report;
-import com.trung.entity.User;
+import com.trung.util.enums.ReportStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface IReportRepository extends JpaRepository<Report, Long> {
@@ -32,9 +30,23 @@ public interface IReportRepository extends JpaRepository<Report, Long> {
                                  @Param("keyword") String keyword,
                                  Pageable pageable);
 
-    @Query("SELECT COUNT(r) FROM Report r WHERE r.user.mentor.mentorId = :mentorId AND r.reportStatus = 'PENDING'")
-    long countPendingReportsByMentorId(@Param("mentorId") Long mentorId);
+    @Query("SELECT COUNT(r) FROM Report r " +
+            "WHERE r.reportStatus = :status " +
+            "AND r.user.student IN (" +
+            "  SELECT s FROM InternshipAssignment ia " +
+            "  JOIN ia.students s " +
+            "  WHERE ia.mentor.mentorId = :mentorId" +
+            ")")
+    long countReportsByMentorIdAndStatus(@Param("mentorId") Long mentorId,
+                                         @Param("status") ReportStatus status);
 
-    @Query("SELECT COUNT(r) FROM Report r WHERE r.user.mentor.mentorId = :mentorId AND r.reportStatus = 'GRADED'")
-    long countGradedReportsByMentorId(@Param("mentorId") Long mentorId);
+    @Query("SELECT COUNT(DISTINCT s.studentId) " +
+            "FROM Report r " +
+            "JOIN r.user u " +
+            "JOIN u.student s " +
+            "JOIN InternshipAssignment ia ON s MEMBER OF ia.students " +
+            "WHERE ia.mentor.mentorId = :mentorId " +
+            "AND r.reportStatus = :status")
+    long countDistinctStudentsGradedByMentor(@Param("mentorId") Long mentorId,
+                                             @Param("status") ReportStatus status);
 }

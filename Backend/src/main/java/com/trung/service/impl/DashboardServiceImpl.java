@@ -8,6 +8,7 @@ import com.trung.entity.User;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.repository.*;
 import com.trung.service.DashboardService;
+import com.trung.util.enums.ReportStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -71,11 +72,11 @@ public class DashboardServiceImpl implements DashboardService {
 
         long totalStudents = userRepository.countStudentsByMentorId(mentorId);
 
-        long pendingReports = reportRepository.countPendingReportsByMentorId(mentorId);
-        long gradedReports = reportRepository.countGradedReportsByMentorId(mentorId);
+        long pendingReports = reportRepository.countReportsByMentorIdAndStatus(mentorId, ReportStatus.PENDING);
+        long studentsGraded = reportRepository.countDistinctStudentsGradedByMentor(mentorId, ReportStatus.GRADED);
 
         double completionRate = totalStudents > 0
-                ? Math.round(((double) gradedReports / totalStudents) * 100.0)
+                ? Math.round(((double) studentsGraded / totalStudents) * 100.0)
                 : 0.0;
 
         return MentorStatsResponse.builder()
