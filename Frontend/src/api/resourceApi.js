@@ -247,3 +247,7 @@ export const notificationApi = {
   markAllAsRead: () =>
     axiosClient.put("/api/v1/notifications/mark-all-as-read"),
 };
+
+export const dashboardApi = {
+  getStats: () => axiosClient.get("/api/v1/dashboards/stats"),
+};

@@ -34,4 +34,6 @@ public interface IUserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmailAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(String email, Long id);
 
+    long countByRole(Role role);
+
 }
