@@ -219,7 +219,7 @@ export const reportApi = {
 
   downloadReport: (reportId) => {
     return axiosClient.get(`/api/v1/reports/download/${reportId}`, {
-      responseType: "blob", 
+      responseType: "blob",
     });
   },
   getMyReports: () => {
@@ -235,6 +235,8 @@ export const reportApi = {
       params: { search, page, size },
       responseType: "blob",
     }),
+
+  gradeReport: (reportId, data) => axiosClient.put(`/api/v1/reports/${reportId}/grade`, data),
 };
 
 export const notificationApi = {
@@ -250,4 +252,5 @@ export const notificationApi = {
 
 export const dashboardApi = {
   getStats: () => axiosClient.get("/api/v1/dashboards/stats"),
+  getMentorStats: () => axiosClient.get("/api/v1/dashboards/mentor-stats"),
 };

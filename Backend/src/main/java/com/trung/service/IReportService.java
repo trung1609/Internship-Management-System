@@ -1,5 +1,6 @@
 package com.trung.service;
 
+import com.trung.dto.request.GradeReportRequest;
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
@@ -24,4 +25,6 @@ public interface IReportService {
     ByteArrayInputStream exportReportExcel(String search, PageRequestDTO pageRequestDTO);
 
     ByteArrayInputStream exportReportZip(String search, PageRequestDTO pageRequestDTO);
+
+    void gradeReport(Long reportId, GradeReportRequest request) throws ResourceNotFoundException;
 }

@@ -13,6 +13,8 @@ import java.util.Optional;
 
 @Repository
 public interface IUserRepository extends JpaRepository<User, Long> {
+    
+    Optional<User> findByUsername(String username);
 
     Optional<User> findByEmailAndIsDeletedFalseAndIsActiveTrue(String email);
 
@@ -36,4 +38,7 @@ public interface IUserRepository extends JpaRepository<User, Long> {
 
     long countByRole(Role role);
 
+    @Query("select count(s) from User s where s.student.studentId in " +
+            "(select st.studentId from InternshipAssignment ia join ia.students st where ia.mentor.mentorId = :mentorId)")
+    long countStudentsByMentorId(Long mentorId);
 }

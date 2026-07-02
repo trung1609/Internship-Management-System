@@ -1,5 +1,6 @@
 package com.trung.service.impl;
 
+import com.trung.dto.request.GradeReportRequest;
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
@@ -16,6 +17,7 @@ import com.trung.service.IReportService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.ExcelUtil;
 import com.trung.util.PaginationUtil;
+import com.trung.util.enums.ReportStatus;
 import com.trung.util.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -82,6 +85,7 @@ public class ReportServiceImpl implements IReportService {
 
                 NotificationEventDTO eventDTO = NotificationEventDTO.builder()
                         .recipientId(mentorUserId)
+                        .title("🔔 Báo cáo mới từ sinh viên!")
                         .message("Sinh viên có mã sinh viên " + currentUserUtil.getCurrentUser().getStudent().getStudentCode() + " vừa nộp báo cáo: " + title)
                         .type("REPORT")
                         .build();
@@ -203,5 +207,30 @@ public class ReportServiceImpl implements IReportService {
         }
 
         return new ByteArrayInputStream(baos.toByteArray());
+    }
+
+    @Override
+    @Transactional
+    public void gradeReport(Long reportId, GradeReportRequest request) throws ResourceNotFoundException {
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy báo cáo có ID: " + reportId));
+
+        report.setScore(request.getScore());
+        report.setFeedback(request.getFeedback());
+        report.setReportStatus(ReportStatus.GRADED);
+
+        reportRepository.save(report);
+
+        Long studentId = report.getUser().getUserId();
+
+        NotificationEventDTO notification = NotificationEventDTO.builder()
+                .recipientId(studentId)
+                .title("🔔 Điểm báo cáo mới!")
+                .message(String.format("Báo cáo '%s' của bạn đã được chấm: %.2f điểm. Nhận xét: %s",
+                        report.getTitle(), request.getScore(), request.getFeedback()))
+                .type("REPORT_GRADED")
+                .build();
+
+        rabbitTemplate.convertAndSend(exchangeName, routingKey, notification);
     }
 }

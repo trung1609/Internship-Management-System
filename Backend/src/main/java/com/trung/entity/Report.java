@@ -1,5 +1,6 @@
 package com.trung.entity;
 
+import com.trung.util.enums.ReportStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,6 +30,14 @@ public class Report {
     private User user;
 
     private String fileUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ReportStatus reportStatus = ReportStatus.PENDING;
+
+    private Double score;
+
+    private String feedback;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -47,7 +47,8 @@ public class SecurityConfig {
             "/api/v1/round-criterias/**",
             "/api/v1/internship-assignments/**",
             "/api/v1/assessment-results/**",
-            "/api/v1/reports/**"
+            "/api/v1/reports/**",
+            "/api/v1/dashboards/**"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
@@ -57,7 +58,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(COMMON_ENDPOINTS).hasAnyAuthority("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
-                        .requestMatchers("/api/v1/dashboards/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

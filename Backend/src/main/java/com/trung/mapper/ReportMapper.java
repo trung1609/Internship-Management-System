@@ -16,6 +16,9 @@ public class ReportMapper {
                 .studentId(report.getUser().getStudent().getStudentId())
                 .studentCode(report.getUser().getStudent().getStudentCode())
                 .studentName(report.getUser().getFullName())
+                .score(report.getScore())
+                .feedback(report.getFeedback())
+                .reportStatus(report.getReportStatus().name())
                 .build();
     }
 }

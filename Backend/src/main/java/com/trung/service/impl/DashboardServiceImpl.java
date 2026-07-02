@@ -2,7 +2,10 @@ package com.trung.service.impl;
 
 import com.trung.dto.response.ChartDataResponse;
 import com.trung.dto.response.DashboardStatsResponse;
+import com.trung.dto.response.MentorStatsResponse;
 import com.trung.entity.SiteTraffic;
+import com.trung.entity.User;
+import com.trung.exception.ResourceNotFoundException;
 import com.trung.repository.*;
 import com.trung.service.DashboardService;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +58,31 @@ public class DashboardServiceImpl implements DashboardService {
                 .websiteVisits(totalVisits)
                 .pieData(pieData)
                 .visitorData(visitorData)
+                .build();
+    }
+
+    @Override
+    public MentorStatsResponse getMentorStats(String username) throws ResourceNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
+        Long mentorId = user.getMentor().getMentorId();
+
+        long totalGroups = assignmentRepository.countByMentor_MentorId(mentorId);
+
+        long totalStudents = userRepository.countStudentsByMentorId(mentorId);
+
+        long pendingReports = reportRepository.countPendingReportsByMentorId(mentorId);
+        long gradedReports = reportRepository.countGradedReportsByMentorId(mentorId);
+
+        double completionRate = totalStudents > 0
+                ? Math.round(((double) gradedReports / totalStudents) * 100.0)
+                : 0.0;
+
+        return MentorStatsResponse.builder()
+                .totalGroups(totalGroups)
+                .totalStudents(totalStudents)
+                .pendingReports(pendingReports)
+                .completionRate(completionRate)
                 .build();
     }
 }

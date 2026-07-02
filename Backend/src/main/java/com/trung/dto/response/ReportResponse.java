@@ -21,4 +21,7 @@ public class ReportResponse {
     private String studentName;
     private String studentCode;
     private Long studentId;
+    private Double score;
+    private String feedback;
+    private String reportStatus;
 }

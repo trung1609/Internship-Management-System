@@ -31,4 +31,10 @@ public interface IReportRepository extends JpaRepository<Report, Long> {
     Page<Report> findByStudentId(@Param("studentId") Long studentId,
                                  @Param("keyword") String keyword,
                                  Pageable pageable);
+
+    @Query("SELECT COUNT(r) FROM Report r WHERE r.user.mentor.mentorId = :mentorId AND r.reportStatus = 'PENDING'")
+    long countPendingReportsByMentorId(@Param("mentorId") Long mentorId);
+
+    @Query("SELECT COUNT(r) FROM Report r WHERE r.user.mentor.mentorId = :mentorId AND r.reportStatus = 'GRADED'")
+    long countGradedReportsByMentorId(@Param("mentorId") Long mentorId);
 }

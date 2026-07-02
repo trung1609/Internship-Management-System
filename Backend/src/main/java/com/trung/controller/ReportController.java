@@ -1,5 +1,6 @@
 package com.trung.controller;
 
+import com.trung.dto.request.GradeReportRequest;
 import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.PageResponseDTO;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -102,5 +104,18 @@ public class ReportController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .body(resource);
+    }
+
+    @PutMapping("/{reportId}/grade")
+    @PreAuthorize("hasAuthority('ROLE_MENTOR')")
+    public ResponseEntity<ApiResponse<Void>> gradeReport(
+            @PathVariable Long reportId,
+            @RequestBody GradeReportRequest request) throws ResourceNotFoundException {
+
+        reportService.gradeReport(reportId, request);
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                null, true, "Chấm điểm và gửi thông báo thành công!", null, LocalDateTime.now()
+        ));
     }
 }

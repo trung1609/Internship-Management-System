@@ -88,4 +88,6 @@ public interface InternshipAssignmentRepository extends JpaRepository<Internship
             "where ia.mentor.mentorId = :mentorId")
     Page<Student> findStudentsByMentorId(@Param("mentorId") Long mentorId,
                                          Pageable pageable);
+
+    long countByMentor_MentorId(Long mentorId);
 }

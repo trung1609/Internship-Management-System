@@ -44,9 +44,9 @@ const AdminDashboard = () => {
     totalAssignments: 0,
     totalReports: 0,
     websiteVisits: 0,
-    visitorData: [], // Dữ liệu động từ API
-    sourceData: [],  // Dữ liệu động từ API
-    pieData: [],     // Dữ liệu động từ API
+    visitorData: [],
+    sourceData: [],
+    pieData: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -114,7 +114,7 @@ const AdminDashboard = () => {
   );
 
   return (
-    <Box sx={{ maxWidth: 1400, margin: "0 auto", pb: 5 }}>
+    <Box sx={{ maxWidth: "100%", px: { xs: 2, md: 4 }, margin: "0 auto", pb: 5, overflowX: "hidden" }}>
       {/* HEADER BANNER 3D */}
       <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
         <Paper
@@ -159,12 +159,18 @@ const AdminDashboard = () => {
         <StatCard3D delay={0.4} color="#8b5cf6" icon={<AssignmentIcon fontSize="large" />} title="Nhóm Thực Tập" value={stats.totalAssignments.toLocaleString()} subText="+5 nhóm mới" />
       </Box>
 
-      {/* KHU VỰC BIỂU ĐỒ 3D */}
-      <Grid container spacing={10} sx={{ width: "100%", margin: 0 }}>
-        
-        {/* Biểu đồ Đường - Rộng 2/3 màn hình */}
-        <Grid item xs={12} lg={8} sx={{ paddingLeft: "0 !important" }}>
-          <Paper sx={{ ...box3DStyle, p: 3, height: "100%", minHeight: 420, display: 'flex', flexDirection: 'column' }}>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", lg: "row" }, 
+          gap: 4,
+          alignItems: "stretch", 
+        }}
+      >
+        {/* Biểu đồ Đường - Chiếm 2 phần */}
+        <Box sx={{ flex: { xs: "1 1 100%", lg: 2 } }}>
+          <Paper sx={{ ...box3DStyle, p: 3, height: "100%", minHeight: 420, display: "flex", flexDirection: "column" }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b", mb: 3 }}>
               Xu hướng truy cập website (7 ngày gần nhất)
             </Typography>
@@ -180,43 +186,42 @@ const AdminDashboard = () => {
               </ResponsiveContainer>
             </Box>
           </Paper>
-        </Grid>
+        </Box>
 
-        {/* Biểu đồ Tròn - Rộng 1/3 màn hình */}
-        <Grid item xs={12} lg={4}>
-          <Stack spacing={3} sx={{ height: "100%" }}>
-            <Paper sx={{ ...box3DStyle, p: 3, flex: 1, minHeight: 420, display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#1e293b", mb: 1, textAlign: "center" }}>
-                Tỷ lệ hoàn thành báo cáo
-              </Typography>
-              <Box sx={{ flexGrow: 1, width: "100%", minHeight: 250, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={stats.pieData} innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value">
-                      {stats.pieData?.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+        {/* Biểu đồ Tròn - Chiếm 1 phần */}
+        <Box sx={{ flex: { xs: "1 1 100%", lg: 1 } }}>
+          <Paper sx={{ ...box3DStyle, p: 3, height: "100%", minHeight: 420, display: "flex", flexDirection: "column" }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#1e293b", mb: 1, textAlign: "center" }}>
+              Tỷ lệ hoàn thành báo cáo
+            </Typography>
+            <Box sx={{ flexGrow: 1, width: "100%", minHeight: 250, display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={stats.pieData} innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value">
+                    {stats.pieData?.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+
+            {/* Chú thích (Legend) cho biểu đồ tròn */}
+            <Stack direction="row" justifyContent="center" spacing={3} sx={{ mt: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: COLORS[0] }} />
+                <Typography variant="caption" sx={{ fontWeight: 700, color: "#64748b" }}>Đã nộp</Typography>
               </Box>
-              
-              {/* Chú thích (Legend) cho biểu đồ tròn */}
-              <Stack direction="row" justifyContent="center" spacing={3} sx={{ mt: 2 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: COLORS[0] }} />
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: "#64748b" }}>Đã nộp</Typography>
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: COLORS[1] }} />
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: "#64748b" }}>Chưa nộp</Typography>
-                </Box>
-              </Stack>
-            </Paper>
-          </Stack>
-        </Grid>
-      </Grid>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: COLORS[1] }} />
+                <Typography variant="caption" sx={{ fontWeight: 700, color: "#64748b" }}>Chưa nộp</Typography>
+              </Box>
+            </Stack>
+          </Paper>
+        </Box>
+
+      </Box>
     </Box>
   );
 };

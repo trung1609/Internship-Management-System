@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class NotificationEventDTO {
     private Long recipientId;
+    private String title;
     private String message;
     private String type;
 }

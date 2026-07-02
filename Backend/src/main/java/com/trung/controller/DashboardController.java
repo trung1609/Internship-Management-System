@@ -2,6 +2,8 @@ package com.trung.controller;
 
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.DashboardStatsResponse;
+import com.trung.dto.response.MentorStatsResponse;
+import com.trung.exception.ResourceNotFoundException;
 import com.trung.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 @RestController
@@ -22,6 +25,7 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/stats")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<DashboardStatsResponse>> getStats() {
         DashboardStatsResponse stats = dashboardService.getDashboardStats();
 
@@ -30,5 +34,15 @@ public class DashboardController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/mentor-stats")
+    @PreAuthorize("hasAuthority('ROLE_MENTOR')")
+    public ResponseEntity<ApiResponse<MentorStatsResponse>> getMentorStats(Principal principal) throws ResourceNotFoundException {
+        MentorStatsResponse stats = dashboardService.getMentorStats(principal.getName());
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                stats, true, "Lấy thống kê Mentor thành công", null, LocalDateTime.now()
+        ));
     }
 }
