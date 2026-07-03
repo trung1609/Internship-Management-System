@@ -1,19 +1,20 @@
 package com.trung.service.impl;
 
 import com.trung.dto.request.ForgotPasswordRequest;
-import com.trung.dto.request.FormLoginRequest;
-import com.trung.dto.request.FormRegisterRequest;
-import com.trung.dto.response.*;
 import com.trung.entity.Mentor;
 import com.trung.entity.Student;
 import com.trung.entity.User;
+import com.trung.repository.IMentorRepository;
+import com.trung.repository.IStudentRepository;
+import com.trung.util.enums.Role;
+import com.trung.dto.request.FormLoginRequest;
+import com.trung.dto.request.FormRegisterRequest;
+import com.trung.dto.response.*;
 import com.trung.exception.InvalidCredentialsException;
 import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.UserMapper;
-import com.trung.repository.IMentorRepository;
-import com.trung.repository.IStudentRepository;
 import com.trung.repository.IUserRepository;
 import com.trung.security.jwt.JwtProvider;
 import com.trung.security.jwt.RefreshTokenService;
@@ -21,7 +22,6 @@ import com.trung.security.jwt.TokenBlacklistService;
 import com.trung.security.principal.UserPrincipal;
 import com.trung.service.IAuthService;
 import com.trung.util.ValidationErrorUtil;
-import com.trung.util.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -72,11 +72,11 @@ public class AuthServiceImpl implements IAuthService {
         if (request.getRole() != null) {
             try {
                 users.setRole(Role.valueOf(request.getRole().toUpperCase()));
-            } catch (IllegalArgumentException e) {
+            }catch (IllegalArgumentException e) {
                 errorList.put("role", "Invalid role value");
                 throw new ResourceBadRequestException("Validation failed", errorList);
             }
-        } else {
+        }else {
             users.setRole(Role.ROLE_STUDENT);
         }
 
@@ -85,14 +85,14 @@ public class AuthServiceImpl implements IAuthService {
         users.setFullName(request.getFullName());
         users.setEmail(request.getEmail());
         users.setPhoneNumber(request.getPhoneNumber());
-        userRepository.saveAndFlush(users);
+        userRepository.save(users);
 
         if (users.getRole() == Role.ROLE_STUDENT) {
             Student student = new Student();
             student.setUser(users);
             student.setStudentCode("STU" + String.format("%04d", users.getUserId()));
             iStudentRepository.save(student);
-        } else if (users.getRole() == Role.ROLE_MENTOR) {
+        }else if (users.getRole() == Role.ROLE_MENTOR) {
             Mentor mentor = new Mentor();
             mentor.setUser(users);
             iMentorRepository.save(mentor);
@@ -130,7 +130,7 @@ public class AuthServiceImpl implements IAuthService {
                     .user(UserMapper.toDto(users))
                     .build();
             return new ApiResponse<>(response, true, "SUCCESS", null, LocalDateTime.now());
-        } catch (AuthenticationException ex) {
+        }catch (AuthenticationException ex) {
             throw new InvalidCredentialsException("Invalid username or password");
         }
     }
