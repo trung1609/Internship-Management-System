@@ -21,12 +21,16 @@ public class Student {
     @Column(nullable = false, unique = true)
     private String studentCode;
 
+    @Column(nullable = true)
     private String major;
 
+    @Column(nullable = true)
     private String classRoom;
 
+    @Column(nullable = true)
     private LocalDate dateOfBirth;
 
+    @Column(nullable = true)
     private String address;
 
     @CreationTimestamp

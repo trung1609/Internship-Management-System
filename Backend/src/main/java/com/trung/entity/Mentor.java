@@ -22,7 +22,9 @@ public class Mentor {
     @JoinColumn(name = "mentor_id")
     private User user;
 
+    @Column(nullable = true)
     private String department;
+    @Column(nullable = true)
     private String academicRank;
 
     @CreationTimestamp
