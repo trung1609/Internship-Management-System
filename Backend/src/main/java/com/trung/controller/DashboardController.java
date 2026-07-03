@@ -3,6 +3,7 @@ package com.trung.controller;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.DashboardStatsResponse;
 import com.trung.dto.response.MentorStatsResponse;
+import com.trung.dto.response.StudentStatsResponse;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.service.DashboardService;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,16 @@ public class DashboardController {
 
         return ResponseEntity.ok(new ApiResponse<>(
                 stats, true, "Lấy thống kê Mentor thành công", null, LocalDateTime.now()
+        ));
+    }
+
+    @GetMapping("/student-stats")
+    @PreAuthorize("hasAuthority('ROLE_STUDENT')")
+    public ResponseEntity<ApiResponse<StudentStatsResponse>> getStudentStats(Principal principal) throws ResourceNotFoundException {
+        StudentStatsResponse stats = dashboardService.getStudentStats(principal.getName());
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                stats, true, "Lấy thống kê Student thành công", null, LocalDateTime.now()
         ));
     }
 }

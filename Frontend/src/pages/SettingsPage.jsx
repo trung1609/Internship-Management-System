@@ -85,6 +85,7 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDobFocused, setIsDobFocused] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [loadingAvatar, setLoadingAvatar] = useState(false);
@@ -93,12 +94,11 @@ const SettingsPage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { register: regProfile, handleSubmit: handleProfileSubmit, reset: resetProfile, formState: { errors: profileErrors } } = useForm();
+  const { register: regProfile, handleSubmit: handleProfileSubmit, watch: watchProfile, reset: resetProfile, formState: { errors: profileErrors } } = useForm();
   const { register: regPassword, handleSubmit: handlePasswordSubmit, watch, reset: resetPasswordForm, formState: { errors: passwordErrors } } = useForm();
 
   const formatToISO = (dateStr) => {
     if (!dateStr) return "";
-    if (dateStr.includes("-")) return dateStr;
     if (dateStr.includes("/")) {
       const [day, month, year] = dateStr.split("/");
       return `${year}-${month}-${day}`;
@@ -164,7 +164,11 @@ const SettingsPage = () => {
         await fetchUser();
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Cập nhật thất bại!");
+      if (error.response?.status === 403) {
+        toast.error("Hệ thống từ chối cập nhật. Vui lòng kiểm tra lại các trường bắt buộc.");
+      } else {
+        toast.error(error.response?.data?.message || "Cập nhật thất bại!");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -250,13 +254,14 @@ const SettingsPage = () => {
                     <TextField
                       fullWidth
                       label="Ngày sinh"
-                      type={regProfile("dateOfBirth") ? "date" : "text"}
-                      {...regProfile("dateOfBirth")}
-                      onFocus={(e) => (e.target.type = "date")}
-                      onBlur={(e) => { if (!e.target.value) e.target.type = "text" }}
+                      type={(isDobFocused || watchProfile("dateOfBirth")) ? "date" : "text"}
                       InputLabelProps={{
-                        shrink: true,
+                        shrink: isDobFocused || !!watchProfile("dateOfBirth")
                       }}
+                      {...regProfile("dateOfBirth", {
+                        onBlur: () => setIsDobFocused(false)
+                      })}
+                      onFocus={() => setIsDobFocused(true)}
                       sx={{
                         '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 3 }
                       }}

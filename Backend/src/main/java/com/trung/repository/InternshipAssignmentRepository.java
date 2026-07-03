@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
@@ -90,4 +91,18 @@ public interface InternshipAssignmentRepository extends JpaRepository<Internship
                                          Pageable pageable);
 
     long countByMentor_MentorId(Long mentorId);
+
+    @Query("SELECT COUNT(ia) FROM InternshipAssignment ia JOIN ia.students s WHERE s.studentId = :studentId")
+    long countTotalAssignmentsByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT COUNT(ia) FROM InternshipAssignment ia JOIN ia.students s WHERE s.studentId = :studentId AND ia.status = 'COMPLETED'")
+    long countCompletedAssignmentsByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT COUNT(ia) FROM InternshipAssignment ia JOIN ia.students s " +
+            "WHERE s.studentId = :studentId " +
+            "AND ia.status != 'COMPLETED' " +
+            "AND ia.dueDate >= :today AND ia.dueDate <= :nextWeek")
+    long countUpcomingDeadlinesByStudentId(@Param("studentId") Long studentId,
+                                           @Param("today") LocalDate today,
+                                           @Param("nextWeek") LocalDate nextWeek);
 }

@@ -26,7 +26,19 @@ public class ProfileCompletionInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         String method = request.getMethod();
 
-        if (uri.startsWith("/api/v1/auth") || method.equals("OPTIONS") || method.equals("GET") || method.equals("PUT")) {
+        if (uri.startsWith("/api/v1/auth") || method.equals("OPTIONS")) {
+            return true;
+        }
+
+        if (uri.equals("/api/v1/users/me") && method.equals("GET")) {
+            return true;
+        }
+
+        if(uri.equals("/api/v1/notifications")){
+            return true;
+        }
+
+        if (uri.matches("^/api/v1/(students|mentors|users)(/.+)?$") && (method.equals("PUT") || method.equals("POST"))) {
             return true;
         }
 

@@ -3,6 +3,7 @@ package com.trung.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -19,4 +20,5 @@ public class InternshipAssignmentUpdateRequest {
     private Long mentorId;
     private Long phaseId;
     private List<Long> studentIds;
+    private LocalDate dueDate;
 }

@@ -70,7 +70,7 @@ export const userApi = {
     axiosClient.post("/api/v1/users/change-password", data),
 
   uploadAvatar: (userId, formData) => {
-    return axiosClient.put(`api/v1/users/${userId}/avatar`, formData,
+    return axiosClient.put(`/api/v1/users/${userId}/avatar`, formData,
       {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -253,4 +253,5 @@ export const notificationApi = {
 export const dashboardApi = {
   getStats: () => axiosClient.get("/api/v1/dashboards/stats"),
   getMentorStats: () => axiosClient.get("/api/v1/dashboards/mentor-stats"),
+  getStudentStats: () => axiosClient.get("/api/v1/dashboards/student-stats"),
 };

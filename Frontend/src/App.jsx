@@ -32,6 +32,7 @@ import AssignmentDetail from "./pages/AssignmentDetail";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import SettingsPage from "./pages/SettingsPage";
+import RequireProfileCompletion from "./components/RequireProfileCompletion";
 
 function App() {
   const location = useLocation();
@@ -56,138 +57,137 @@ function App() {
 
           {/* Dashboard Routes */}
           <Route element={<ProtectedRoute />}>
-            {/* Route này thường dành cho Student, hoặc làm trang chuyển tiếp */}
-            <Route
-              path="/dashboard"
-              element={
-                <AppLayout>
-                  <MainDashboard />
-                </AppLayout>
-              }
-            />
+            <Route element={<RequireProfileCompletion />}>
+              <Route
+                path="/dashboard"
+                element={
+                  <AppLayout>
+                    <MainDashboard />
+                  </AppLayout>
+                }
+              />
 
-            {/* Toàn bộ các trang Quản lý (Management) đặt trong này */}
-            <Route
-              path="/management/users"
-              element={
-                <AppLayout>
-                  <UsersManagement />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/management/students"
-              element={
-                <AppLayout>
-                  <StudentsManagement />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/management/mentors"
-              element={
-                <AppLayout>
-                  <MentorsManagement />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/management/phases"
-              element={
-                <AppLayout>
-                  <InternshipPhasesManagement />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/management/assignments"
-              element={
-                <AppLayout>
-                  <InternshipAssignmentsManagement />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/management/assessment-rounds"
-              element={
-                <AppLayout>
-                  <AssessmentRoundsManagement />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/management/evaluation-criteria"
-              element={
-                <AppLayout>
-                  <EvaluationCriteriaManagement />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/management/assessment-results"
-              element={
-                <AppLayout>
-                  <AssessmentResultsManagement />
-                </AppLayout>
-              }
-            />
-            {/* Ví dụ: Chi tiết sinh viên thì cả Admin và Mentor phụ trách đều xem được */}
-            <Route
-              path="/admin/assessment-rounds/:id"
-              element={
-                <AppLayout>
-                  <AssessmentRoundDetail />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/admin/assessment-results/:id"
-              element={
-                <AppLayout>
-                  <AssessmentResultDetail />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/my-mentor"
-              element={
-                <AppLayout>
-                  <AssignedMentor />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/my-students"
-              element={
-                <AppLayout>
-                  <AssignedStudents />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/submit-report"
-              element={
-                <AppLayout>
-                  <StudentReportSubmit />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/management/reports"
-              element={
-                <AppLayout>
-                  <ReportManagement />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/assignments/:id"
-              element={
-                <AppLayout>
-                  <AssignmentDetail />
-                </AppLayout>
-              }
-            />
+              <Route
+                path="/management/users"
+                element={
+                  <AppLayout>
+                    <UsersManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/management/students"
+                element={
+                  <AppLayout>
+                    <StudentsManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/management/mentors"
+                element={
+                  <AppLayout>
+                    <MentorsManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/management/phases"
+                element={
+                  <AppLayout>
+                    <InternshipPhasesManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/management/assignments"
+                element={
+                  <AppLayout>
+                    <InternshipAssignmentsManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/management/assessment-rounds"
+                element={
+                  <AppLayout>
+                    <AssessmentRoundsManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/management/evaluation-criteria"
+                element={
+                  <AppLayout>
+                    <EvaluationCriteriaManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/management/assessment-results"
+                element={
+                  <AppLayout>
+                    <AssessmentResultsManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/admin/assessment-rounds/:id"
+                element={
+                  <AppLayout>
+                    <AssessmentRoundDetail />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/admin/assessment-results/:id"
+                element={
+                  <AppLayout>
+                    <AssessmentResultDetail />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/my-mentor"
+                element={
+                  <AppLayout>
+                    <AssignedMentor />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/my-students"
+                element={
+                  <AppLayout>
+                    <AssignedStudents />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/submit-report"
+                element={
+                  <AppLayout>
+                    <StudentReportSubmit />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/management/reports"
+                element={
+                  <AppLayout>
+                    <ReportManagement />
+                  </AppLayout>
+                }
+              />
+              <Route
+                path="/assignments/:id"
+                element={
+                  <AppLayout>
+                    <AssignmentDetail />
+                  </AppLayout>
+                }
+              />
+            </Route>
             <Route
               path="/settings"
               element={
@@ -197,7 +197,6 @@ function App() {
               }
             />
           </Route>
-          {/* Bắt các đường dẫn không tồn tại -> Đẩy về login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AnimatePresence>

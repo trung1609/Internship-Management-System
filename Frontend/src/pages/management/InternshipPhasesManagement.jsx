@@ -31,9 +31,6 @@ import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 const MotionPaper = motion(Paper);
 
 const InternshipPhasesManagement = () => {
-  // ==========================================
-  // PHẦN LOGIC
-  // ==========================================
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);

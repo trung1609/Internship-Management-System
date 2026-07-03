@@ -3,6 +3,7 @@ package com.trung.service.impl;
 import com.trung.dto.response.ChartDataResponse;
 import com.trung.dto.response.DashboardStatsResponse;
 import com.trung.dto.response.MentorStatsResponse;
+import com.trung.dto.response.StudentStatsResponse;
 import com.trung.entity.SiteTraffic;
 import com.trung.entity.User;
 import com.trung.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import com.trung.util.enums.ReportStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -84,6 +86,35 @@ public class DashboardServiceImpl implements DashboardService {
                 .totalStudents(totalStudents)
                 .pendingReports(pendingReports)
                 .completionRate(completionRate)
+                .build();
+    }
+
+    @Override
+    public StudentStatsResponse getStudentStats(String username) throws ResourceNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
+        Long studentId = user.getStudent().getStudentId();
+
+        long submittedReports = reportRepository.countReportsByStudentId(studentId);
+        double averageScore = reportRepository.getAverageScoreByStudentId(studentId);
+        averageScore = Math.round(averageScore * 10.0) / 10.0;
+
+        long totalAssignments = assignmentRepository.countTotalAssignmentsByStudentId(studentId);
+        long completedAssignments = assignmentRepository.countCompletedAssignmentsByStudentId(studentId);
+
+        double progress = totalAssignments > 0
+                ? Math.round(((double) completedAssignments / totalAssignments) * 100.0)
+                : 0.0;
+
+        LocalDate today = LocalDate.now();
+        LocalDate nextWeek = today.plusDays(7);
+        long upcomingDeadlines = assignmentRepository.countUpcomingDeadlinesByStudentId(studentId, today, nextWeek);
+
+        return StudentStatsResponse.builder()
+                .progress(progress)
+                .submittedReports(submittedReports)
+                .averageScore(averageScore)
+                .upcomingDeadlines(upcomingDeadlines)
                 .build();
     }
 }

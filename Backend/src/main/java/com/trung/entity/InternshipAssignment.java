@@ -44,6 +44,8 @@ public class InternshipAssignment {
 
     private LocalDate assignedDate;
 
+    private LocalDate dueDate;
+
     @Enumerated(EnumType.STRING)
     private AssignmentStatus status;
 

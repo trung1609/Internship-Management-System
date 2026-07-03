@@ -44,6 +44,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import AlarmIcon from "@mui/icons-material/Alarm";
 
 const AssignmentDetail = () => {
   const { id } = useParams();
@@ -369,7 +370,11 @@ const AssignmentDetail = () => {
                 {detail.assignmentTitle}
               </Typography>
 
-              <Stack direction="row" spacing={4} sx={{ mb: 4 }}>
+              <Stack
+                direction="row"
+                spacing={4}
+                sx={{ mb: 4, flexWrap: "wrap", rowGap: 3 }}
+              >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <Avatar
                     src={detail.mentorAvatarUrl}
@@ -389,6 +394,7 @@ const AssignmentDetail = () => {
                     </Typography>
                   </Box>
                 </Box>
+
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <Avatar sx={{ bgcolor: "#fef2f2", color: "#ef4444" }}>
                     <FlagIcon />
@@ -403,6 +409,25 @@ const AssignmentDetail = () => {
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 700 }}>
                       {detail.assignedDate}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* KHỐI HIỂN THỊ DEADLINE (MỚI THÊM) */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Avatar sx={{ bgcolor: "#fff7ed", color: "#d97706" }}>
+                    <AlarmIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ fontWeight: 600 }}
+                    >
+                      Hạn chót (Deadline)
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700, color: detail.dueDate ? "#b45309" : "#94a3b8" }}>
+                      {detail.dueDate ? detail.dueDate : "Chưa thiết lập"}
                     </Typography>
                   </Box>
                 </Box>

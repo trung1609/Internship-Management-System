@@ -49,4 +49,11 @@ public interface IReportRepository extends JpaRepository<Report, Long> {
             "AND r.reportStatus = :status")
     long countDistinctStudentsGradedByMentor(@Param("mentorId") Long mentorId,
                                              @Param("status") ReportStatus status);
+
+    @Query("SELECT COUNT(r) FROM Report r WHERE r.user.student.studentId = :studentId")
+    long countReportsByStudentId(@Param("studentId") Long studentId);
+
+    // Tính điểm trung bình của các báo cáo đã chấm
+    @Query("SELECT COALESCE(AVG(r.score), 0.0) FROM Report r WHERE r.user.student.studentId = :studentId AND r.reportStatus = 'GRADED'")
+    double getAverageScoreByStudentId(@Param("studentId") Long studentId);
 }

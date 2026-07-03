@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -24,4 +25,6 @@ public class InternshipAssignmentCreateRequest {
 
     @NotNull(message = "Mentor ID is required.")
     private Long mentorId;
+
+    private LocalDate dueDate;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     IconButton, Badge, Popover, Box, Typography, List, ListItem,
     ListItemText, Divider, ListItemAvatar, Avatar, Tooltip
@@ -9,8 +9,10 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import CircleIcon from '@mui/icons-material/Circle';
 import { motion, AnimatePresence } from 'framer-motion';
 import { notificationApi } from '../api/resourceApi';
+import { AuthContext } from '../context/AuthContext';
 
 const NotificationBell = () => {
+    const { user } = useContext(AuthContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const [notifications, setNotifications] = useState([]);
 
@@ -24,10 +26,16 @@ const NotificationBell = () => {
     };
 
     useEffect(() => {
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 10000);
-        return () => clearInterval(interval);
-    }, []);
+        const isProfileComplete = user && user.fullName && user.phoneNumber &&
+            (user.role.includes('ADMIN') ||
+                (user.role.includes('STUDENT') && user.student?.major && user.student?.classRoom) ||
+                (user.role.includes('MENTOR') && user.mentor?.department));
+        if (isProfileComplete) {
+            fetchNotifications();
+            const interval = setInterval(fetchNotifications, 10000);
+            return () => clearInterval(interval);
+        }
+    }, [user]);
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 

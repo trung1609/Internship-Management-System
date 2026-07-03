@@ -38,6 +38,7 @@ public class InternshipAssignmentMapper {
                 .assignedDate(entity.getAssignedDate())
                 .status(entity.getStatus())
                 .students(studentInfos)
+                .dueDate(entity.getDueDate())
                 .build();
     }
 
@@ -50,6 +51,7 @@ public class InternshipAssignmentMapper {
                 .phase(phase)
                 .assignedDate(LocalDateTime.now().toLocalDate())
                 .status(AssignmentStatus.PENDING)
+                .dueDate(request.getDueDate())
                 .build();
     }
 

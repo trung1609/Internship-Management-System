@@ -23,6 +23,9 @@ public class InternshipAssignmentResponse {
     private String phaseName;
 
     @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dueDate;
+
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate assignedDate;
     private AssignmentStatus status;
 

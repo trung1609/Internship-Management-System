@@ -145,6 +145,10 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             internshipAssignment.setAssignmentDescription(request.getAssignmentDescription());
         }
 
+        if (request.getDueDate() != null) {
+            internshipAssignment.setDueDate(request.getDueDate());
+        }
+
         if (request.getMentorId() != null && !request.getMentorId().equals(internshipAssignment.getMentor().getMentorId())) {
             Mentor mentor = iMentorRepository.findByMentorId(request.getMentorId())
                     .orElseThrow(() -> new ResourceNotFoundException("Mentor not found with id: " + request.getMentorId()));

@@ -40,6 +40,7 @@ const InternshipAssignmentsManagement = () => {
     mentorId: "",
     phaseId: "",
     studentIds: [],
+    dueDate: "",
     status: "PENDING",
   });
 
@@ -62,6 +63,11 @@ const InternshipAssignmentsManagement = () => {
   const handleOpenModal = (assignment = null) => {
     if (assignment) {
       setEditingAssignment(assignment);
+      let formattedDate = "";
+      if (assignment.dueDate) {
+        const [day, month, year] = assignment.dueDate.split('/');
+        formattedDate = `${year}-${month}-${day}`;
+      }
       setFormData({
         assignmentTitle: assignment.assignmentTitle || "",
         assignmentDescription: assignment.assignmentDescription || "",
@@ -69,12 +75,13 @@ const InternshipAssignmentsManagement = () => {
         phaseId: assignment.phaseId || "",
         // Lấy thẳng mảng ID ra
         studentIds: assignment.students ? assignment.students.map(s => s.id) : [],
+        dueDate: formattedDate || "",
         status: assignment.status || "PENDING",
       });
     } else {
       setEditingAssignment(null);
       setFormData({
-        assignmentTitle: "", assignmentDescription: "", mentorId: "", phaseId: "", studentIds: [],
+        assignmentTitle: "", assignmentDescription: "", mentorId: "", phaseId: "", studentIds: [], dueDate: ""
       });
     }
     setOpenModal(true);
@@ -278,6 +285,17 @@ const InternshipAssignmentsManagement = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={6}><TextField fullWidth label="ID Mentor" value={formData.mentorId} onChange={(e) => setFormData({ ...formData, mentorId: e.target.value })} /></Grid>
                       <Grid item xs={6}><TextField fullWidth label="ID Giai đoạn" value={formData.phaseId} onChange={(e) => setFormData({ ...formData, phaseId: e.target.value })} /></Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Hạn chót (Deadline)"
+                          type={formData.dueDate ? "date" : "text"}
+                          value={formData.dueDate}
+                          onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                          onFocus={(e) => (e.target.type = "date")}
+                          onBlur={(e) => { if (!formData.dueDate) e.target.type = "text"; }}
+                        />
+                      </Grid>
                     </Grid>
                   </Stack>
                   <Box sx={{ mt: 2 }}>
