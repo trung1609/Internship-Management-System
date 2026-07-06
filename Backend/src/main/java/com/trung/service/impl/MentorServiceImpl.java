@@ -15,6 +15,7 @@ import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.MentorMapper;
 import com.trung.repository.IMentorRepository;
 import com.trung.repository.IUserRepository;
+import com.trung.repository.InternshipAssignmentRepository;
 import com.trung.service.IMentorService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
@@ -34,6 +35,7 @@ public class MentorServiceImpl implements IMentorService {
     private final IMentorRepository mentorRepository;
     private final IUserRepository iUserRepository;
     private final CurrentUserUtil currentUserUtil;
+    private final InternshipAssignmentRepository internshipAssignmentRepository;
 
     @Override
     public PageResponseDTO<Object> getAllMentor(PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
@@ -46,7 +48,7 @@ public class MentorServiceImpl implements IMentorService {
             return PaginationUtil.toPageResponseDTO(mentorPage, MentorMapper::toDto);
         } else if (user.getRole() == Role.ROLE_STUDENT) {
             Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "mentor");
-            mentorPage = mentorRepository.findAllByMentor(pageable);
+            mentorPage = internshipAssignmentRepository.findMentorByStudent(user.getUserId(), pageable);
             return PaginationUtil.toPageResponseDTO(mentorPage, MentorMapper::toPublicDto);
         } else {
             throw new ResourceForbiddenException("User role not supported for this operation");

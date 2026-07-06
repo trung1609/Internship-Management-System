@@ -1,6 +1,7 @@
 package com.trung.repository;
 
 import com.trung.entity.InternshipAssignment;
+import com.trung.entity.Mentor;
 import com.trung.entity.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -78,6 +79,13 @@ public interface InternshipAssignmentRepository extends JpaRepository<Internship
     Page<InternshipAssignment> findByStudent_StudentId(@Param("search") String search,
                                                        @Param("studentId") Long studentId,
                                                        Pageable pageable);
+
+    @Query("select m from InternshipAssignment ia " +
+            "join ia.mentor m " +
+            "join ia.students s " +
+            "where s.studentId = :studentId")
+    Page<Mentor> findMentorByStudent(@Param("studentId") Long studentId,
+                                     Pageable pageable);
 
     @Query("select case when count(ia) > 0 then true else false end from InternshipAssignment ia " +
             "join ia.students s " +
