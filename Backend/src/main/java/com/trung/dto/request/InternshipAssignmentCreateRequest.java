@@ -1,5 +1,6 @@
 package com.trung.dto.request;
 
+import com.trung.util.enums.AssignmentStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -25,6 +26,8 @@ public class InternshipAssignmentCreateRequest {
 
     @NotNull(message = "Mentor ID is required.")
     private Long mentorId;
+
+    private AssignmentStatus status;
 
     private LocalDate dueDate;
 }

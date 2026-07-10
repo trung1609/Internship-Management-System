@@ -50,7 +50,7 @@ public class InternshipAssignmentMapper {
                 .mentor(mentor)
                 .phase(phase)
                 .assignedDate(LocalDateTime.now().toLocalDate())
-                .status(AssignmentStatus.PENDING)
+                .status(request.getStatus() != null ? request.getStatus() : AssignmentStatus.PENDING)
                 .dueDate(request.getDueDate())
                 .build();
     }
