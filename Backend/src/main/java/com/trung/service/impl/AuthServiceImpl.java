@@ -24,6 +24,7 @@ import com.trung.service.IAuthService;
 import com.trung.util.ValidationErrorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -47,6 +48,8 @@ public class AuthServiceImpl implements IAuthService {
     private final RefreshTokenService refreshTokenService;
     private final IStudentRepository iStudentRepository;
     private final IMentorRepository iMentorRepository;
+    private final StringRedisTemplate redisTemplate;
+    private final EmailService emailService;
 
     @Value("${jwt_expire}")
     private long expire;
@@ -55,7 +58,40 @@ public class AuthServiceImpl implements IAuthService {
     @Transactional
     public ApiResponse<RegisterResponse> register(FormRegisterRequest request) throws ResourceBadRequestException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
+        String redisOtpKey = "OTP:" + request.getEmail();
 
+        if (request.getOtp() == null || request.getOtp().trim().isEmpty()) {
+
+            if (userRepository.existsByUsernameAndIsDeletedFalseAndIsActiveTrue(request.getUsername())) {
+                errorList.put("username", "Username already exists");
+            }
+            if (userRepository.existsByEmailAndIsDeletedFalseAndIsActiveTrue(request.getEmail())) {
+                errorList.put("email", "Email already exists");
+            }
+            if (ValidationErrorUtil.hasErrors(errorList)) {
+                throw new ResourceConflictException("Validation failed", errorList);
+            }
+
+            emailService.sendOtpEmail(request.getEmail());
+
+            RegisterResponse response = RegisterResponse.builder()
+                    .message("OTP_SENT_REDIRECT")
+                    .build();
+
+            return new ApiResponse<>(response, true, "Mã OTP xác thực kích hoạt đã được gửi qua email.", null, LocalDateTime.now());
+        }
+
+        String savedOtp = redisTemplate.opsForValue().get(redisOtpKey);
+
+        if (savedOtp == null) {
+            errorList.put("otp", "Mã xác thực OTP đã hết hạn hoặc không tồn tại. Vui lòng quay lại đăng ký lại.");
+            throw new ResourceConflictException("Xác thực thất bại", errorList);
+        }
+
+        if (!savedOtp.equals(request.getOtp().trim())) {
+            errorList.put("otp", "Mã xác thực OTP không chính xác.");
+            throw new ResourceConflictException("Xác thực thất bại", errorList);
+        }
         if (userRepository.existsByUsernameAndIsDeletedFalseAndIsActiveTrue(request.getUsername())) {
             errorList.put("username", "Username already exists");
         }
@@ -97,6 +133,8 @@ public class AuthServiceImpl implements IAuthService {
             mentor.setUser(users);
             iMentorRepository.save(mentor);
         }
+
+        redisTemplate.delete(redisOtpKey);
         RegisterResponse response = RegisterResponse.builder()
                 .message("Register successfully")
                 .user(UserMapper.toDto(users))

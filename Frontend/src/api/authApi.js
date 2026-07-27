@@ -12,4 +12,5 @@ export const authApi = {
     forgotPassword: (payload) => axiosClient.post('/api/v1/auth/forgot-password', payload),
 
     resetPassword: (data) => axiosClient.post('/api/v1/auth/reset-password', data),
+    sendOtp: (payload) => axiosClient.post('/api/v1/auth/send-otp', payload),
 };

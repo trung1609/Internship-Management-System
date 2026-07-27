@@ -1,15 +1,13 @@
 package com.trung.controller;
 
-import com.trung.dto.request.ForgotPasswordRequest;
-import com.trung.dto.request.FormLoginRequest;
-import com.trung.dto.request.FormRegisterRequest;
-import com.trung.dto.request.ResetPasswordRequest;
+import com.trung.dto.request.*;
 import com.trung.dto.response.*;
 import com.trung.exception.InvalidCredentialsException;
 import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.service.IAuthService;
+import com.trung.service.impl.EmailService;
 import com.trung.service.impl.PasswordResetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.AuthenticationException;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -30,6 +29,7 @@ import javax.naming.AuthenticationException;
 public class AuthController {
     private final IAuthService authService;
     private final PasswordResetService passwordResetService;
+    private final EmailService emailService;
 
     @Value("${jwt_expire}")
     private long expire;
@@ -126,5 +126,20 @@ public class AuthController {
 
         passwordResetService.verifyAndResetPassword(request);
         return ResponseEntity.ok("Cập nhật mật khẩu mới thành công.");
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<ApiResponse<Void>> sendOtp(@RequestBody OtpRequest request) {
+        emailService.sendOtpEmail(request.getEmail());
+        return ResponseEntity.ok(new ApiResponse<>(null, true, "Mã OTP đã được gửi về Email!", null, LocalDateTime.now()));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ApiResponse<Void>> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        boolean isValid = emailService.verifyOtp(request);
+        if (isValid) {
+            return ResponseEntity.ok(new ApiResponse<>(null, true, "Xác thực OTP thành công!", null, LocalDateTime.now()));
+        }
+        return ResponseEntity.badRequest().body(new ApiResponse<>(null, false, "Mã OTP không chính xác hoặc đã hết hạn!", null, LocalDateTime.now()));
     }
 }
