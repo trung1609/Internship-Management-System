@@ -239,6 +239,10 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ApiResponse<JwtResponse> googleLogin(GoogleLoginRequest request) throws Exception {
+
+        System.out.println("========= X-RAY DEBUG GOOGLE LOGIN =========");
+        System.out.println("1. Client ID Backend đang cầm: [" + googleClientId + "]");
+        System.out.println("2. ID Token nhận từ React: [" + request.getIdToken().substring(0, Math.min(request.getIdToken().length(), 30)) + "...]");
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                 .setAudience(Collections.singletonList(googleClientId))
                 .build();
