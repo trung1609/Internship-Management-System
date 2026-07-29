@@ -1,6 +1,11 @@
 package com.trung.service.impl;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.trung.dto.request.ForgotPasswordRequest;
+import com.trung.dto.request.GoogleLoginRequest;
 import com.trung.entity.Mentor;
 import com.trung.entity.Student;
 import com.trung.entity.User;
@@ -34,8 +39,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +60,9 @@ public class AuthServiceImpl implements IAuthService {
 
     @Value("${jwt_expire}")
     private long expire;
+
+    @Value("${google.client-id}")
+    private String googleClientId;
 
     @Override
     @Transactional
@@ -227,7 +237,53 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
-    public ApiResponse<String> forgotPassword(ForgotPasswordRequest request) {
-        return null;
+    @Transactional(rollbackFor = Exception.class)
+    public ApiResponse<JwtResponse> googleLogin(GoogleLoginRequest request) throws Exception {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
+
+        GoogleIdToken idToken = verifier.verify(request.getIdToken());
+        if (idToken == null) {
+            throw new InvalidCredentialsException("Mã xác thực Google không hợp lệ hoặc đã hết hạn.");
+        }
+
+        GoogleIdToken.Payload payload = idToken.getPayload();
+        String email = payload.getEmail();
+        String fullName = (String) payload.get("name");
+
+        User user = userRepository.findByEmailAndIsDeletedFalseAndIsActiveTrue(email).orElse(null);
+
+        if (user == null) {
+            user = new User();
+            user.setEmail(email);
+            user.setUsername(email.split("@")[0]);
+            user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+            user.setFullName(fullName);
+            user.setRole(Role.ROLE_STUDENT);
+
+            user = userRepository.save(user);
+
+            Student student = new Student();
+            student.setUser(user);
+            student.setStudentCode("STU" + String.format("%04d", user.getUserId()));
+            iStudentRepository.save(student);
+        }
+
+        Date expireDate = new Date(new Date().getTime() + expire);
+        String accessToken = jwtProvider.generateAccessToken(user);
+        String refreshToken = jwtProvider.generateRefreshToken(user);
+
+        refreshTokenService.saveRefreshToken(refreshToken);
+
+        JwtResponse response = JwtResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(expireDate)
+                .username(user.getUsername())
+                .user(UserMapper.toDto(user))
+                .build();
+
+        return new ApiResponse<>(response, true, "SUCCESS", null, LocalDateTime.now());
     }
 }

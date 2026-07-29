@@ -53,6 +53,8 @@ dependencies {
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
     // Source: https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44
     implementation("com.cloudinary:cloudinary-http44:1.39.0")
+    // Source: https://mvnrepository.com/artifact/com.google.api-client/google-api-client
+    implementation("com.google.api-client:google-api-client:2.9.0")
 }
 
 tasks.named('test') {

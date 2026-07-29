@@ -33,11 +33,14 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import SettingsPage from "./pages/SettingsPage";
 import RequireProfileCompletion from "./components/RequireProfileCompletion";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
+
+const GOOGLE_CLIENT_ID = "1050982532847-dacfe3vlietuad8fht70p5bla3isf0vm.apps.googleusercontent.com";
 function App() {
   const location = useLocation();
   return (
-    <>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -200,7 +203,7 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AnimatePresence>
-    </>
+    </GoogleOAuthProvider>
   );
 }
 

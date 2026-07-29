@@ -142,4 +142,22 @@ public class AuthController {
         }
         return ResponseEntity.badRequest().body(new ApiResponse<>(null, false, "Mã OTP không chính xác hoặc đã hết hạn!", null, LocalDateTime.now()));
     }
+
+    @PostMapping("/google-login")
+    public ResponseEntity<ApiResponse<JwtResponse>> googleLogin(@Valid @RequestBody GoogleLoginRequest request) throws Exception {
+        ApiResponse<JwtResponse> response = authService.googleLogin(request);
+        String refreshToken = response.getData().getRefreshToken();
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/v1/auth")
+                .maxAge((expire * 7) / 1000) 
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(response);
+    }
 }

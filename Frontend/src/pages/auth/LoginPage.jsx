@@ -16,11 +16,15 @@ import {
   OutlinedInput,
   InputLabel,
   FormControl,
+  Divider,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { motion } from "framer-motion";
+import { GoogleLogin } from "@react-oauth/google";
+import { authApi } from "../../api/authApi";
+import { toast } from "react-toastify";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -312,6 +316,46 @@ const LoginPage = () => {
                 "Đăng nhập"
               )}
             </Button>
+
+            <Divider sx={{ my: 3, color: "#94a3b8", fontSize: "0.875rem", fontWeight: 600 }}>
+              HOẶC ĐĂNG NHẬP BẰNG
+            </Divider>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, '& iframe': { borderRadius: '12px !important' } }}>
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  setIsLoading(true);
+                  try {
+                    // 1. Gửi ID Token xuống API
+                    const res = await authApi.googleLogin({
+                      idToken: credentialResponse.credential
+                    });
+
+                    const payload = res.data ? res.data : res;
+                    const jwtData = payload.data ? payload.data : payload;
+
+                    if (jwtData && jwtData.accessToken) {
+                      localStorage.setItem('accessToken', jwtData.accessToken);
+
+                      toast.success("Đăng nhập bằng Google thành công! 🎉");
+                      navigate("/dashboard");
+                      window.location.reload();
+                    } else {
+                      toast.error("Không thể đọc dữ liệu Token từ máy chủ!");
+                    }
+                  } catch (error) {
+                    console.error("Lỗi chi tiết:", error);
+                    toast.error(error.response?.data?.message || "Xác thực tài khoản Google thất bại tại máy chủ!");
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                theme="outline"
+                size="large"
+                shape="rectangular"
+                width="400px"
+              />
+            </Box>
 
             <Typography
               variant="body1"
