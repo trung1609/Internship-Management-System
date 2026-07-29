@@ -15,9 +15,9 @@ spring:
     password: guest
   datasource:
     driver-class-name: org.postgresql.Driver
-    password: 123456
-    url: jdbc:postgresql://localhost:5432/intership_management_system
-    username: postgres
+    password: ${POSTGRES_PASSWORD_DEV}
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB_DEV}
+    username: ${POSTGRES_USER_DEV}
   jpa:
     hibernate:
       ddl-auto: update
