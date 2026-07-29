@@ -385,7 +385,7 @@ const LoginPage = () => {
                   "&:hover": { bgcolor: "#f6f8fa", borderColor: "#24292e" }
                 }}
               >
-                Sign in with GitHub
+                Đăng nhập với GitHub
               </Button>
             </Stack>
 

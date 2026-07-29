@@ -46,7 +46,7 @@ const drawerWidth = 280;
 
 const allMenuItems = [
   {
-    label: "Dashboard",
+    label: "Bảng điều khiển",
     icon: <DashboardIcon />,
     path: "/dashboard",
     roles: [
@@ -59,13 +59,13 @@ const allMenuItems = [
     ],
   },
   {
-    label: "My Mentor",
+    label: "Giảng viên phụ trách",
     icon: <PersonIcon />,
     path: "/my-mentor",
     roles: ["STUDENT", "ROLE_STUDENT"],
   },
   {
-    label: "My Students",
+    label: "Danh sách sinh viên",
     icon: <GroupIcon />,
     path: "/my-students",
     roles: ["MENTOR", "ROLE_MENTOR"],
@@ -77,17 +77,17 @@ const allMenuItems = [
     roles: ["STUDENT", "ROLE_STUDENT"],
   },
   {
-    label: "User Management",
+    label: "Quản lý Người dùng",
     icon: <PeopleIcon />,
     roles: ["ADMIN", "ROLE_ADMIN"],
     children: [
-      { label: "All Users", path: "/management/users" },
-      { label: "All Students", path: "/management/students" },
-      { label: "All Mentors", path: "/management/mentors" },
+      { label: "Tất cả Người dùng", path: "/management/users" },
+      { label: "Tất cả Sinh viên", path: "/management/students" },
+      { label: "Tất cả Giảng viên", path: "/management/mentors" },
     ],
   },
   {
-    label: "Internship Management",
+    label: "Quản lý Thực tập",
     icon: <SchoolIcon />,
     roles: [
       "ADMIN",
@@ -98,8 +98,8 @@ const allMenuItems = [
       "ROLE_STUDENT",
     ],
     children: [
-      { label: "Internship Phases", path: "/management/phases" },
-      { label: "Internship Assignments", path: "/management/assignments" },
+      { label: "Giai đoạn Thực tập", path: "/management/phases" },
+      { label: "Nhiệm vụ Thực tập", path: "/management/assignments" },
     ],
   },
   {
@@ -109,7 +109,7 @@ const allMenuItems = [
     roles: ["ADMIN", "ROLE_ADMIN", "MENTOR", "ROLE_MENTOR"],
   },
   {
-    label: "Assessment Management",
+    label: "Quản lý Đánh giá",
     icon: <RateReviewIcon />,
     roles: [
       "ADMIN",
@@ -120,9 +120,9 @@ const allMenuItems = [
       "ROLE_STUDENT",
     ],
     children: [
-      { label: "Evaluation Criteria", path: "/management/evaluation-criteria" },
-      { label: "Assessment Rounds", path: "/management/assessment-rounds" },
-      { label: "Assessment Results", path: "/management/assessment-results" },
+      { label: "Tiêu chí Đánh giá", path: "/management/evaluation-criteria" },
+      { label: "Vòng Đánh giá", path: "/management/assessment-rounds" },
+      { label: "Kết quả Đánh giá", path: "/management/assessment-results" },
     ],
   },
 ];
