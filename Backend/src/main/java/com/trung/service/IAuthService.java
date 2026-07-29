@@ -1,9 +1,6 @@
 package com.trung.service;
 
-import com.trung.dto.request.ForgotPasswordRequest;
-import com.trung.dto.request.FormLoginRequest;
-import com.trung.dto.request.FormRegisterRequest;
-import com.trung.dto.request.GoogleLoginRequest;
+import com.trung.dto.request.*;
 import com.trung.dto.response.*;
 import com.trung.exception.InvalidCredentialsException;
 import com.trung.exception.ResourceBadRequestException;
@@ -19,4 +16,5 @@ public interface IAuthService {
     ApiResponse<String> logout(String accessToken, String refreshToken);
     ApiResponse<RefreshTokenResponse> refreshToken(String refreshToken) throws InvalidCredentialsException, ResourceNotFoundException;
     ApiResponse<JwtResponse> googleLogin(GoogleLoginRequest request) throws Exception;
+    ApiResponse<JwtResponse> githubLogin(GithubLoginRequest request) throws Exception;
 }

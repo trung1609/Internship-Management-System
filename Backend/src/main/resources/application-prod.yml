@@ -53,3 +53,7 @@ rabbitmq:
 app:
   frontend:
     url: "https://trung1609.github.io/Internship-Management-System"
+
+github:
+  client-id: ${GITHUB_CLIENT_ID_PROD}
+  client-secret: ${GITHUB_CLIENT_SECRET_PROD}

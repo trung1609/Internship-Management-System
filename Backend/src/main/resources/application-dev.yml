@@ -58,3 +58,6 @@ rabbitmq:
 app:
   frontend:
     url: "http://localhost:5173"
+github:
+  client-id: ${GITHUB_CLIENT_ID_DEV}
+  client-secret: ${GITHUB_CLIENT_SECRET_DEV}

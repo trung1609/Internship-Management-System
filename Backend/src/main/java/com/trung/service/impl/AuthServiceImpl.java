@@ -4,16 +4,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import com.trung.dto.request.ForgotPasswordRequest;
-import com.trung.dto.request.GoogleLoginRequest;
+import com.trung.dto.request.*;
 import com.trung.entity.Mentor;
 import com.trung.entity.Student;
 import com.trung.entity.User;
 import com.trung.repository.IMentorRepository;
 import com.trung.repository.IStudentRepository;
 import com.trung.util.enums.Role;
-import com.trung.dto.request.FormLoginRequest;
-import com.trung.dto.request.FormRegisterRequest;
 import com.trung.dto.response.*;
 import com.trung.exception.InvalidCredentialsException;
 import com.trung.exception.ResourceBadRequestException;
@@ -30,6 +27,10 @@ import com.trung.util.ValidationErrorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,12 +38,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +62,90 @@ public class AuthServiceImpl implements IAuthService {
 
     @Value("${google.client-id}")
     private String googleClientId;
+
+    @Value("${github.client-id}")
+    private String githubClientId;
+
+    @Value("${github.client-secret}")
+    private String githubClientSecret;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ApiResponse<JwtResponse> githubLogin(GithubLoginRequest request) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+        String tokenUrl = "https://github.com/login/oauth/access_token" +
+                "?client_id=" + githubClientId +
+                "&client_secret=" + githubClientSecret +
+                "&code=" + request.getCode();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "application/json");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Map> tokenResponse = restTemplate.exchange(tokenUrl, HttpMethod.POST, entity, Map.class);
+        String githubAccessToken = (String) tokenResponse.getBody().get("access_token");
+
+        if (githubAccessToken == null) {
+            throw new InvalidCredentialsException("Mã xác thực GitHub không hợp lệ hoặc đã hết hạn.");
+        }
+
+        // 2. Dùng GitHub Access Token để lấy thông tin Profile User
+        HttpHeaders profileHeaders = new HttpHeaders();
+        profileHeaders.setBearerAuth(githubAccessToken);
+        HttpEntity<String> profileEntity = new HttpEntity<>(profileHeaders);
+
+        ResponseEntity<Map> profileResponse = restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, profileEntity, Map.class);
+        Map<String, Object> profileData = profileResponse.getBody();
+
+        // GitHub đôi khi ẩn email công khai, ta cần lấy thêm email nếu profileData.get("email") bị null
+        String email = (String) profileData.get("email");
+        if (email == null) {
+            // Backup plan: Gọi endpoint lấy các email của account github
+            ResponseEntity<List> emailsResponse = restTemplate.exchange("https://api.github.com/user/emails", HttpMethod.GET, profileEntity, List.class);
+            Map firstEmail = (Map) emailsResponse.getBody().get(0);
+            email = (String) firstEmail.get("email");
+        }
+
+        String fullName = (String) profileData.get("name");
+        if (fullName == null) fullName = (String) profileData.get("login"); // Lấy tạm username github nếu ko có tên thật
+        String avatarUrl = (String) profileData.get("avatar_url");
+
+        // 3. Logic kiểm tra/tạo User & Cấp JWT (Y hệt luồng Google của bạn)
+        User user = userRepository.findByEmailAndIsDeletedFalseAndIsActiveTrue(email).orElse(null);
+
+        if (user == null) {
+            user = new User();
+            user.setEmail(email);
+            user.setUsername(email.split("@")[0]);
+            user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+            user.setFullName(fullName);
+            user.setAvatarUrl(avatarUrl);
+            user.setRole(Role.ROLE_STUDENT);
+            user = userRepository.save(user);
+
+            Student student = new Student();
+            student.setUser(user);
+            student.setStudentCode("STU" + String.format("%04d", user.getUserId()));
+            iStudentRepository.save(student);
+        }
+
+        // 4. Cấp phát Token hệ thống
+        Date expireDate = new Date(new Date().getTime() + expire);
+        String accessToken = jwtProvider.generateAccessToken(user);
+        String refreshToken = jwtProvider.generateRefreshToken(user);
+        refreshTokenService.saveRefreshToken(refreshToken);
+
+        JwtResponse response = JwtResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(expireDate)
+                .username(user.getUsername())
+                .user(UserMapper.toDto(user))
+                .build();
+
+        return new ApiResponse<>(response, true, "SUCCESS", null, LocalDateTime.now());
+    }
 
     @Override
     @Transactional

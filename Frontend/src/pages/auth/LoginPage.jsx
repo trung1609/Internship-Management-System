@@ -25,6 +25,7 @@ import { motion } from "framer-motion";
 import { GoogleLogin } from "@react-oauth/google";
 import { authApi } from "../../api/authApi";
 import { toast } from "react-toastify";
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -72,6 +73,13 @@ const LoginPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // --- HÀM ĐIỀU HƯỚNG SANG GITHUB APP ---
+  const handleGithubLogin = () => {
+    const CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID;
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=user:email`;
+    window.location.href = githubAuthUrl;
   };
 
   return (
@@ -321,46 +329,70 @@ const LoginPage = () => {
               HOẶC ĐĂNG NHẬP BẰNG
             </Divider>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, '& iframe': { borderRadius: '12px !important' } }}>
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
-                  setIsLoading(true);
-                  try {
-                    // 1. Gửi ID Token xuống API
-                    const res = await authApi.googleLogin({
-                      idToken: credentialResponse.credential
-                    });
+            <Stack spacing={2}>
+              {/* NÚT GOOGLE CHÍNH CHỦ */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', '& iframe': { borderRadius: '12px !important' } }}>
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    setIsLoading(true);
+                    try {
+                      const res = await authApi.googleLogin({
+                        idToken: credentialResponse.credential
+                      });
 
-                    const payload = res.data ? res.data : res;
-                    const jwtData = payload.data ? payload.data : payload;
+                      const payload = res.data ? res.data : res;
+                      const jwtData = payload.data ? payload.data : payload;
 
-                    if (jwtData && jwtData.accessToken) {
-                      localStorage.setItem('accessToken', jwtData.accessToken);
+                      if (jwtData && jwtData.accessToken) {
+                        localStorage.setItem('accessToken', jwtData.accessToken);
+                        localStorage.setItem('user', JSON.stringify(jwtData.user));
 
-                      toast.success("Đăng nhập bằng Google thành công! 🎉");
-                      navigate("/dashboard");
-                      window.location.reload();
-                    } else {
-                      toast.error("Không thể đọc dữ liệu Token từ máy chủ!");
+                        toast.success("Đăng nhập bằng Google thành công! 🎉");
+                        navigate("/dashboard");
+                        window.location.reload();
+                      } else {
+                        toast.error("Không thể đọc dữ liệu Token từ máy chủ!");
+                      }
+                    } catch (error) {
+                      console.error("Lỗi chi tiết:", error);
+                      toast.error(error.response?.data?.message || "Xác thực tài khoản Google thất bại tại máy chủ!");
+                    } finally {
+                      setIsLoading(false);
                     }
-                  } catch (error) {
-                    console.error("Lỗi chi tiết:", error);
-                    toast.error(error.response?.data?.message || "Xác thực tài khoản Google thất bại tại máy chủ!");
-                  } finally {
-                    setIsLoading(false);
-                  }
+                  }}
+                  theme="outline"
+                  size="large"
+                  shape="rectangular"
+                  width="400px"
+                />
+              </Box>
+
+              {/* NÚT GITHUB TỰ DESIGN ĐỒNG BỘ FLAT UI */}
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<GitHubIcon />}
+                onClick={handleGithubLogin}
+                disabled={isLoading}
+                sx={{
+                  py: 1.4,
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  color: "#24292e",
+                  borderColor: "#dadce0",
+                  "&:hover": { bgcolor: "#f6f8fa", borderColor: "#24292e" }
                 }}
-                theme="outline"
-                size="large"
-                shape="rectangular"
-                width="400px"
-              />
-            </Box>
+              >
+                Sign in with GitHub
+              </Button>
+            </Stack>
 
             <Typography
               variant="body1"
               align="center"
-              sx={{ color: "#64748b" }}
+              sx={{ color: "#64748b", mt: 3 }}
             >
               Chưa có tài khoản?{" "}
               <Link

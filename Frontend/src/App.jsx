@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -23,7 +23,7 @@ import EvaluationCriteriaManagement from "./pages/management/EvaluationCriteriaM
 import AssessmentResultsManagement from "./pages/management/AssessmentResultsManagement";
 import ReportManagement from "./pages/management/ReportManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import AssessmentRoundDetail from "./pages/management/AssessmentRoundDetail";
 import AssessmentResultDetail from "./pages/management/AssessmentResultDetail";
 import LandingPage from "./pages/LandingPage";
@@ -34,11 +34,68 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import SettingsPage from "./pages/SettingsPage";
 import RequireProfileCompletion from "./components/RequireProfileCompletion";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { useEffect, useRef, useState } from "react";
+import { authApi } from "./api/authApi";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 
 const GOOGLE_CLIENT_ID = "1050982532847-dacfe3vlietuad8fht70p5bla3isf0vm.apps.googleusercontent.com";
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const isGithubLoginProcessed = useRef(false);
+
+  const [isProcessing, setIsProcessing] = useState(() => {
+    return new URLSearchParams(window.location.search).has("code");
+  });
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const code = searchParams.get("code");
+
+    if (code && !isGithubLoginProcessed.current) {
+      isGithubLoginProcessed.current = true;
+      const processGithubLogin = async () => {
+        try {
+          // Gửi mã code lên Spring Boot Backend để xử lý JWT
+          const res = await authApi.githubLogin({ code });
+
+          // Phân tách payload (tùy thuộc vào cấu trúc ApiResponse của bạn)
+          const payload = res.data ? res.data : res;
+          const jwtData = payload.data ? payload.data : payload;
+
+          if (jwtData && jwtData.accessToken) {
+            // Lưu thông tin đăng nhập vào LocalStorage
+            localStorage.setItem('accessToken', jwtData.accessToken);
+
+            toast.success("Đăng nhập bằng GitHub thành công!");
+
+            window.history.replaceState({}, document.title, window.location.pathname);
+            window.location.href = window.location.origin + window.location.pathname + "#/dashboard";
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error("Lỗi đăng nhập GitHub:", error);
+          toast.error("Xác thực tài khoản GitHub thất bại!");
+
+          window.location.href = window.location.origin + window.location.pathname + "#/login";
+          window.location.reload();
+        }
+      };
+
+      processGithubLogin();
+    }
+  }, []);
+  if (isProcessing) {
+    return (
+      <Box sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+        <CircularProgress size={60} sx={{ mb: 3 }} />
+        <Typography variant="h6" color="text.secondary">
+          Đang xác thực tài khoản GitHub...
+        </Typography>
+      </Box>
+    );
+  }
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <ToastContainer

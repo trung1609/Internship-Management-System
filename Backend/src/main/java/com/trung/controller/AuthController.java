@@ -160,4 +160,22 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(response);
     }
+
+    @PostMapping("/github-login")
+    public ResponseEntity<ApiResponse<JwtResponse>> githubLogin(@Valid @RequestBody GithubLoginRequest request) throws Exception {
+        ApiResponse<JwtResponse> response = authService.githubLogin(request);
+        String refreshToken = response.getData().getRefreshToken();
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/v1/auth")
+                .maxAge((expire * 7) / 1000)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(response);
+    }
 }

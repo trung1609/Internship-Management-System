@@ -14,4 +14,5 @@ export const authApi = {
     resetPassword: (data) => axiosClient.post('/api/v1/auth/reset-password', data),
     sendOtp: (payload) => axiosClient.post('/api/v1/auth/send-otp', payload),
     googleLogin: (payload) => axiosClient.post('/api/v1/auth/google-login', payload),
+    githubLogin: (payload) => axiosClient.post('/api/v1/auth/github-login', payload),
 };
