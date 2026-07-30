@@ -345,9 +345,8 @@ const LoginPage = () => {
 
                       if (jwtData && jwtData.accessToken) {
                         localStorage.setItem('accessToken', jwtData.accessToken);
-                        localStorage.setItem('user', JSON.stringify(jwtData.user));
 
-                        toast.success("Đăng nhập bằng Google thành công! 🎉");
+                        toast.success("Đăng nhập bằng Google thành công!");
                         navigate("/dashboard");
                         window.location.reload();
                       } else {
