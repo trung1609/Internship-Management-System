@@ -77,7 +77,7 @@ function App() {
         } catch (error) {
           console.error("Lỗi đăng nhập GitHub:", error);
           toast.error("Xác thực tài khoản GitHub thất bại!");
-
+          window.history.replaceState({}, document.title, window.location.pathname);
           window.location.href = window.location.origin + window.location.pathname + "#/login";
           window.location.reload();
         }
