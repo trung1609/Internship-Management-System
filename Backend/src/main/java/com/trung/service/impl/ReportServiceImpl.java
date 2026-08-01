@@ -58,6 +58,7 @@ public class ReportServiceImpl implements IReportService {
     private String routingKey;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<ReportResponse> processAndSaveReport(MultipartFile file, String title) {
         try {
             String fileUrl = fileUploadService.uploadFile(file);
