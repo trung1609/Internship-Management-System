@@ -133,6 +133,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Resource getReportFileAsResource(String cloudinaryUrl) {
         try {
             Resource resource = new UrlResource(cloudinaryUrl);
@@ -175,6 +176,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ByteArrayInputStream exportReportExcel(String search, PageRequestDTO pageRequestDTO) {
         PageResponseDTO<ReportResponse> pageData = this.getAllReport(search, pageRequestDTO);
 
@@ -184,6 +186,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ByteArrayInputStream exportReportZip(String search, PageRequestDTO pageRequestDTO) {
         PageResponseDTO<ReportResponse> pageData = this.getAllReport(search, pageRequestDTO);
         List<ReportResponse> reports = pageData.getContent();
@@ -214,7 +217,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void gradeReport(Long reportId, GradeReportRequest request) throws ResourceNotFoundException {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy báo cáo có ID: " + reportId));
