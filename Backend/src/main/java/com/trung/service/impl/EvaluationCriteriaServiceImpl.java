@@ -29,6 +29,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
     private final IEvaluationCriteriaRepository evaluationCriteriaRepository;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<EvaluationCriteriaResponse> createCriteria(EvaluationCriteriaCreateRequest request) throws ResourceConflictException {
         Map<String, String> errors = ValidationErrorUtil.createErrorMap();
         if (evaluationCriteriaRepository.existsByCriterionNameIgnoreCaseAndIsDeletedFalse(request.getCriterionName())) {
@@ -81,6 +82,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<EvaluationCriteriaResponse> updateCriteria(Long id, EvaluationCriteriaUpdateRequest request) throws ResourceNotFoundException, ResourceConflictException {
         Map<String, String> errors = ValidationErrorUtil.createErrorMap();
         EvaluationCriteria existingCriteria = evaluationCriteriaRepository.findById(id)
@@ -102,6 +104,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> deleteCriteria(Long id) throws ResourceNotFoundException {
         EvaluationCriteria existingCriteria = evaluationCriteriaRepository.findByCriterionIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evaluation criteria not found with id: " + id));

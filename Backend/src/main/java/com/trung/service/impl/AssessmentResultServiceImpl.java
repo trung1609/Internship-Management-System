@@ -161,6 +161,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<AssessmentResultResponse> updateAssessmentResult(Long id, AssessmentResultUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         AssessmentResult assessmentResult = assessmentResultRepository.findById(id)

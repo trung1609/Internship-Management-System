@@ -85,6 +85,7 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<MentorResponse> createMentor(MentorCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
 
@@ -113,6 +114,7 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<MentorResponse> updateMentor(Long id, MentorUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User currentUser = currentUserUtil.getCurrentUser();
@@ -161,6 +163,7 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<MentorResponse> getMentorInfo(String username) throws ResourceNotFoundException {
         Mentor mentor = mentorRepository.findByUser_Username(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor not found with username: " + username));

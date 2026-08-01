@@ -116,6 +116,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<AssessmentRoundsResponse> updateAssessmentRound(Long id, AssessmentRoundUpdateRequest request) throws ResourceNotFoundException, ResourceConflictException, ResourceBadRequestException {
         AssessmentRound assessmentRound = assessmentRoundsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));
@@ -131,6 +132,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> deleteAssessmentRound(Long id) throws ResourceNotFoundException {
         AssessmentRound assessmentRound = assessmentRoundsRepository.findByRoundIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));

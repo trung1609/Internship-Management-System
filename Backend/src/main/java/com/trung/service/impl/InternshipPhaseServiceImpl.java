@@ -31,6 +31,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<InternshipPhaseResponse> createInternshipPhase(InternshipPhaseCreateRequest request) throws ResourceConflictException {
         Map<String, String> errors = ValidationErrorUtil.createErrorMap();
         if (internshipPhaseRepository.existsByPhaseNameIgnoreCaseAndIsDeletedFalse(request.getPhaseName())) {
@@ -74,6 +75,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<InternshipPhaseResponse> updateInternshipPhase(Long id, InternshipPhaseUpdateRequest request) throws ResourceNotFoundException, ResourceConflictException, ResourceBadRequestException {
         Map<String, String> errors = ValidationErrorUtil.createErrorMap();
         InternshipPhase existingPhase = internshipPhaseRepository.findById(id)
@@ -95,6 +97,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> deleteInternshipPhase(Long id) throws ResourceNotFoundException {
         InternshipPhase existingPhase = internshipPhaseRepository.findByPhaseIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Internship phase not found with id: " + id));

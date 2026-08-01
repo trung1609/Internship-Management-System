@@ -130,6 +130,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<InternshipAssignmentResponse> updateInternshipAssignment(Long internshipAssignmentId, InternshipAssignmentUpdateRequest request) throws ResourceNotFoundException, ResourceBadRequestException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         InternshipAssignment internshipAssignment = internshipAssignmentRepository.findById(internshipAssignmentId)

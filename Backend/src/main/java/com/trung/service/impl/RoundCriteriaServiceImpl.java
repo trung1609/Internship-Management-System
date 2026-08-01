@@ -60,6 +60,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<RoundCriterionResponse> createCriterionInRound(RoundCriterionCreateRequest request) throws ResourceNotFoundException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         // kiem tra assessmentRound co ton tai hay khong
@@ -87,6 +88,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<RoundCriterionResponse> updateWeight(Long roundCriteriaId, RoundCriterionUpdateRequest request) throws ResourceNotFoundException {
 
         RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaId(roundCriteriaId)
@@ -104,6 +106,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> deleteCriterionInRound(Long roundCriteriaId) throws ResourceNotFoundException {
         RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaId(roundCriteriaId)
                 .orElseThrow(() -> new ResourceNotFoundException("RoundCriteria not found with id: " + roundCriteriaId));

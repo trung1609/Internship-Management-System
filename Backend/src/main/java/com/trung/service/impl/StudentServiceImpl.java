@@ -41,6 +41,7 @@ public class StudentServiceImpl implements IStudentService {
     private final CurrentUserUtil currentUserUtil;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<StudentResponse> createStudent(StudentCreateRequest request) throws ResourceNotFoundException, ResourceBadRequestException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User user = iUserRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(request.getUserId())
@@ -135,6 +136,7 @@ public class StudentServiceImpl implements IStudentService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<StudentResponse> updateStudent(Long id, StudentUpdateRequest request) throws ResourceNotFoundException, ResourceBadRequestException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User currentUser = currentUserUtil.getCurrentUser();

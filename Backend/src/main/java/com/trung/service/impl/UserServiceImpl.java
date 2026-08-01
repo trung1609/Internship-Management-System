@@ -37,6 +37,7 @@ public class UserServiceImpl implements IUserService {
     private final FileUploadService fileUploadService;
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<UserResponse> getAllProfile(String role, PageRequestDTO pageRequestDTO) throws ResourceBadRequestException {
 
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
@@ -71,6 +72,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<UserResponse> createProfile(UserCreateRequest userCreateRequest) throws ResourceBadRequestException, ResourceConflictException {
         Role roleEnum = null;
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
@@ -130,6 +132,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<UserResponse> updateStatus(Long id) throws ResourceNotFoundException {
         User users = userRepository.findByUserIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -140,6 +143,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<UserResponse> updateRole(Long id, UpdateRoleRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User users = userRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(id)
@@ -159,6 +163,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> deleteProfile(Long id) throws ResourceNotFoundException {
         User users = userRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -170,6 +175,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> changePassword(ChangePasswordRequest request) throws ResourceBadRequestException {
         User user = currentUserUtil.getCurrentUser();
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
@@ -184,6 +190,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> uploadAvatar(Long userId, MultipartFile file) throws ResourceNotFoundException, IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
