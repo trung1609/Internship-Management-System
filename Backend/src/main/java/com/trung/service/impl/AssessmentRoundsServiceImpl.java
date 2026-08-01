@@ -3,6 +3,7 @@ package com.trung.service.impl;
 import com.trung.dto.request.AssessmentRoundCreateRequest;
 import com.trung.dto.request.AssessmentRoundUpdateRequest;
 import com.trung.dto.request.PageRequestDTO;
+import com.trung.dto.request.RoundCriterionUpdateRequest;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.AssessmentRoundsResponse;
 import com.trung.dto.response.PageResponseDTO;
@@ -122,6 +123,39 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));
 
         AssessmentRoundsMapper.updateFromDto(assessmentRound, request);
+
+        if (request.getRoundCriteria() != null) {
+            Set<Long> uniqueCriterionIds = new HashSet<>();
+            List<RoundCriteria> currentCriteriaList = assessmentRound.getRoundCriteriaList();
+
+            for (RoundCriterionUpdateRequest req : request.getRoundCriteria()) {
+                if (!uniqueCriterionIds.add(req.getCriterionId())) {
+                    Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
+                    ValidationErrorUtil.addError(errorList, "roundCriteria", "Duplicate criterion ID: " + req.getCriterionId());
+                    throw new ResourceConflictException("Validation failed", errorList);
+                }
+
+                Optional<RoundCriteria> existingRcOpt = currentCriteriaList.stream()
+                        .filter(rc -> rc.getCriterion().getCriterionId().equals(req.getCriterionId()))
+                        .findFirst();
+
+                if (existingRcOpt.isPresent()) {
+                    existingRcOpt.get().setWeight(req.getWeight());
+                } else {
+                    EvaluationCriteria criteria = iEvaluationCriteriaRepository.findById(req.getCriterionId())
+                            .orElseThrow(() -> new ResourceNotFoundException("EvaluationCriteria not found with id: " + req.getCriterionId()));
+
+                    RoundCriteria newRc = RoundCriteria.builder()
+                            .round(assessmentRound)
+                            .criterion(criteria)
+                            .weight(req.getWeight())
+                            .build();
+                    currentCriteriaList.add(newRc);
+                }
+            }
+
+            currentCriteriaList.removeIf(rc -> !uniqueCriterionIds.contains(rc.getCriterion().getCriterionId()));
+        }
 
         assessmentRoundsRepository.save(assessmentRound);
         return new ApiResponse<>(AssessmentRoundsMapper.toDto(assessmentRound),
