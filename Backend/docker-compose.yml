@@ -1,64 +1,34 @@
 version: '3.8'
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres_server
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: intership_management_system
-      SPRING_PROFILES_ACTIVE: prod
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    restart: unless-stopped
-  redis:
-    image: redis:alpine
-    container_name: redis_server
-    restart: unless-stopped
-
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: rabbitmq_server
-    ports:
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin123
-    restart: unless-stopped
-
   backend:
     build: .
     container_name: spring_backend
     ports:
       - "8080:8080"
-    depends_on:
-      - redis
-      - rabbitmq
     environment:
       # Spring Boot sẽ kết nối với Redis & RabbitMQ thông qua TÊN SERVICE trong Docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/intership_management_system
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - SPRING_RABBITMQ_USERNAME=admin
-      - SPRING_RABBITMQ_PASSWORD=admin123
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_HOST_PROD}:5432/${POSTGRES_DB_PROD}?sslmode=require
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER_PROD}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD_PROD}
+
+      - SPRING_DATA_REDIS_HOST=${REDIS_HOST_PROD}
+      - SPRING_DATA_REDIS_PORT=${REDIS_PORT_PROD}
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD_PROD}
+
+      - SPRING_RABBITMQ_ADDRESSES=${CLOUDAMQP_URL}
+
       - SPRING_PROFILES_ACTIVE=prod
+
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+
       - JWT_SECRET=${JWT_SECRET}
-      - POSTGRES_HOST_PROD=${POSTGRES_HOST_PROD}
-      - POSTGRES_DB_PROD=${POSTGRES_DB_PROD}
-      - POSTGRES_USER_PROD=${POSTGRES_USER_PROD}
-      - POSTGRES_PASSWORD_PROD=${POSTGRES_PASSWORD_PROD}
+
       - GITHUB_CLIENT_ID_PROD=${GITHUB_CLIENT_ID_PROD}
       - GITHUB_CLIENT_SECRET_PROD=${GITHUB_CLIENT_SECRET_PROD}
     restart: unless-stopped
-
-volumes:
-  pgdata:
