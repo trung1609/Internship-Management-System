@@ -115,6 +115,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<ReportResponse> getAllReport(String search, PageRequestDTO pageRequestDTO) {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "report");
         User user = currentUserUtil.getCurrentUser();
@@ -146,6 +147,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<ReportResponse> getReportById(Long reportId) throws ResourceNotFoundException {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy báo cáo với ID: " + reportId));
@@ -162,6 +164,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<ReportResponse> getMyReport(String search, PageRequestDTO pageRequestDTO) {
         User user = currentUserUtil.getCurrentUser();
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "report");

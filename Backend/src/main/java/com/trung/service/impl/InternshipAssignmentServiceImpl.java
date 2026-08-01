@@ -85,6 +85,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<InternshipAssignmentResponse> getAllInternshipAssignment(String search, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "internshipAssignment");
@@ -106,6 +107,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<InternshipAssignmentResponse> getInternshipAssignmentById(Long internshipAssignmentId) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
 

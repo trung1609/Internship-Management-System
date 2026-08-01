@@ -120,6 +120,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<AssessmentResultResponse> getAllAssessmentResult(String search, Long assignmentId, PageRequestDTO requestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
 
         Pageable pageable = PaginationUtil.createPageRequest(requestDTO, "assessmentResult");
@@ -193,6 +194,7 @@ public class AssessmentResultServiceImpl implements IAssessmentResultService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<AssessmentResultResponse> getAssessmentResultById(Long resultId) throws ResourceNotFoundException {
         AssessmentResult result = assessmentResultRepository.findById(resultId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment result not found with id: " + resultId));

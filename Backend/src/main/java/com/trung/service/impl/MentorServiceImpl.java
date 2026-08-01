@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class MentorServiceImpl implements IMentorService {
     private final InternshipAssignmentRepository internshipAssignmentRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<Object> getAllMentor(PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
 
@@ -56,6 +58,7 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<Object> getMentorById(Long id) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
 

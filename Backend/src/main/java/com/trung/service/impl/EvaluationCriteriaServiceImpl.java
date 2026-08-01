@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -49,6 +50,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<EvaluationCriteriaResponse> getAllCriteria(String search, PageRequestDTO pageRequestDTO) {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "evaluationCriteria");
 
@@ -64,6 +66,7 @@ public class EvaluationCriteriaServiceImpl implements IEvaluationCriteriaService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<EvaluationCriteriaResponse> getCriteriaById(Long id) throws ResourceNotFoundException {
         EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evaluation criteria not found with id: " + id));

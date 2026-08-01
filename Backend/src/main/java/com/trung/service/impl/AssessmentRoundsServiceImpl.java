@@ -84,6 +84,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<AssessmentRoundsResponse> getAllAssessmentRound(String search, Long phaseId, PageRequestDTO pageRequestDTO) {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "assessmentRound");
 

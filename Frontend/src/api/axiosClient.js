@@ -82,8 +82,7 @@ axiosClient.interceptors.response.use(
                 processQueue(err, null);
 
                 localStorage.removeItem('accessToken');
-                // window.location.href = '#/login';
-                console.log("Lỗi chi tiết 401:", error.response?.data);
+                window.location.href = '#/login';
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;
