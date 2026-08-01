@@ -23,14 +23,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
-          cache-dependency-path: ./Backend/pom.xml
+          cache: 'gradle'
+          cache-dependency-path: ./Backend/build.gradle
 
-      - name: Grant execute permission for mvnw
-        run: chmod +x mvnw
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Build and Test with Maven
-        run: ./mvnw clean test
+      - name: Build and Test with Gradle
+        run: ./gradlew clean test
 
   deploy-to-render:
     needs: build-and-test
