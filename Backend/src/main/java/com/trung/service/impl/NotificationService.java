@@ -25,6 +25,7 @@ public class NotificationService {
     private final INotificationRepository notificationRepository;
     private final CurrentUserUtil currentUserUtil;
 
+    @Transactional(rollbackFor = Exception.class)
     public void createNotification(User recipient, String message, String type) {
         Notification notification = Notification.builder()
                 .user(recipient)
@@ -35,6 +36,7 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Transactional(readOnly = true)
     public PageResponseDTO<NotificationResponse> getMyNotifications(String search, PageRequestDTO pageRequestDTO) {
         Long userId = currentUserUtil.getCurrentUser().getUserId();
 
@@ -45,6 +47,7 @@ public class NotificationService {
         return PaginationUtil.toPageResponseDTO(notificationPage, NotificationMapper::toDTO);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long notificationId) {
         notificationRepository.findById(notificationId).ifPresent(notification -> {
             notification.setIsRead(true);
