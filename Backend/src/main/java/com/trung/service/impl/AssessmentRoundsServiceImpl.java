@@ -17,6 +17,7 @@ import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.AssessmentRoundsMapper;
 import com.trung.repository.IAssessmentRoundsRepository;
 import com.trung.repository.IEvaluationCriteriaRepository;
+import com.trung.repository.IRoundCriteriaRepository;
 import com.trung.repository.InternshipPhaseRepository;
 import com.trung.service.IAssessmentRoundsService;
 import com.trung.util.PaginationUtil;
@@ -37,6 +38,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     private final IAssessmentRoundsRepository assessmentRoundsRepository;
     private final InternshipPhaseRepository internshipPhaseRepository;
     private final IEvaluationCriteriaRepository iEvaluationCriteriaRepository;
+    private final IRoundCriteriaRepository iRoundCriteriaRepository;
 
 
     @Override
@@ -129,12 +131,18 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
             List<RoundCriteria> currentCriteriaList = assessmentRound.getRoundCriteriaList();
 
             for (RoundCriterionUpdateRequest req : request.getRoundCriteria()) {
-                if (!uniqueCriterionIds.add(req.getCriterionId())) {
-                    Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
-                    ValidationErrorUtil.addError(errorList, "roundCriteria", "Duplicate criterion ID: " + req.getCriterionId());
-                    throw new ResourceConflictException("Validation failed", errorList);
-                }
+                uniqueCriterionIds.add(req.getCriterionId());
+            }
 
+            List<RoundCriteria> criteriaToDelete = currentCriteriaList.stream()
+                    .filter(rc -> !uniqueCriterionIds.contains(rc.getCriterion().getCriterionId()))
+                    .toList();
+
+            if (!criteriaToDelete.isEmpty()) {
+                currentCriteriaList.removeAll(criteriaToDelete);
+                iRoundCriteriaRepository.deleteAll(criteriaToDelete);
+            }
+            for (RoundCriterionUpdateRequest req : request.getRoundCriteria()) {
                 Optional<RoundCriteria> existingRcOpt = currentCriteriaList.stream()
                         .filter(rc -> rc.getCriterion().getCriterionId().equals(req.getCriterionId()))
                         .findFirst();
@@ -153,8 +161,6 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
                     currentCriteriaList.add(newRc);
                 }
             }
-
-            currentCriteriaList.removeIf(rc -> !uniqueCriterionIds.contains(rc.getCriterion().getCriterionId()));
         }
 
         assessmentRoundsRepository.save(assessmentRound);
