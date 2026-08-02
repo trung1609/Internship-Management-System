@@ -1,22 +1,22 @@
-import {useState, useEffect, useContext} from "react";
+import {useContext, useEffect, useState} from "react";
 import {internshipPhaseApi} from "../../api/resourceApi";
 import {toast} from "react-toastify";
 import {AuthContext} from "../../context/AuthContext";
-import {motion, AnimatePresence} from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 import {
+    Avatar,
     Box,
     Button,
-    TextField,
-    FormControlLabel,
-    Switch,
-    Typography,
-    Stack,
-    Paper,
-    Divider,
-    Modal,
-    IconButton,
     Chip,
-    Avatar
+    Divider,
+    FormControlLabel,
+    IconButton,
+    Modal,
+    Paper,
+    Stack,
+    Switch,
+    TextField,
+    Typography
 } from "@mui/material";
 
 // Import Icons
@@ -47,11 +47,14 @@ const InternshipPhasesManagement = () => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [phaseToDelete, setPhaseToDelete] = useState(null);
 
+    // --- STATE QUẢN LÝ HIỂU THỊ NGÀY THÁNG ---
+    const [dateFocus, setDateFocus] = useState({start: false, end: false});
+
     const [formData, setFormData] = useState({
         phaseName: "",
         description: "",
-        startDate: "",
-        endDate: "",
+        startDate: "", // Ngầm lưu yyyy-MM-dd
+        endDate: "",   // Ngầm lưu yyyy-MM-dd
         isDeleted: false,
     });
 
@@ -79,6 +82,7 @@ const InternshipPhasesManagement = () => {
         if (phase) {
             setEditingPhase(phase);
 
+            // Hàm này đưa định dạng về chuẩn yyyy-MM-dd cho React quản lý
             const formatToISO = (dateStr) => {
                 if (!dateStr) return "";
                 if (dateStr.includes("-")) return dateStr;
@@ -118,6 +122,7 @@ const InternshipPhasesManagement = () => {
         try {
             setLoading(true);
             const payload = {...formData};
+            // Dữ liệu trong formData lúc này đã là yyyy-MM-dd nên cứ thế gửi thẳng lên DB
             if (!payload.startDate || payload.startDate.trim() === "") payload.startDate = null;
             if (!payload.endDate || payload.endDate.trim() === "") payload.endDate = null;
 
@@ -137,7 +142,6 @@ const InternshipPhasesManagement = () => {
         }
     };
 
-    // Logic Mở Modal Xóa
     const handleOpenDeleteModal = (phase) => {
         setPhaseToDelete(phase);
         setOpenDeleteModal(true);
@@ -148,7 +152,6 @@ const InternshipPhasesManagement = () => {
         setPhaseToDelete(null);
     };
 
-    // Thực hiện Xóa thật
     const handleConfirmDelete = async () => {
         if (!phaseToDelete) return;
         const targetId = phaseToDelete.phaseId || phaseToDelete.id;
@@ -165,10 +168,19 @@ const InternshipPhasesManagement = () => {
         }
     };
 
+    // --- HÀM HELPER: CHUYỂN ĐỔI GIAO DIỆN SANG dd/MM/yyyy ĐỂ NHÌN CHO ĐẸP ---
+    const getDisplayDate = (isoStr) => {
+        if (!isoStr) return "";
+        if (isoStr.includes('-')) {
+            const [year, month, day] = isoStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+        return isoStr;
+    };
+
     return (
         <Box sx={{p: 4, minHeight: '100vh', backgroundColor: '#f4f6f8'}}>
 
-            {/* --- HEADER CHÍNH --- */}
             <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4}}>
                 <Box>
                     <Typography variant="h4" sx={{fontWeight: 800, color: "#1a237e", letterSpacing: '-0.5px'}}>
@@ -181,10 +193,7 @@ const InternshipPhasesManagement = () => {
 
                 {isAdmin && (
                     <Button
-                        variant="contained"
-                        size="large"
-                        startIcon={<AddTaskIcon/>}
-                        onClick={() => handleOpenModal()}
+                        variant="contained" size="large" startIcon={<AddTaskIcon/>} onClick={() => handleOpenModal()}
                         sx={{
                             borderRadius: '50px',
                             px: 4,
@@ -199,7 +208,6 @@ const InternshipPhasesManagement = () => {
                 )}
             </Box>
 
-            {/* --- THANH TÌM KIẾM --- */}
             <Paper sx={{
                 p: 2,
                 mb: 4,
@@ -208,60 +216,40 @@ const InternshipPhasesManagement = () => {
                 alignItems: "center",
                 boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
             }}>
-                <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Tìm kiếm kỳ thực tập..."
-                    value={search}
-                    onChange={(e) => {
-                        setSearch(e.target.value);
-                        setPage(0);
-                    }}
-                    size="small"
-                    sx={{'& fieldset': {border: 'none'}, bgcolor: '#f8f9fa', borderRadius: 2}}
-                />
+                <TextField fullWidth variant="outlined" placeholder="Tìm kiếm kỳ thực tập..." value={search}
+                           onChange={(e) => {
+                               setSearch(e.target.value);
+                               setPage(0);
+                           }} size="small" sx={{'& fieldset': {border: 'none'}, bgcolor: '#f8f9fa', borderRadius: 2}}/>
             </Paper>
 
-            {/* --- DANH SÁCH THẺ 3D --- */}
-            <Box
-                sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                        xs: "1fr",
-                        sm: "repeat(2, 1fr)",
-                        md: "repeat(3, 1fr)",
-                        lg: "repeat(4, 1fr)",
-                    },
-                    gap: 4,
-                    alignItems: "stretch",
-                }}
-            >
+            <Box sx={{
+                display: "grid",
+                gridTemplateColumns: {xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)"},
+                gap: 4,
+                alignItems: "stretch"
+            }}>
                 <AnimatePresence>
                     {data.map((phase, index) => (
                         <motion.div
                             key={phase.id || index}
-                            initial={{opacity: 0, y: 50, scale: 0.9}}
-                            animate={{opacity: 1, y: 0, scale: 1}}
+                            initial={{opacity: 0, y: 50, scale: 0.9}} animate={{opacity: 1, y: 0, scale: 1}}
                             exit={{opacity: 0, scale: 0.8, transition: {duration: 0.2}}}
-                            transition={{duration: 0.4, delay: index * 0.05}}
-                            whileHover={{scale: 1.03, y: -5}}
+                            transition={{duration: 0.4, delay: index * 0.05}} whileHover={{scale: 1.03, y: -5}}
                             style={{flex: '1 1 320px', maxWidth: '400px'}}
                         >
-                            <Paper
-                                sx={{
-                                    p: 3,
-                                    borderRadius: 4,
-                                    position: "relative",
-                                    overflow: "hidden",
-                                    background: 'linear-gradient(145deg, #ffffff, #f9f9f9)',
-                                    boxShadow: '8px 8px 16px #e6e6e6, -8px -8px 16px #ffffff',
-                                    border: '1px solid rgba(0,0,0,0.05)',
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column'
-                                }}
-                            >
-                                {/* Background Decoration */}
+                            <Paper sx={{
+                                p: 3,
+                                borderRadius: 4,
+                                position: "relative",
+                                overflow: "hidden",
+                                background: 'linear-gradient(145deg, #ffffff, #f9f9f9)',
+                                boxShadow: '8px 8px 16px #e6e6e6, -8px -8px 16px #ffffff',
+                                border: '1px solid rgba(0,0,0,0.05)',
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
                                 <Box sx={{
                                     position: 'absolute',
                                     top: -30,
@@ -288,15 +276,13 @@ const InternshipPhasesManagement = () => {
                                             }}>
                                                 {phase.phaseName}
                                             </Typography>
-                                            <Chip
-                                                label={phase.isDeleted ? "Đã khóa" : "Hoạt động"}
-                                                size="small"
-                                                sx={{
-                                                    fontWeight: 'bold', fontSize: '0.7rem', height: 20,
-                                                    bgcolor: phase.isDeleted ? 'rgba(211, 47, 47, 0.1)' : 'rgba(46, 125, 50, 0.1)',
-                                                    color: phase.isDeleted ? '#d32f2f' : '#2e7d32'
-                                                }}
-                                            />
+                                            <Chip label={phase.isDeleted ? "Đã khóa" : "Hoạt động"} size="small" sx={{
+                                                fontWeight: 'bold',
+                                                fontSize: '0.7rem',
+                                                height: 20,
+                                                bgcolor: phase.isDeleted ? 'rgba(211, 47, 47, 0.1)' : 'rgba(46, 125, 50, 0.1)',
+                                                color: phase.isDeleted ? '#d32f2f' : '#2e7d32'
+                                            }}/>
                                         </Box>
                                     </Box>
                                 </Stack>
@@ -327,17 +313,13 @@ const InternshipPhasesManagement = () => {
                                     </Typography>
                                     <Stack direction="row" alignItems="center" gap={1.5}>
                                         <CalendarMonthIcon sx={{color: '#757575', fontSize: 20}}/>
-                                        <Typography variant="body2" sx={{fontWeight: 600}}>
-                                            Bắt đầu: <span
-                                            style={{fontWeight: 400}}>{phase.startDate || "Chưa xác định"}</span>
-                                        </Typography>
+                                        <Typography variant="body2" sx={{fontWeight: 600}}>Bắt đầu: <span
+                                            style={{fontWeight: 400}}>{phase.startDate || "Chưa xác định"}</span></Typography>
                                     </Stack>
                                     <Stack direction="row" alignItems="center" gap={1.5}>
                                         <EventAvailableIcon sx={{color: '#757575', fontSize: 20}}/>
-                                        <Typography variant="body2" sx={{fontWeight: 600}}>
-                                            Kết thúc: <span
-                                            style={{fontWeight: 400}}>{phase.endDate || "Chưa xác định"}</span>
-                                        </Typography>
+                                        <Typography variant="body2" sx={{fontWeight: 600}}>Kết thúc: <span
+                                            style={{fontWeight: 400}}>{phase.endDate || "Chưa xác định"}</span></Typography>
                                     </Stack>
                                 </Stack>
 
@@ -348,9 +330,7 @@ const InternshipPhasesManagement = () => {
                                            sx={{position: 'relative', zIndex: 1}}>
                                         <Button startIcon={<EditIcon/>} size="small" color="primary"
                                                 onClick={() => handleOpenModal(phase)}
-                                                sx={{borderRadius: 2, fontWeight: 600}}>
-                                            Chỉnh sửa
-                                        </Button>
+                                                sx={{borderRadius: 2, fontWeight: 600}}>Chỉnh sửa</Button>
                                         <IconButton size="small" color="error"
                                                     onClick={() => handleOpenDeleteModal(phase)}>
                                             <DeleteIcon/>
@@ -363,35 +343,22 @@ const InternshipPhasesManagement = () => {
                 </AnimatePresence>
             </Box>
 
-            {/* --- PAGINATION CHẠY TAY --- */}
             <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 6}}>
                 <Button variant="outlined" disabled={page === 0} onClick={() => setPage(p => p - 1)}
-                        sx={{borderRadius: '50px', px: 3}}>
-                    Trang trước
-                </Button>
+                        sx={{borderRadius: '50px', px: 3}}>Trang trước</Button>
                 <Typography variant="body2" fontWeight="bold">Trang {page + 1}</Typography>
                 <Button variant="outlined" disabled={data.length < rowsPerPage} onClick={() => setPage(p => p + 1)}
-                        sx={{borderRadius: '50px', px: 3}}>
-                    Trang sau
-                </Button>
+                        sx={{borderRadius: '50px', px: 3}}>Trang sau</Button>
             </Box>
 
-            {/* --- MODAL THÊM / SỬA CHUẨN FRAMER MOTION --- */}
-            <Modal
-                open={openModal}
-                onClose={handleCloseModal}
-                closeAfterTransition
-                sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(3px)'}}
-            >
+            <Modal open={openModal} onClose={handleCloseModal} closeAfterTransition
+                   sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(3px)'}}>
                 <AnimatePresence>
                     {openModal && (
-                        <motion.div
-                            initial={{scale: 0.8, opacity: 0, y: 30}}
-                            animate={{scale: 1, opacity: 1, y: 0}}
-                            exit={{scale: 0.8, opacity: 0, y: 30}}
-                            transition={{type: "spring", stiffness: 350, damping: 25}}
-                            style={{width: '100%', maxWidth: '500px', outline: 'none', padding: '16px'}}
-                        >
+                        <motion.div initial={{scale: 0.8, opacity: 0, y: 30}} animate={{scale: 1, opacity: 1, y: 0}}
+                                    exit={{scale: 0.8, opacity: 0, y: 30}}
+                                    transition={{type: "spring", stiffness: 350, damping: 25}}
+                                    style={{width: '100%', maxWidth: '500px', outline: 'none', padding: '16px'}}>
                             <Paper sx={{
                                 borderRadius: 4,
                                 overflow: 'hidden',
@@ -412,9 +379,7 @@ const InternshipPhasesManagement = () => {
                                         {editingPhase ? "Cập nhật Giai đoạn" : "Thêm Giai đoạn mới"}
                                     </Typography>
                                     <IconButton onClick={handleCloseModal}
-                                                sx={{bgcolor: '#f4f6f8', '&:hover': {bgcolor: '#e0e0e0'}}}>
-                                        <CloseIcon/>
-                                    </IconButton>
+                                                sx={{bgcolor: '#f4f6f8', '&:hover': {bgcolor: '#e0e0e0'}}}><CloseIcon/></IconButton>
                                 </Box>
 
                                 <Divider/>
@@ -432,27 +397,30 @@ const InternshipPhasesManagement = () => {
                                                        description: e.target.value
                                                    })} multiline rows={3}/>
 
-                                        {/* Logic DatePicker giữ nguyên */}
+                                        {/* --- GHI ĐÈ GIAO DIỆN HIỂN THỊ NGÀY THÁNG TẠI ĐÂY --- */}
                                         <TextField
-                                            fullWidth label="Ngày bắt đầu" type={formData.startDate ? "date" : "text"}
-                                            value={formData.startDate}
+                                            fullWidth label="Ngày bắt đầu"
+                                            // Nếu đang focus thì biến thành date, nếu bỏ chuột ra thì là text
+                                            type={dateFocus.start ? "date" : "text"}
+                                            // Nếu là date thì đưa yyyy-MM-dd vào, nếu là text thì xuất dd/MM/yyyy ra
+                                            value={dateFocus.start ? formData.startDate : getDisplayDate(formData.startDate)}
                                             onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                                            onFocus={(e) => (e.target.type = "date")}
-                                            onBlur={(e) => {
-                                                if (!formData.startDate) e.target.type = "text";
-                                            }}
-                                        />
-                                        <TextField
-                                            fullWidth label="Ngày kết thúc" type={formData.endDate ? "date" : "text"}
-                                            value={formData.endDate}
-                                            onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                                            onFocus={(e) => (e.target.type = "date")}
-                                            onBlur={(e) => {
-                                                if (!formData.endDate) e.target.type = "text";
-                                            }}
+                                            onFocus={() => setDateFocus({...dateFocus, start: true})}
+                                            onBlur={() => setDateFocus({...dateFocus, start: false})}
+                                            placeholder="dd/MM/yyyy"
                                         />
 
-                                        {/* Khung Trạng thái */}
+                                        <TextField
+                                            fullWidth label="Ngày kết thúc"
+                                            type={dateFocus.end ? "date" : "text"}
+                                            value={dateFocus.end ? formData.endDate : getDisplayDate(formData.endDate)}
+                                            onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                                            onFocus={() => setDateFocus({...dateFocus, end: true})}
+                                            onBlur={() => setDateFocus({...dateFocus, end: false})}
+                                            placeholder="dd/MM/yyyy"
+                                        />
+                                        {/* ----------------------------------------------------- */}
+
                                         <Box sx={{
                                             p: 2,
                                             borderRadius: 2,
@@ -490,17 +458,13 @@ const InternshipPhasesManagement = () => {
                                     mt: 2
                                 }}>
                                     <Button fullWidth variant="outlined" color="inherit" onClick={handleCloseModal}
-                                            sx={{borderRadius: 2, py: 1.5, mt: 2}}>
-                                        Hủy bỏ
-                                    </Button>
+                                            sx={{borderRadius: 2, py: 1.5, mt: 2}}>Hủy bỏ</Button>
                                     <Button fullWidth variant="contained" onClick={handleSave} sx={{
                                         borderRadius: 2,
                                         py: 1.5,
                                         mt: 2,
                                         boxShadow: '0 8px 16px rgba(25, 118, 210, 0.2)'
-                                    }}>
-                                        Lưu thông tin
-                                    </Button>
+                                    }}>Lưu thông tin</Button>
                                 </Box>
                             </Paper>
                         </motion.div>
@@ -508,22 +472,14 @@ const InternshipPhasesManagement = () => {
                 </AnimatePresence>
             </Modal>
 
-            {/* --- ALERT MODAL XÁC NHẬN XÓA --- */}
-            <Modal
-                open={openDeleteModal}
-                onClose={handleCloseDeleteModal}
-                closeAfterTransition
-                sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)'}}
-            >
+            <Modal open={openDeleteModal} onClose={handleCloseDeleteModal} closeAfterTransition
+                   sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)'}}>
                 <AnimatePresence>
                     {openDeleteModal && (
-                        <motion.div
-                            initial={{scale: 0.85, opacity: 0, y: 20}}
-                            animate={{scale: 1, opacity: 1, y: 0}}
-                            exit={{scale: 0.85, opacity: 0, y: 20}}
-                            transition={{type: "spring", stiffness: 400, damping: 28}}
-                            style={{width: '100%', maxWidth: '400px', outline: 'none', padding: '16px'}}
-                        >
+                        <motion.div initial={{scale: 0.85, opacity: 0, y: 20}} animate={{scale: 1, opacity: 1, y: 0}}
+                                    exit={{scale: 0.85, opacity: 0, y: 20}}
+                                    transition={{type: "spring", stiffness: 400, damping: 28}}
+                                    style={{width: '100%', maxWidth: '400px', outline: 'none', padding: '16px'}}>
                             <Paper sx={{
                                 borderRadius: 4,
                                 overflow: 'hidden',
@@ -541,31 +497,24 @@ const InternshipPhasesManagement = () => {
                                     }}>
                                         <WarningAmberRoundedIcon sx={{fontSize: 36}}/>
                                     </Avatar>
-                                    <Typography variant="h6" sx={{fontWeight: 800, color: '#1a237e'}}>
-                                        Xác nhận xóa giai đoạn?
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Bạn có chắc chắn muốn xóa kỳ thực
+                                    <Typography variant="h6" sx={{fontWeight: 800, color: '#1a237e'}}>Xác nhận xóa giai
+                                        đoạn?</Typography>
+                                    <Typography variant="body2" color="text.secondary">Bạn có chắc chắn muốn xóa kỳ thực
                                         tập <strong>{phaseToDelete?.phaseName}</strong>? Hành động này không thể hoàn
-                                        tác.
-                                    </Typography>
+                                        tác.</Typography>
                                 </Stack>
 
                                 <Stack direction="row" spacing={2}>
                                     <Button fullWidth variant="outlined" color="inherit"
                                             onClick={handleCloseDeleteModal}
-                                            sx={{borderRadius: 2, py: 1.2, fontWeight: 600}}>
-                                        Hủy bỏ
-                                    </Button>
+                                            sx={{borderRadius: 2, py: 1.2, fontWeight: 600}}>Hủy bỏ</Button>
                                     <Button fullWidth variant="contained" color="error" onClick={handleConfirmDelete}
                                             sx={{
                                                 borderRadius: 2,
                                                 py: 1.2,
                                                 fontWeight: 600,
                                                 boxShadow: '0 4px 12px rgba(211, 47, 47, 0.3)'
-                                            }}>
-                                        Xóa ngay
-                                    </Button>
+                                            }}>Xóa ngay</Button>
                                 </Stack>
                             </Paper>
                         </motion.div>

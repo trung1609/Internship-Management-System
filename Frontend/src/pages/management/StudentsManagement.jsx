@@ -1,28 +1,27 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import {studentApi, userApi} from "../../api/resourceApi";
 import {toast} from "react-toastify";
-import {motion, AnimatePresence} from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 import {
+    Avatar,
     Box,
     Button,
-    TextField,
-    Paper,
-    Typography,
-    Stack,
-    Modal,
-    IconButton,
-    Avatar,
     Chip,
     Divider,
     FormControl,
+    IconButton,
     InputLabel,
-    Select,
     MenuItem,
+    Modal,
+    Paper,
+    Select,
+    Stack,
+    TextField,
+    Typography,
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
-import SchoolIcon from '@mui/icons-material/School';
 
 const StudentsManagement = () => {
     const [data, setData] = useState([]);
@@ -34,8 +33,10 @@ const StudentsManagement = () => {
     const [openModal, setOpenModal] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
 
-
     const [availableUsers, setAvailableUsers] = useState([]);
+
+    // --- STATE QUẢN LÝ HIỂN THỊ NGÀY SINH ---
+    const [dateFocus, setDateFocus] = useState(false);
 
     const [formData, setFormData] = useState({
         userId: "",
@@ -46,7 +47,7 @@ const StudentsManagement = () => {
         major: "",
         classRoom: "",
         address: "",
-        dateOfBirth: "",
+        dateOfBirth: "", // Ngầm lưu yyyy-MM-dd
     });
 
     useEffect(() => {
@@ -83,14 +84,14 @@ const StudentsManagement = () => {
         if (student) {
             setEditingStudent(student);
 
-            // LOGIC DATE OF BIRTH ĐƯỢC GIỮ NGUYÊN 100%
-            let formattedDate = "";
+            // LOGIC CHUẨN HÓA DATE OF BIRTH VỀ yyyy-MM-dd
+            let safeDate = "";
             if (student.dateOfBirth) {
-                if (student.dateOfBirth.includes("-")) {
-                    formattedDate = student.dateOfBirth;
-                } else if (student.dateOfBirth.includes("/")) {
+                if (student.dateOfBirth.includes("/")) {
                     const [day, month, year] = student.dateOfBirth.split("/");
-                    formattedDate = `${year}-${month}-${day}`;
+                    safeDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                } else if (student.dateOfBirth.includes("-")) {
+                    safeDate = student.dateOfBirth;
                 }
             }
 
@@ -103,7 +104,7 @@ const StudentsManagement = () => {
                 major: student.major || "",
                 classRoom: student.classRoom || "",
                 address: student.address || "",
-                dateOfBirth: formattedDate,
+                dateOfBirth: safeDate,
             });
         } else {
             setEditingStudent(null);
@@ -134,7 +135,6 @@ const StudentsManagement = () => {
             setLoading(true);
             const payload = {...formData};
 
-            // LOGIC KIỂM TRA DATE OF BIRTH GIỮ NGUYÊN
             if (!payload.dateOfBirth || payload.dateOfBirth.trim() === "") {
                 payload.dateOfBirth = null;
             }
@@ -155,29 +155,13 @@ const StudentsManagement = () => {
         }
     };
 
-    const handleOpenDeleteModal = (mentor) => {
-        setMentorToDelete(mentor);
-        setOpenDeleteModal(true);
-    };
-
-    const handleCloseDeleteModal = () => {
-        setOpenDeleteModal(false);
-        setMentorToDelete(null);
-    };
-
-    const handleConfirmDelete = async () => {
-        if (!mentorToDelete) return;
-        try {
-            setLoading(true);
-            await mentorApi.deleteMentor(mentorToDelete.id);
-            toast.success("Xóa cố vấn thành công!");
-            handleCloseDeleteModal();
-            fetchMentors();
-        } catch (err) {
-            console.error("Lỗi khi xóa dữ liệu:", err);
-        } finally {
-            setLoading(false);
+    const getDisplayDate = (isoStr) => {
+        if (!isoStr) return "";
+        if (isoStr.includes('-')) {
+            const [year, month, day] = isoStr.split('-');
+            return `${day}/${month}/${year}`;
         }
+        return isoStr;
     };
 
     return (
@@ -278,7 +262,8 @@ const StudentsManagement = () => {
                                     <Typography variant="body2"><strong>SĐT:</strong> {student.phoneNumber || 'N/A'}
                                     </Typography>
                                     <Typography variant="body2"><strong>Ngày
-                                        sinh:</strong> {student.dateOfBirth || 'N/A'}</Typography>
+                                        sinh:</strong> {student.dateOfBirth ? getDisplayDate(student.dateOfBirth) : 'N/A'}
+                                    </Typography>
                                     <Typography variant="body2"><strong>Địa chỉ:</strong> {student.address || 'N/A'}
                                     </Typography>
                                 </Stack>
@@ -317,7 +302,7 @@ const StudentsManagement = () => {
                 </Button>
             </Box>
 
-            {/* --- MODAL FORM SINH VIÊN (SỬ DỤNG FRAMER MOTION MƯỢT MÀ) --- */}
+            {/* --- MODAL FORM SINH VIÊN --- */}
             <Modal
                 open={openModal}
                 onClose={handleCloseModal}
@@ -370,7 +355,6 @@ const StudentsManagement = () => {
                                     </IconButton>
                                 </Box>
 
-                                {/* Phần cuộn (scroll) được đưa vào Box này nếu nội dung quá dài */}
                                 <Box sx={{p: 4, bgcolor: '#fff', overflowY: 'auto'}}>
                                     <Stack spacing={3}>
 
@@ -456,18 +440,15 @@ const StudentsManagement = () => {
                                             value={formData.address}
                                             onChange={(e) => setFormData({...formData, address: e.target.value})}
                                         />
-
-                                        {/* TEXT FIELD DATE OF BIRTH GIỮ NGUYÊN HOÀN TOÀN LOGIC */}
                                         <TextField
                                             fullWidth
                                             label="Date of Birth"
-                                            type={formData.dateOfBirth ? "date" : "text"}
-                                            value={formData.dateOfBirth}
+                                            type={dateFocus ? "date" : "text"}
+                                            value={dateFocus ? formData.dateOfBirth : getDisplayDate(formData.dateOfBirth)}
                                             onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
-                                            onFocus={(e) => (e.target.type = "date")}
-                                            onBlur={(e) => {
-                                                if (!formData.dateOfBirth) e.target.type = "text";
-                                            }}
+                                            onFocus={() => setDateFocus(true)}
+                                            onBlur={() => setDateFocus(false)}
+                                            placeholder="dd/MM/yyyy"
                                         />
 
                                     </Stack>

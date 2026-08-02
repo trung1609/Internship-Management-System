@@ -1,30 +1,30 @@
-import {useState, useEffect, useContext} from "react";
+import {useContext, useEffect, useState} from "react";
 // IMPORT THÊM CÁC API KHÁC ĐỂ LẤY DANH SÁCH
-import {internshipAssignmentApi, studentApi, mentorApi, internshipPhaseApi} from "../../api/resourceApi";
+import {internshipAssignmentApi, internshipPhaseApi, mentorApi, studentApi} from "../../api/resourceApi";
 import {toast} from "react-toastify";
 import {AuthContext} from "../../context/AuthContext";
-import {motion, AnimatePresence} from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 import {useNavigate} from "react-router-dom";
 import {
+    Autocomplete,
+    Avatar,
+    AvatarGroup,
     Box,
     Button,
-    TextField,
-    Typography,
-    Stack,
-    Paper,
-    Divider,
-    Modal,
-    IconButton,
     Chip,
-    Avatar,
-    Grid,
-    AvatarGroup,
-    Tooltip,
-    Autocomplete,
+    Divider,
     FormControl,
+    Grid,
+    IconButton,
     InputLabel,
+    MenuItem,
+    Modal,
+    Paper,
     Select,
-    MenuItem
+    Stack,
+    TextField,
+    Tooltip,
+    Typography
 } from "@mui/material";
 
 // Import Icons
@@ -37,6 +37,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import GroupIcon from '@mui/icons-material/Group';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable'; // Đã import lại
 
 const InternshipAssignmentsManagement = () => {
     const navigate = useNavigate();
@@ -57,13 +58,16 @@ const InternshipAssignmentsManagement = () => {
     const [availableMentors, setAvailableMentors] = useState([]);
     const [availablePhases, setAvailablePhases] = useState([]);
 
+    // --- STATE QUẢN LÝ HIỂN THỊ NGÀY THÁNG CỦA DEADLINE ---
+    const [dateFocus, setDateFocus] = useState(false);
+
     const [formData, setFormData] = useState({
         assignmentTitle: "",
         assignmentDescription: "",
         mentorId: "",
         phaseId: "",
         studentIds: [],
-        dueDate: "",
+        dueDate: "", // Ngầm lưu chuẩn yyyy-MM-dd
         status: "PENDING",
     });
 
@@ -87,9 +91,9 @@ const InternshipAssignmentsManagement = () => {
     const fetchDependencies = async () => {
         try {
             const [studentsRes, mentorsRes, phasesRes] = await Promise.all([
-                studentApi.getAllStudents(0, 500, ""), // Lấy tối đa 500 sinh viên
-                mentorApi.getAllMentors(0, 100, ""),   // Lấy tối đa 100 mentor
-                internshipPhaseApi.getAllPhases("", 0, 50) // Lấy tối đa 50 phases
+                studentApi.getAllStudents(0, 500, ""),
+                mentorApi.getAllMentors(0, 100, ""),
+                internshipPhaseApi.getAllPhases("", 0, 50)
             ]);
             setAvailableStudents(studentsRes?.content || []);
             setAvailableMentors(mentorsRes?.content || []);
@@ -101,10 +105,12 @@ const InternshipAssignmentsManagement = () => {
     };
 
     const handleOpenModal = (assignment = null) => {
-        fetchDependencies(); // Gọi tải dữ liệu Dropdown
+        fetchDependencies();
 
         if (assignment) {
             setEditingAssignment(assignment);
+
+            // Xử lý đưa mọi định dạng về chuẩn yyyy-MM-dd để lưu State
             let safeDate = "";
             if (assignment.dueDate) {
                 if (assignment.dueDate.includes('/')) {
@@ -114,6 +120,7 @@ const InternshipAssignmentsManagement = () => {
                     safeDate = assignment.dueDate;
                 }
             }
+
             setFormData({
                 assignmentTitle: assignment.assignmentTitle || "",
                 assignmentDescription: assignment.assignmentDescription || "",
@@ -126,7 +133,13 @@ const InternshipAssignmentsManagement = () => {
         } else {
             setEditingAssignment(null);
             setFormData({
-                assignmentTitle: "", assignmentDescription: "", mentorId: "", phaseId: "", studentIds: [], dueDate: ""
+                assignmentTitle: "",
+                assignmentDescription: "",
+                mentorId: "",
+                phaseId: "",
+                studentIds: [],
+                dueDate: "",
+                status: "PENDING"
             });
         }
         setOpenModal(true);
@@ -140,13 +153,8 @@ const InternshipAssignmentsManagement = () => {
     const handleSave = async () => {
         try {
             setLoading(true);
-
-            let formattedSubmitDate = formData.dueDate;
-            if (formattedSubmitDate && formattedSubmitDate.includes('-')) {
-                const [year, month, day] = formattedSubmitDate.split('-');
-                formattedSubmitDate = `${month}/${day}/${year}`; // mm/dd/yyyy
-            }
             const payload = {...formData};
+            // Dữ liệu dueDate trong formData lúc này đã là yyyy-MM-dd rồi nên gửi thẳng
 
             if (editingAssignment) {
                 await internshipAssignmentApi.updateAssignment(editingAssignment.id || editingAssignment.assignmentId, payload);
@@ -160,13 +168,23 @@ const InternshipAssignmentsManagement = () => {
         } catch (err) {
             console.error("Lỗi lưu phân công:", err);
             if (err.response?.data?.error) {
-                toast.error(Object.values(err.response.data.error)[0]); // Bắn lỗi từ backend lên (ví dụ trùng đề tài)
+                toast.error(Object.values(err.response.data.error)[0]);
             } else {
                 toast.error("Có lỗi xảy ra, vui lòng thử lại.");
             }
         } finally {
             setLoading(false);
         }
+    };
+
+    // --- HÀM HELPER CHUYỂN YYYY-MM-DD SANG DD/MM/YYYY ĐỂ HIỂN THỊ ĐẸP ---
+    const getDisplayDate = (isoStr) => {
+        if (!isoStr) return "";
+        if (isoStr.includes('-')) {
+            const [year, month, day] = isoStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+        return isoStr;
     };
 
     const getStatusChip = (status) => {
@@ -312,10 +330,12 @@ const InternshipAssignmentsManagement = () => {
                                     <Grid container spacing={2}>
                                         <Grid item xs={12}>
                                             <Stack direction="row" alignItems="center" spacing={1.5}>
-                                                <Avatar
-                                                    src={assignment.mentorAvatarUrl}
-                                                    sx={{width: 32, height: 32, bgcolor: '#fce7f3', color: '#db2777'}}
-                                                >
+                                                <Avatar src={assignment.mentorAvatarUrl} sx={{
+                                                    width: 32,
+                                                    height: 32,
+                                                    bgcolor: '#fce7f3',
+                                                    color: '#db2777'
+                                                }}>
                                                     {!assignment.mentorAvatarUrl &&
                                                         <SupervisorAccountIcon fontSize="small"/>}
                                                 </Avatar>
@@ -330,6 +350,17 @@ const InternshipAssignmentsManagement = () => {
                                                         color: '#0f172a'
                                                     }}>{assignment.mentorName}</Typography>
                                                 </Box>
+                                            </Stack>
+                                        </Grid>
+
+                                        {/* HIỂN THỊ DEADLINE NGOÀI THẺ CARD */}
+                                        <Grid item xs={12} sx={{pt: '4px !important'}}>
+                                            <Stack direction="row" alignItems="center" spacing={1} sx={{mt: 0.5}}>
+                                                <EventAvailableIcon fontSize="small" sx={{color: '#64748b'}}/>
+                                                <Typography variant="body2" sx={{color: '#64748b', fontWeight: 600}}>
+                                                    Hạn chót: <span
+                                                    style={{color: '#ef4444'}}>{assignment.dueDate || "Chưa thiết lập"}</span>
+                                                </Typography>
                                             </Stack>
                                         </Grid>
 
@@ -446,16 +477,12 @@ const InternshipAssignmentsManagement = () => {
                                             assignmentDescription: e.target.value
                                         })}/>
 
-                                        {/* --- 1. CHỌN NHÓM SINH VIÊN (AUTOCOMPLETE) --- */}
                                         <Autocomplete
                                             multiple
                                             options={availableStudents}
-                                            // Định nghĩa cách hiển thị tên trên dropdown
                                             getOptionLabel={(option) => `${option.fullName} (${option.studentCode})`}
-                                            // Tìm các object sinh viên tương ứng với mảng ID đang lưu trong state
                                             value={availableStudents.filter(student => formData.studentIds.includes(student.studentId || student.id))}
                                             onChange={(event, newValue) => {
-                                                // newValue trả về mảng các Object Student, ta map ra để lấy mảng ID
                                                 setFormData({
                                                     ...formData,
                                                     studentIds: newValue.map(item => item.studentId || item.id)
@@ -463,27 +490,17 @@ const InternshipAssignmentsManagement = () => {
                                             }}
                                             renderTags={(value, getTagProps) =>
                                                 value.map((option, index) => (
-                                                    <Chip
-                                                        variant="filled"
-                                                        color="primary"
-                                                        label={option.fullName}
-                                                        {...getTagProps({index})}
-                                                        sx={{fontWeight: 600, borderRadius: 2}}
-                                                    />
+                                                    <Chip variant="filled" color="primary"
+                                                          label={option.fullName} {...getTagProps({index})}
+                                                          sx={{fontWeight: 600, borderRadius: 2}}/>
                                                 ))
                                             }
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    variant="outlined"
-                                                    label="Thêm thành viên nhóm"
-                                                    placeholder="Tìm sinh viên..."
-                                                />
-                                            )}
+                                            renderInput={(params) => <TextField {...params} variant="outlined"
+                                                                                label="Thêm thành viên nhóm"
+                                                                                placeholder="Tìm sinh viên..."/>}
                                         />
 
                                         <Stack direction={{xs: "column", sm: "row"}} spacing={2}>
-                                            {/* --- 2. CHỌN MENTOR (SELECT) --- */}
                                             <FormControl fullWidth>
                                                 <InputLabel id="mentor-select-label">Cố vấn Hướng dẫn</InputLabel>
                                                 <Select
@@ -504,7 +521,6 @@ const InternshipAssignmentsManagement = () => {
                                                 </Select>
                                             </FormControl>
 
-                                            {/* --- 3. CHỌN PHASE (SELECT) --- */}
                                             <FormControl fullWidth>
                                                 <InputLabel id="phase-select-label">Giai đoạn thực tập</InputLabel>
                                                 <Select
@@ -526,20 +542,16 @@ const InternshipAssignmentsManagement = () => {
                                             </FormControl>
                                         </Stack>
 
-
+                                        {/* --- THAY THẾ LOGIC NGÀY THÁNG Ở ĐÂY --- */}
                                         <TextField
                                             fullWidth
                                             label="Hạn chót (Deadline)"
-                                            type={formData.dueDate ? "date" : "text"}
-                                            value={formData.dueDate}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                dueDate: e.target.value
-                                            })}
-                                            onFocus={(e) => (e.target.type = "date")}
-                                            onBlur={(e) => {
-                                                if (!formData.dueDate) e.target.type = "text";
-                                            }}
+                                            type={dateFocus ? "date" : "text"}
+                                            value={dateFocus ? formData.dueDate : getDisplayDate(formData.dueDate)}
+                                            onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                                            onFocus={() => setDateFocus(true)}
+                                            onBlur={() => setDateFocus(false)}
+                                            placeholder="dd/MM/yyyy"
                                         />
                                     </Stack>
 

@@ -1,14 +1,28 @@
-import {useState, useEffect, useContext} from "react";
-// 1. IMPORT THÊM internshipPhaseApi
+import {useContext, useEffect, useState} from "react";
 import {assessmentRoundsApi, evaluationCriteriaApi, internshipPhaseApi} from "../../api/resourceApi";
 import {toast} from "react-toastify";
 import {useNavigate} from "react-router-dom";
 import {AuthContext} from "../../context/AuthContext";
-import {motion, AnimatePresence} from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 import {
-    Box, Button, TextField, FormControlLabel, Switch, Autocomplete,
-    Typography, Stack, Paper, Divider, Modal, IconButton, Chip, Avatar,
-    FormControl, InputLabel, Select, MenuItem // 2. IMPORT THÊM CÁC COMPONENT SELECT
+    Autocomplete,
+    Avatar,
+    Box,
+    Button,
+    Chip,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Modal,
+    Paper,
+    Select,
+    Stack,
+    Switch,
+    TextField,
+    Typography
 } from "@mui/material";
 
 // Import Icons
@@ -43,11 +57,14 @@ const AssessmentRoundsManagement = () => {
     // 3. STATE LƯU DANH SÁCH GIAI ĐOẠN (PHASES) KHẢ DỤNG
     const [availablePhases, setAvailablePhases] = useState([]);
 
+    // --- STATE QUẢN LÝ HIỂN THỊ NGÀY THÁNG ---
+    const [dateFocus, setDateFocus] = useState({start: false, end: false});
+
     const [formData, setFormData] = useState({
         roundName: "",
         description: "",
-        startDate: "",
-        endDate: "",
+        startDate: "", // Ngầm lưu yyyy-MM-dd
+        endDate: "",   // Ngầm lưu yyyy-MM-dd
         phaseId: "",
         isDeleted: false,
         roundCriteria: []
@@ -195,6 +212,16 @@ const AssessmentRoundsManagement = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // --- HÀM HELPER CHUYỂN YYYY-MM-DD SANG DD/MM/YYYY ĐỂ HIỂN THỊ ĐẸP ---
+    const getDisplayDate = (isoStr) => {
+        if (!isoStr) return "";
+        if (isoStr.includes('-')) {
+            const [year, month, day] = isoStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+        return isoStr;
     };
 
     return (
@@ -455,22 +482,30 @@ const AssessmentRoundsManagement = () => {
                                                    })} multiline rows={2}/>
 
                                         <Stack direction="row" spacing={2}>
-                                            <TextField fullWidth label="Ngày bắt đầu"
-                                                       type={formData.startDate ? "date" : "text"}
-                                                       value={formData.startDate} onChange={(e) => setFormData({
-                                                ...formData,
-                                                startDate: e.target.value
-                                            })} onFocus={(e) => (e.target.type = "date")} onBlur={(e) => {
-                                                if (!formData.startDate) e.target.type = "text";
-                                            }}/>
-                                            <TextField fullWidth label="Ngày kết thúc"
-                                                       type={formData.endDate ? "date" : "text"}
-                                                       value={formData.endDate} onChange={(e) => setFormData({
-                                                ...formData,
-                                                endDate: e.target.value
-                                            })} onFocus={(e) => (e.target.type = "date")} onBlur={(e) => {
-                                                if (!formData.endDate) e.target.type = "text";
-                                            }}/>
+                                            <TextField
+                                                fullWidth label="Ngày bắt đầu"
+                                                type={dateFocus.start ? "date" : "text"}
+                                                value={dateFocus.start ? formData.startDate : getDisplayDate(formData.startDate)}
+                                                onChange={(e) => setFormData({
+                                                    ...formData,
+                                                    startDate: e.target.value
+                                                })}
+                                                onFocus={() => setDateFocus({...dateFocus, start: true})}
+                                                onBlur={() => setDateFocus({...dateFocus, start: false})}
+                                                placeholder="dd/MM/yyyy"
+                                            />
+                                            <TextField
+                                                fullWidth label="Ngày kết thúc"
+                                                type={dateFocus.end ? "date" : "text"}
+                                                value={dateFocus.end ? formData.endDate : getDisplayDate(formData.endDate)}
+                                                onChange={(e) => setFormData({
+                                                    ...formData,
+                                                    endDate: e.target.value
+                                                })}
+                                                onFocus={() => setDateFocus({...dateFocus, end: true})}
+                                                onBlur={() => setDateFocus({...dateFocus, end: false})}
+                                                placeholder="dd/MM/yyyy"
+                                            />
                                         </Stack>
 
                                         {/* 5. THAY THẾ TEXTFIELD PHASE BẰNG DROPDOWN SELECT */}
