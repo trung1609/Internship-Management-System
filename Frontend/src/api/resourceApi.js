@@ -68,6 +68,13 @@ export const userApi = {
 
   changePassword: (data) =>
     axiosClient.post("/api/v1/users/change-password", data),
+  getAvailableStudents: () => {
+    return axiosClient.get("/api/v1/users/available-students");
+  },
+
+  getAvailableMentors: () => {
+    return axiosClient.get("/api/v1/users/available-mentors");
+  },
 
   uploadAvatar: (userId, formData) => {
     return axiosClient.put(`/api/v1/users/${userId}/avatar`, formData,

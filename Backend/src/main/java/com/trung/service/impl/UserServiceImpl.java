@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -201,5 +202,24 @@ public class UserServiceImpl implements IUserService {
         userRepository.save(user);
 
         return new ApiResponse<>(avatarUrl, true, "Upload avatar successfully", null, LocalDateTime.now());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAvailableStudentsForProfile() {
+        List<User> availableUsers = userRepository.findAvailableStudentsForProfile();
+
+        return availableUsers.stream()
+                .map(UserMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAvailableMentorsForProfile() {
+        List<User> availableMentor = userRepository.findAvailableMentorsForProfile();
+        return availableMentor.stream()
+                .map(UserMapper::toDto)
+                .toList();
     }
 }

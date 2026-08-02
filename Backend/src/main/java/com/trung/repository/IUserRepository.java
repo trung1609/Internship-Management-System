@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -36,9 +37,13 @@ public interface IUserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmailAndIsDeletedFalseAndIsActiveTrueAndUserIdNot(String email, Long id);
 
-    long countByRole(Role role);
-
     @Query("select count(s) from User s where s.student.studentId in " +
             "(select st.studentId from InternshipAssignment ia join ia.students st where ia.mentor.mentorId = :mentorId)")
     long countStudentsByMentorId(Long mentorId);
+
+    @Query("select u from User u where u.role = 'ROLE_STUDENT' and u.userId not in (select s.studentId FROM Student s)")
+    List<User> findAvailableStudentsForProfile();
+
+    @Query("SELECT u FROM User u WHERE u.role = 'ROLE_MENTOR' AND u.userId NOT IN (SELECT m.mentorId FROM Mentor m)")
+    List<User> findAvailableMentorsForProfile();
 }

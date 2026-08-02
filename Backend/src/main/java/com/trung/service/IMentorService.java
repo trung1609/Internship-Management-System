@@ -6,10 +6,13 @@ import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.MentorResponse;
 import com.trung.dto.response.PageResponseDTO;
+import com.trung.dto.response.UserResponse;
 import com.trung.exception.ResourceBadRequestException;
 import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceForbiddenException;
 import com.trung.exception.ResourceNotFoundException;
+
+import java.util.List;
 
 public interface IMentorService {
     PageResponseDTO<Object> getAllMentor(PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException;
@@ -17,4 +20,5 @@ public interface IMentorService {
     ApiResponse<MentorResponse> createMentor(MentorCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException;
     ApiResponse<MentorResponse> updateMentor(Long id, MentorUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException;
     ApiResponse<MentorResponse> getMentorInfo(String username) throws ResourceNotFoundException;
+
 }

@@ -6,6 +6,7 @@ import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.MentorResponse;
 import com.trung.dto.response.PageResponseDTO;
+import com.trung.dto.response.UserResponse;
 import com.trung.entity.Mentor;
 import com.trung.entity.User;
 import com.trung.exception.ResourceBadRequestException;
@@ -13,6 +14,7 @@ import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceForbiddenException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.MentorMapper;
+import com.trung.mapper.UserMapper;
 import com.trung.repository.IMentorRepository;
 import com.trung.repository.IUserRepository;
 import com.trung.repository.InternshipAssignmentRepository;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
