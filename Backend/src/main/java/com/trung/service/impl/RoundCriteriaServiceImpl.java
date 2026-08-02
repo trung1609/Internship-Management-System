@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<RoundCriterionResponse> getAllCriteriaInRound(RoundCriteriaRequest request, PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceBadRequestException {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "roundCriteria");
         Page<RoundCriteria> roundCriteriaPage = roundCriteriaRepository.findAllByRound_RoundId(request.getRoundId(), pageable);
@@ -45,6 +47,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<RoundCriterionResponse> getCriterionInRoundById(Long roundCriteriaId) throws ResourceNotFoundException {
         RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaId(roundCriteriaId)
                 .orElseThrow(() -> new ResourceNotFoundException("RoundCriteria not found with id: " + roundCriteriaId));
@@ -57,6 +60,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<RoundCriterionResponse> createCriterionInRound(RoundCriterionCreateRequest request) throws ResourceNotFoundException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         // kiem tra assessmentRound co ton tai hay khong
@@ -84,6 +88,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<RoundCriterionResponse> updateWeight(Long roundCriteriaId, RoundCriterionUpdateRequest request) throws ResourceNotFoundException {
 
         RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaId(roundCriteriaId)
@@ -101,6 +106,7 @@ public class RoundCriteriaServiceImpl implements IRoundCriteriaService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> deleteCriterionInRound(Long roundCriteriaId) throws ResourceNotFoundException {
         RoundCriteria roundCriteria = roundCriteriaRepository.findByRoundCriteriaId(roundCriteriaId)
                 .orElseThrow(() -> new ResourceNotFoundException("RoundCriteria not found with id: " + roundCriteriaId));

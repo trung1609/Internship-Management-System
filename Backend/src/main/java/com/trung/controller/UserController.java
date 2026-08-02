@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -95,5 +96,19 @@ public class UserController {
         }
 
         return ResponseEntity.ok(userService.uploadAvatar(userId, file));
+    }
+
+    @GetMapping("/available-students")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<UserResponse>> getAvailableStudentsForProfile() {
+        List<UserResponse> responses = userService.getAvailableStudentsForProfile();
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/available-mentors")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<UserResponse>> getAvailableMentorsForProfile() {
+        List<UserResponse> responses = userService.getAvailableMentorsForProfile();
+        return ResponseEntity.ok(responses);
     }
 }

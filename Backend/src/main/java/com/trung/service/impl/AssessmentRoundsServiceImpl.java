@@ -3,6 +3,7 @@ package com.trung.service.impl;
 import com.trung.dto.request.AssessmentRoundCreateRequest;
 import com.trung.dto.request.AssessmentRoundUpdateRequest;
 import com.trung.dto.request.PageRequestDTO;
+import com.trung.dto.request.RoundCriterionUpdateRequest;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.AssessmentRoundsResponse;
 import com.trung.dto.response.PageResponseDTO;
@@ -16,6 +17,7 @@ import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.AssessmentRoundsMapper;
 import com.trung.repository.IAssessmentRoundsRepository;
 import com.trung.repository.IEvaluationCriteriaRepository;
+import com.trung.repository.IRoundCriteriaRepository;
 import com.trung.repository.InternshipPhaseRepository;
 import com.trung.service.IAssessmentRoundsService;
 import com.trung.util.PaginationUtil;
@@ -36,6 +38,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     private final IAssessmentRoundsRepository assessmentRoundsRepository;
     private final InternshipPhaseRepository internshipPhaseRepository;
     private final IEvaluationCriteriaRepository iEvaluationCriteriaRepository;
+    private final IRoundCriteriaRepository iRoundCriteriaRepository;
 
 
     @Override
@@ -84,6 +87,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<AssessmentRoundsResponse> getAllAssessmentRound(String search, Long phaseId, PageRequestDTO pageRequestDTO) {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "assessmentRound");
 
@@ -102,6 +106,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<AssessmentRoundsResponse> getAssessmentRoundById(Long id) throws ResourceNotFoundException {
         AssessmentRound assessmentRound = assessmentRoundsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));
@@ -114,11 +119,49 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<AssessmentRoundsResponse> updateAssessmentRound(Long id, AssessmentRoundUpdateRequest request) throws ResourceNotFoundException, ResourceConflictException, ResourceBadRequestException {
         AssessmentRound assessmentRound = assessmentRoundsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));
 
         AssessmentRoundsMapper.updateFromDto(assessmentRound, request);
+
+        if (request.getRoundCriteria() != null) {
+            Set<Long> uniqueCriterionIds = new HashSet<>();
+            List<RoundCriteria> currentCriteriaList = assessmentRound.getRoundCriteriaList();
+
+            for (RoundCriterionUpdateRequest req : request.getRoundCriteria()) {
+                uniqueCriterionIds.add(req.getCriterionId());
+            }
+
+            List<RoundCriteria> criteriaToDelete = currentCriteriaList.stream()
+                    .filter(rc -> !uniqueCriterionIds.contains(rc.getCriterion().getCriterionId()))
+                    .toList();
+
+            if (!criteriaToDelete.isEmpty()) {
+                currentCriteriaList.removeAll(criteriaToDelete);
+                iRoundCriteriaRepository.deleteAll(criteriaToDelete);
+            }
+            for (RoundCriterionUpdateRequest req : request.getRoundCriteria()) {
+                Optional<RoundCriteria> existingRcOpt = currentCriteriaList.stream()
+                        .filter(rc -> rc.getCriterion().getCriterionId().equals(req.getCriterionId()))
+                        .findFirst();
+
+                if (existingRcOpt.isPresent()) {
+                    existingRcOpt.get().setWeight(req.getWeight());
+                } else {
+                    EvaluationCriteria criteria = iEvaluationCriteriaRepository.findById(req.getCriterionId())
+                            .orElseThrow(() -> new ResourceNotFoundException("EvaluationCriteria not found with id: " + req.getCriterionId()));
+
+                    RoundCriteria newRc = RoundCriteria.builder()
+                            .round(assessmentRound)
+                            .criterion(criteria)
+                            .weight(req.getWeight())
+                            .build();
+                    currentCriteriaList.add(newRc);
+                }
+            }
+        }
 
         assessmentRoundsRepository.save(assessmentRound);
         return new ApiResponse<>(AssessmentRoundsMapper.toDto(assessmentRound),
@@ -129,6 +172,7 @@ public class AssessmentRoundsServiceImpl implements IAssessmentRoundsService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> deleteAssessmentRound(Long id) throws ResourceNotFoundException {
         AssessmentRound assessmentRound = assessmentRoundsRepository.findByRoundIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment round not found with id: " + id));

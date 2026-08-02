@@ -6,6 +6,7 @@ import com.trung.dto.request.PageRequestDTO;
 import com.trung.dto.response.ApiResponse;
 import com.trung.dto.response.MentorResponse;
 import com.trung.dto.response.PageResponseDTO;
+import com.trung.dto.response.UserResponse;
 import com.trung.entity.Mentor;
 import com.trung.entity.User;
 import com.trung.exception.ResourceBadRequestException;
@@ -13,6 +14,7 @@ import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceForbiddenException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.MentorMapper;
+import com.trung.mapper.UserMapper;
 import com.trung.repository.IMentorRepository;
 import com.trung.repository.IUserRepository;
 import com.trung.repository.InternshipAssignmentRepository;
@@ -25,8 +27,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -38,6 +42,7 @@ public class MentorServiceImpl implements IMentorService {
     private final InternshipAssignmentRepository internshipAssignmentRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<Object> getAllMentor(PageRequestDTO pageRequestDTO) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
 
@@ -56,6 +61,7 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<Object> getMentorById(Long id) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
 
@@ -82,6 +88,7 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<MentorResponse> createMentor(MentorCreateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
 
@@ -110,6 +117,7 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<MentorResponse> updateMentor(Long id, MentorUpdateRequest request) throws ResourceNotFoundException, ResourceForbiddenException, ResourceBadRequestException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User currentUser = currentUserUtil.getCurrentUser();
@@ -158,6 +166,7 @@ public class MentorServiceImpl implements IMentorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<MentorResponse> getMentorInfo(String username) throws ResourceNotFoundException {
         Mentor mentor = mentorRepository.findByUser_Username(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor not found with username: " + username));

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -30,6 +31,7 @@ public class PasswordResetService {
     @Value("${app.frontend.url}")
     private String frontendUrl;
 
+    @Transactional(rollbackFor = Exception.class)
     public void createAndSendResetToken(ForgotPasswordRequest request) throws ResourceNotFoundException {
         User user = userRepository.findByEmailAndIsDeletedFalseAndIsActiveTrue(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
@@ -42,6 +44,7 @@ public class PasswordResetService {
         emailService.sendResetPasswordEmail(request.getEmail(), user.getUsername(), resetUrl);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void verifyAndResetPassword(ResetPasswordRequest request) throws InvalidCredentialsException, ResourceNotFoundException {
         String redisKey = REDIS_PREFIX + request.getToken();
         String email = redisTemplate.opsForValue().get(redisKey);

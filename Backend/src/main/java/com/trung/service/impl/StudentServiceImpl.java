@@ -30,6 +30,7 @@ import com.trung.util.ValidationErrorUtil;
 import com.trung.util.enums.Role;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +41,7 @@ public class StudentServiceImpl implements IStudentService {
     private final CurrentUserUtil currentUserUtil;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<StudentResponse> createStudent(StudentCreateRequest request) throws ResourceNotFoundException, ResourceBadRequestException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User user = iUserRepository.findByUserIdAndIsDeletedFalseAndIsActiveTrue(request.getUserId())
@@ -74,6 +76,7 @@ public class StudentServiceImpl implements IStudentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<StudentResponse> getAllStudent(PageRequestDTO pageRequestDTO) throws ResourceForbiddenException {
 
         User currentUser = currentUserUtil.getCurrentUser();
@@ -92,6 +95,7 @@ public class StudentServiceImpl implements IStudentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<StudentResponse> getCurrentStudentInfo() throws ResourceNotFoundException, ResourceForbiddenException {
         User currentUser = currentUserUtil.getCurrentUser();
         if (currentUser.getRole() != Role.ROLE_STUDENT) {
@@ -111,6 +115,7 @@ public class StudentServiceImpl implements IStudentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<StudentResponse> getStudentById(Long id) throws ResourceNotFoundException, ResourceForbiddenException {
         User user = currentUserUtil.getCurrentUser();
 
@@ -131,6 +136,7 @@ public class StudentServiceImpl implements IStudentService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<StudentResponse> updateStudent(Long id, StudentUpdateRequest request) throws ResourceNotFoundException, ResourceBadRequestException, ResourceForbiddenException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         User currentUser = currentUserUtil.getCurrentUser();

@@ -58,6 +58,7 @@ public class ReportServiceImpl implements IReportService {
     private String routingKey;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<ReportResponse> processAndSaveReport(MultipartFile file, String title) {
         try {
             String fileUrl = fileUploadService.uploadFile(file);
@@ -115,6 +116,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<ReportResponse> getAllReport(String search, PageRequestDTO pageRequestDTO) {
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "report");
         User user = currentUserUtil.getCurrentUser();
@@ -131,6 +133,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Resource getReportFileAsResource(String cloudinaryUrl) {
         try {
             Resource resource = new UrlResource(cloudinaryUrl);
@@ -146,6 +149,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<ReportResponse> getReportById(Long reportId) throws ResourceNotFoundException {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy báo cáo với ID: " + reportId));
@@ -162,6 +166,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponseDTO<ReportResponse> getMyReport(String search, PageRequestDTO pageRequestDTO) {
         User user = currentUserUtil.getCurrentUser();
         Pageable pageable = PaginationUtil.createPageRequest(pageRequestDTO, "report");
@@ -171,6 +176,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ByteArrayInputStream exportReportExcel(String search, PageRequestDTO pageRequestDTO) {
         PageResponseDTO<ReportResponse> pageData = this.getAllReport(search, pageRequestDTO);
 
@@ -180,6 +186,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ByteArrayInputStream exportReportZip(String search, PageRequestDTO pageRequestDTO) {
         PageResponseDTO<ReportResponse> pageData = this.getAllReport(search, pageRequestDTO);
         List<ReportResponse> reports = pageData.getContent();
@@ -210,7 +217,7 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void gradeReport(Long reportId, GradeReportRequest request) throws ResourceNotFoundException {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy báo cáo có ID: " + reportId));
