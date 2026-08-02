@@ -316,6 +316,12 @@ Internship-Management-System/
 | `POST` | `/auth/forgot-password` | Gửi email đặt lại mật khẩu | ❌ |
 | `POST` | `/auth/reset-password` | Đặt lại mật khẩu bằng token | ❌ |
 
+### ❤️ Health Check
+
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|-------|------|
+| `GET` | `/health` | Kiểm tra trạng thái server (`Server is UP and running smoothly!`) | ❌ |
+
 ### 🧾 User Profile Utilities
 
 | Method | Endpoint | Mô tả | Auth | Role |
@@ -333,6 +339,8 @@ Internship-Management-System/
 | `PUT` | `/users/{userId}` | Cập nhật thông tin người dùng | ✅ | - |
 | `PUT` | `/users/{userId}/status` | Cập nhật trạng thái người dùng | ✅ | ADMIN |
 | `PUT` | `/users/{userId}/role` | Cập nhật vai trò người dùng | ✅ | ADMIN |
+| `GET` | `/users/available-students` | Lấy danh sách sinh viên khả dụng để tạo hồ sơ/phân công | ✅ | ADMIN |
+| `GET` | `/users/available-mentors` | Lấy danh sách cố vấn khả dụng để tạo hồ sơ/phân công | ✅ | ADMIN |
 | `DELETE` | `/users/{userId}` | Xóa người dùng | ✅ | ADMIN |
 
 ### 🎓 Student Management
@@ -451,6 +459,7 @@ Internship-Management-System/
 - ✅ Quên mật khẩu & đặt lại mật khẩu qua email
 - ✅ Quản lý thông tin cá nhân, đổi mật khẩu, cập nhật avatar
 - ✅ Cấp quyền dựa trên vai trò
+- ✅ API lấy danh sách sinh viên/cố vấn khả dụng để hỗ trợ tạo hồ sơ và phân công nhanh hơn
 
 ### 2️⃣ Quản Lý Sinh Viên
 - ✅ Xem hồ sơ sinh viên
@@ -470,6 +479,7 @@ Internship-Management-System/
 - ✅ Theo dõi trạng thái (NOT_STARTED, IN_PROGRESS, COMPLETED, CANCELLED)
 - ✅ Cập nhật và xóa phân công
 - ✅ Xem chi tiết phân công, chọn vòng đánh giá, chọn tiêu chí và nhập điểm theo nhóm
+- ✅ Tự động quét và đóng phân công quá hạn hằng ngày (scheduler 00:00 Asia/Ho_Chi_Minh)
 
 ### 5️⃣ Quản Lý Giai Đoạn Thực Tập
 - ✅ Định nghĩa giai đoạn (ví dụ: Giai đoạn 1, 2, 3)
@@ -501,6 +511,12 @@ Internship-Management-System/
 - ✅ Dashboard tự động đổi theo vai trò Admin / Mentor / Student
 - ✅ Trang cài đặt hồ sơ cá nhân riêng biệt
 - ✅ Cập nhật ảnh đại diện và đổi mật khẩu ngay trên UI
+
+### 11️⃣ Trải Nghiệm & Vận Hành Mới
+- ✅ Tăng cường validation form ở Register / Reset Password / Users Management (regex, tooltip lỗi, kiểm tra xác nhận mật khẩu)
+- ✅ Chặn copy/paste ở các ô mật khẩu nhạy cảm để giảm lỗi thao tác người dùng
+- ✅ Health Check API (`/api/v1/health`) để monitor trạng thái backend nhanh chóng
+- ✅ CI/CD pipeline qua GitHub Actions cho build + deploy tự động khi cập nhật `main`
 
 ### 10️⃣ Xuất Báo Cáo
 - ✅ Xuất danh sách kết quả đánh giá và báo cáo ra file Excel
@@ -540,241 +556,6 @@ Internship-Management-System/
 ### Hành vi UI đáng chú ý
 - Notification bell hiển thị số chưa đọc và tự refresh định kỳ
 - Nếu hồ sơ chưa đầy đủ, người dùng không phải admin sẽ được chuyển về `/settings`
-
----
-
-## 🚀 Hướng Dẫn Cài Đặt
-
-### Yêu Cầu Hệ Thống
-
-- **Java 17+** (cho Backend chạy local không qua Docker)
-- **Node.js 18+** (cho Frontend)
-- **Docker & Docker Compose** (khuyến nghị — đã đóng gói đầy đủ Postgres, Redis, RabbitMQ, Backend)
-
-### Bước 1: Clone Dự Án
-
-```bash
-git clone https://github.com/trung1609/Intership-Management-System.git
-cd Intership-Management-System
-```
-
-### Bước 2: Cấu Hình Biến Môi Trường
-
-Tạo file `.env` trong thư mục `Backend/` để cung cấp các secret cho Docker Compose:
-
-```bash
-# Backend/.env
-SENDGRID_API_KEY=your-sendgrid-api-key
-JWT_SECRET=your-super-secret-jwt-key
-```
-
-> ⚠️ File `.env` đã được thêm vào `.gitignore`, **không commit** secret lên Git.
-
-### Bước 3: Khởi Động Toàn Bộ Stack Bằng Docker Compose
-
-```bash
-cd Backend
-
-# Build & khởi động toàn bộ services (Postgres, Redis, RabbitMQ, Backend)
-docker-compose up -d --build
-
-# Kiểm tra trạng thái container
-docker-compose ps
-
-# Xem log của backend
-docker-compose logs -f backend
-```
-
-Các service sẽ chạy với cấu hình:
-
-| Service     | Container          | Port nội bộ |
-|-------------|--------------------|-------------|
-| PostgreSQL  | `postgres_server`  | 5432        |
-| Redis       | `redis_server`     | 6379        |
-| RabbitMQ    | `rabbitmq_server`  | 5672 / 15672 (management UI) |
-| Backend     | `spring_backend`   | 8080        |
-
-### Bước 4: Cài Đặt Frontend
-
-```bash
-cd Frontend
-
-# Cài dependencies
-npm install
-```
-
-Cấu hình API endpoint trong file `.env` của Frontend:
-
-```bash
-# Frontend/.env
-VITE_API_BASE_URL=http://localhost:8080/api/v1
-```
-
-Khi deploy production, thay bằng URL của Backend trên DigitalOcean Droplet.
-
----
-
-## 🏃 Hướng Dẫn Chạy Dự Án
-
-### 🐳 Chạy Backend Bằng Docker (Khuyến Nghị)
-
-```bash
-cd Backend
-docker-compose up -d --build
-```
-
-ℹ️ Backend sẽ khởi động tại: **http://localhost:8080**
-
-### 🔧 Chạy Backend Bằng Gradle (Dev Mode)
-
-```bash
-cd Backend
-
-./gradlew.bat bootRun    # Windows
-./gradlew bootRun        # Linux/Mac
-```
-
-> Lưu ý: Chế độ này yêu cầu bạn tự khởi động Postgres, Redis, RabbitMQ (có thể chạy riêng từng container).
-
-### 🎨 Chạy Frontend
-
-```bash
-cd Frontend
-
-# Dev server (hot reload)
-npm run dev
-```
-
-ℹ️ Frontend sẽ khởi động tại: **http://localhost:5173**
-
-### 📦 Build Production
-
-#### Backend (Docker image)
-```bash
-cd Backend
-docker-compose build backend
-```
-
-#### Frontend
-```bash
-cd Frontend
-npm run build
-npm run preview
-```
-
-### 🧪 Chạy Tests
-
-```bash
-cd Backend
-./gradlew.bat test     # Windows
-./gradlew test         # Linux/Mac
-```
-
-### 🛑 Dừng Dịch Vụ Docker
-
-```bash
-cd Backend
-
-docker-compose down        # Dừng container
-docker-compose down -v     # Dừng và xóa data (cẩn thận - sẽ mất dữ liệu Postgres)
-```
-
----
-
-## ☁️ Deploy Lên DigitalOcean
-
-Dự án được deploy production lên **DigitalOcean Droplet** thông qua Docker Compose. Toàn bộ stack (Postgres, Redis, RabbitMQ, Spring Backend) chạy trên cùng một Droplet, Frontend host trên GitHub Pages.
-
-### 🌐 Live URLs
-
-- **Frontend**: [https://trung1609.github.io/Internship-Management-System/](https://trung1609.github.io/Internship-Management-System/)
-- **Backend API**: chạy trên DigitalOcean Droplet (port 8080)
-
-### Bước 1: Tạo Droplet
-
-1. Đăng nhập [DigitalOcean](https://cloud.digitalocean.com/)
-2. **Create → Droplets**
-3. Chọn image: **Ubuntu 22.04 LTS**
-4. Plan: **Basic / Regular** (tối thiểu 2GB RAM cho stack đầy đủ)
-5. Region: chọn gần người dùng (Singapore khuyến nghị)
-6. Authentication: **SSH Key** (khuyến nghị) hoặc Password
-
-### Bước 2: Cài Đặt Docker Trên Droplet
-
-```bash
-ssh root@<your-droplet-ip>
-
-# Cập nhật hệ thống
-apt update && apt upgrade -y
-
-# Cài Docker
-curl -fsSL https://get.docker.com | sh
-
-# Cài Docker Compose plugin
-apt install -y docker-compose-plugin
-
-# Kiểm tra
-docker --version
-docker compose version
-```
-
-### Bước 3: Clone & Cấu Hình Dự Án Trên Droplet
-
-```bash
-cd /opt
-git clone https://github.com/trung1609/Intership-Management-System.git
-cd Intership-Management-System/Backend
-
-# Tạo file .env chứa secret
-cat > .env <<EOF
-SENDGRID_API_KEY=your-sendgrid-api-key
-JWT_SECRET=your-super-secret-jwt-key
-EOF
-```
-
-### Bước 4: Khởi Động Stack
-
-```bash
-docker compose up -d --build
-
-# Kiểm tra
-docker compose ps
-docker compose logs -f backend
-```
-
-### Bước 5: Mở Firewall
-
-```bash
-ufw allow 22/tcp        # SSH
-ufw allow 8080/tcp      # Backend API
-ufw allow 15672/tcp     # RabbitMQ management UI (tuỳ chọn)
-ufw enable
-```
-
-### Bước 6: Cấu Hình CORS & Frontend
-
-1. Trong Backend, đảm bảo CORS cho phép domain GitHub Pages: `https://trung1609.github.io`
-2. Trong Frontend, build với biến môi trường trỏ về Droplet:
-   ```bash
-   VITE_API_BASE_URL=http://<droplet-ip>:8080/api/v1 npm run build
-   ```
-3. Deploy thư mục `dist/` lên GitHub Pages.
-
-### Bước 7: Cập Nhật Code (Sau Khi Push Lên Repo)
-
-```bash
-cd /opt/Intership-Management-System
-git pull
-cd Backend
-docker compose up -d --build
-```
-
-### 💡 Khuyến Nghị Production
-
-- 🔒 Cài **Nginx + Let's Encrypt SSL** để có HTTPS cho Backend (tránh mixed-content khi gọi từ GitHub Pages).
-- 🗄️ Backup volume `pgdata` định kỳ: `docker run --rm -v backend_pgdata:/data -v $(pwd):/backup alpine tar czf /backup/pg-$(date +%F).tar.gz /data`
-- 📊 Monitor tài nguyên bằng `docker stats` hoặc DigitalOcean Monitoring.
-- 🚫 Không expose port Postgres (5432) ra ngoài Droplet.
 
 ---
 
@@ -893,34 +674,6 @@ docker compose up -d --build
 
 ---
 
-## 📝 Ghi Chú Quan Trọng
-
-### Security Best Practices
-
-1. **JWT Secret Key**: Thay đổi trong `application.yml`
-   ```yaml
-   jwt_secret: your-super-secret-key-here
-   jwt_expire: 86400000  # 24 hours in ms
-   ```
-
-2. **Gmail App Password**: Sử dụng App Password thay vì password tài khoản
-   - Bật 2-Step Verification trên Google Account
-   - Tạo App Password tại [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-
-3. **CORS Configuration**: Cấu hình frontend URLs
-   - Frontend dev: `http://localhost:5173`
-   - Frontend prod: `https://trung1609.github.io`
-
-4. **Docker Secrets**: Production trên DigitalOcean dùng file `.env` để inject biến môi trường (SENDGRID_API_KEY, JWT_SECRET, DB password) vào container — **không hardcode** trong `docker-compose.yml`.
-
-### Performance Tips
-
-1. **Frontend**: Implement request caching với Axios interceptors
-2. **Backend**: Sử dụng pagination cho các danh sách lớn
-3. **Database**: Index trên các foreign keys
-4. **Redis**: Monitor memory usage
-5. **RabbitMQ**: Monitor queue depth để tránh backlog email
-
 ### Error Handling
 
 | HTTP Status | Ý nghĩa |
@@ -931,16 +684,6 @@ docker compose up -d --build
 | **404** Not Found | Tài nguyên không tìm thấy |
 | **409** Conflict | Xung đột dữ liệu (username trùng, v.v.) |
 | **500** Internal Server Error | Lỗi server |
-
-### Logging
-
-Backend logging cấu hình tại `application.yml`:
-```yaml
-logging:
-  level:
-    com.trung: DEBUG      # Application logs
-    root: INFO            # Spring logs
-```
 
 ---
 
