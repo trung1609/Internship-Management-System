@@ -151,12 +151,26 @@ const KanbanBoard = ({
     if (!isoString) return "";
     const dateObj = new Date(isoString);
     if (isNaN(dateObj)) return isoString;
-    const hours = String(dateObj.getHours()).padStart(2, "0");
-    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
-    const day = String(dateObj.getDate()).padStart(2, "0");
-    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const year = dateObj.getFullYear();
-    return `${hours}:${minutes} - ${day}/${month}/${year}`;
+
+    const options = {
+      timeZone: "Asia/Ho_Chi_Minh",
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour12: false,
+    };
+    const formatter = new Intl.DateTimeFormat("vi-VN", options);
+    const parts = formatter.formatToParts(dateObj);
+
+    const hour = parts.find((p) => p.type === "hour").value;
+    const minute = parts.find((p) => p.type === "minute").value;
+    const day = parts.find((p) => p.type === "day").value;
+    const month = parts.find((p) => p.type === "month").value;
+    const year = parts.find((p) => p.type === "year").value;
+
+    return `${hour}:${minute} - ${day}/${month}/${year}`;
   };
 
   const onDragEnd = async (result) => {
@@ -285,7 +299,9 @@ const KanbanBoard = ({
   useEffect(() => {
     let stompClient = null;
     if (editingTask) {
-      const socket = new SockJS(`${BASE_URL}/ws`);
+      const socket = new SockJS(`${BASE_URL}/ws`, null, {
+        transports: ["websocket"],
+      });
       stompClient = Stomp.over(socket);
       stompClient.debug = null;
       stompClient.connect(
@@ -361,6 +377,7 @@ const KanbanBoard = ({
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value)}
               displayEmpty
+              sx={{ mr: 2 }}
             >
               <MenuItem value="ALL">
                 <FilterListIcon

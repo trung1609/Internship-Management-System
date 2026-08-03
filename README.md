@@ -22,7 +22,8 @@ Một hệ thống quản lý thực tập toàn diện, xây dựng bằng **Sp
 8. [Hướng dẫn chạy dự án](#-hướng-dẫn-chạy-dự-án)
 9. [Deploy lên DigitalOcean](#-deploy-lên-digitalocean)
 10. [Xác thực & Phân quyền](#-xác-thực--phân-quyền)
-11. [Ghi chú quan trọng](#-ghi-chú-quan-trọng)
+11. [Các cập nhật mới nhất](#-các-cập-nhật-mới-nhất)
+12. [Ghi chú quan trọng](#-ghi-chú-quan-trọng)
 
 ---
 
@@ -31,17 +32,18 @@ Một hệ thống quản lý thực tập toàn diện, xây dựng bằng **Sp
 **Internship Management System** là nền tảng quản lý thực tập toàn diện cho các trường đại học, giúp:
 - ✅ Quản lý thông tin sinh viên, cố vấn, và người dùng (CRUD + soft delete)
 - ✅ Phân công sinh viên (nhiều sinh viên) cho cùng một đợt thực tập (ManyToMany Assignment ↔ Student)
+- ✅ Quản lý công việc theo dạng Kanban board, đổi trạng thái kéo-thả, bình luận và theo dõi tiến độ
 - ✅ Định nghĩa các giai đoạn thực tập (`InternshipPhase`) với thời gian cụ thể
 - ✅ Vòng đánh giá (`AssessmentRound`) gắn với từng giai đoạn, mỗi vòng có nhiều tiêu chí có trọng số
 - ✅ Đánh giá sinh viên theo từng tiêu chí, có điểm đóng góp (`contribution`) và nhận xét
 - ✅ Chấm điểm hàng loạt (bulk grading) cho mentor theo assignment / nhóm sinh viên
 - ✅ Sinh viên nộp báo cáo (`Report` — upload file), mentor/admin tải xuống, xuất Excel & ZIP
 - ✅ Quản lý báo cáo sinh viên: tìm kiếm, tải file, xuất Excel, xuất ZIP, chấm điểm báo cáo
-- ✅ Hệ thống **Notification** real-time: backend publish event qua RabbitMQ → lưu DB + có thể gửi email
+- ✅ Hệ thống **Notification** real-time: backend publish event qua RabbitMQ → lưu DB + có thể gửi email và cập nhật UI theo thời gian thực
 - ✅ Trang thông báo có badge số lượng chưa đọc, đánh dấu đã đọc từng thông báo hoặc toàn bộ
 - ✅ Bảng điều khiển thống kê theo vai trò (Admin / Mentor)
-- ✅ Trang cài đặt hồ sơ cá nhân, đổi ảnh đại diện và đổi mật khẩu
-- ✅ Quên mật khẩu & đặt lại mật khẩu qua email (token lưu Redis, gửi qua RabbitMQ + Gmail/SendGrid)
+- ✅ Trang cài đặt hồ sơ cá nhân, đổi ảnh đại diện, đổi mật khẩu và kiểm tra hoàn thiện hồ sơ
+- ✅ Đăng nhập bằng username/password, Google, GitHub; hỗ trợ OTP và quên/đặt lại mật khẩu qua email
 - ✅ Xác thực JWT (Access + Refresh token, blacklist qua Redis)
 - ✅ Phân quyền dựa trên vai trò (`ROLE_ADMIN`, `ROLE_MENTOR`, `ROLE_STUDENT`) qua `@PreAuthorize`
 - ✅ Đóng gói toàn bộ stack bằng Docker Compose, deploy production lên DigitalOcean
@@ -315,12 +317,23 @@ Internship-Management-System/
 | `GET` | `/auth/me` | Lấy thông tin người dùng hiện tại | ✅ |
 | `POST` | `/auth/forgot-password` | Gửi email đặt lại mật khẩu | ❌ |
 | `POST` | `/auth/reset-password` | Đặt lại mật khẩu bằng token | ❌ |
+| `POST` | `/auth/send-otp` | Gửi mã OTP qua email | ❌ |
+| `POST` | `/auth/verify-otp` | Xác thực mã OTP | ❌ |
+| `POST` | `/auth/google-login` | Đăng nhập bằng Google | ❌ |
+| `POST` | `/auth/github-login` | Đăng nhập bằng GitHub | ❌ |
 
 ### ❤️ Health Check
 
 | Method | Endpoint | Mô tả | Auth |
 |--------|----------|-------|------|
 | `GET` | `/health` | Kiểm tra trạng thái server (`Server is UP and running smoothly!`) | ❌ |
+
+### 🔄 Realtime & WebSocket
+
+- WebSocket endpoint: `/ws`
+- Broker prefix: `/topic`
+- Application prefix: `/app`
+- Dùng cho bình luận công việc realtime và cập nhật tương tác UI
 
 ### 🧾 User Profile Utilities
 
@@ -381,6 +394,19 @@ Internship-Management-System/
 | `GET` | `/internship-assignments` | Lấy danh sách phân công | ✅ | - |
 | `GET` | `/internship-assignments/{assignmentId}` | Lấy thông tin phân công | ✅ | - |
 | `PUT` | `/internship-assignments/{assignmentId}/status` | Cập nhật trạng thái phân công | ✅ | ADMIN |
+
+### ✅ Task Management (Kanban)
+
+| Method | Endpoint | Mô tả | Auth | Role |
+|--------|----------|-------|------|------|
+| `GET` | `/tasks/assignment/{assignmentId}` | Lấy danh sách công việc theo assignment (phân trang) | ✅ | ADMIN, MENTOR, STUDENT |
+| `POST` | `/tasks` | Tạo công việc mới | ✅ | ADMIN, MENTOR |
+| `PUT` | `/tasks/{taskId}` | Cập nhật công việc | ✅ | ADMIN, MENTOR |
+| `PATCH` | `/tasks/{taskId}/status` | Đổi trạng thái công việc | ✅ | ADMIN, MENTOR, STUDENT |
+| `DELETE` | `/tasks/{taskId}` | Xóa công việc | ✅ | ADMIN, MENTOR |
+| `GET` | `/tasks/{taskId}/comments` | Lấy danh sách bình luận của công việc | ✅ | ADMIN, MENTOR, STUDENT |
+| `POST` | `/tasks/{taskId}/comments` | Thêm bình luận cho công việc | ✅ | ADMIN, MENTOR, STUDENT |
+| `GET` | `/tasks/assignment/{assignmentId}/progress` | Lấy tiến độ công việc của assignment | ✅ | ADMIN, MENTOR, STUDENT |
 
 ### 📊 Dashboard Statistics
 
@@ -456,6 +482,7 @@ Internship-Management-System/
 ### 1️⃣ Quản Lý Người Dùng
 - ✅ Đăng ký tài khoản (STUDENT, MENTOR, ADMIN)
 - ✅ Đăng nhập/Đăng xuất an toàn
+- ✅ Đăng nhập bằng Google/GitHub, gửi và xác thực OTP qua email
 - ✅ Quên mật khẩu & đặt lại mật khẩu qua email
 - ✅ Quản lý thông tin cá nhân, đổi mật khẩu, cập nhật avatar
 - ✅ Cấp quyền dựa trên vai trò
@@ -480,6 +507,7 @@ Internship-Management-System/
 - ✅ Cập nhật và xóa phân công
 - ✅ Xem chi tiết phân công, chọn vòng đánh giá, chọn tiêu chí và nhập điểm theo nhóm
 - ✅ Tự động quét và đóng phân công quá hạn hằng ngày (scheduler 00:00 Asia/Ho_Chi_Minh)
+- ✅ Trang chi tiết phân công hiển thị Kanban board, tiến độ và bình luận công việc
 
 ### 5️⃣ Quản Lý Giai Đoạn Thực Tập
 - ✅ Định nghĩa giai đoạn (ví dụ: Giai đoạn 1, 2, 3)
@@ -498,6 +526,8 @@ Internship-Management-System/
 ### 7️⃣ Quản Lý Báo Cáo
 - ✅ Sinh viên upload báo cáo theo file
 - ✅ Mentor/Admin tìm kiếm, xem danh sách và tải báo cáo
+- ✅ Lịch sử nộp báo cáo của sinh viên được đồng bộ ngay sau khi upload
+- ✅ Kiểm tra định dạng file và dung lượng trước khi tải lên
 - ✅ Xuất dữ liệu ra Excel hoặc ZIP
 - ✅ Chấm điểm báo cáo và gửi thông báo cho sinh viên
 
@@ -506,22 +536,30 @@ Internship-Management-System/
 - ✅ Email đặt lại mật khẩu kèm link token
 - ✅ Thông báo phân công thực tập
 - ✅ Danh sách thông báo cá nhân, badge số chưa đọc, đánh dấu đã đọc từng cái hoặc tất cả
+- ✅ Cập nhật bình luận công việc và thông báo realtime qua WebSocket
 
 ### 9️⃣ Dashboard & Tài Khoản Cá Nhân
 - ✅ Dashboard tự động đổi theo vai trò Admin / Mentor / Student
 - ✅ Trang cài đặt hồ sơ cá nhân riêng biệt
 - ✅ Cập nhật ảnh đại diện và đổi mật khẩu ngay trên UI
-
-### 11️⃣ Trải Nghiệm & Vận Hành Mới
-- ✅ Tăng cường validation form ở Register / Reset Password / Users Management (regex, tooltip lỗi, kiểm tra xác nhận mật khẩu)
-- ✅ Chặn copy/paste ở các ô mật khẩu nhạy cảm để giảm lỗi thao tác người dùng
-- ✅ Health Check API (`/api/v1/health`) để monitor trạng thái backend nhanh chóng
-- ✅ CI/CD pipeline qua GitHub Actions cho build + deploy tự động khi cập nhật `main`
+- ✅ Chặn truy cập các màn hình nghiệp vụ nếu hồ sơ chưa hoàn thiện (tự động chuyển về `/settings`)
+- ✅ Hỗ trợ chuyển đổi giao diện sáng/tối
 
 ### 10️⃣ Xuất Báo Cáo
 - ✅ Xuất danh sách kết quả đánh giá và báo cáo ra file Excel
 - ✅ Xuất toàn bộ file báo cáo thành ZIP
 - ✅ Sử dụng Apache POI
+
+### 11️⃣ Các Cập Nhật Mới Nhất
+- ✅ Validation được siết chặt hơn cho các form tạo/cập nhật giai đoạn và vòng đánh giá, cũng như bulk assessment
+- ✅ Health Check API (`/api/v1/health`) để monitor trạng thái backend nhanh chóng
+- ✅ CI/CD pipeline qua GitHub Actions cho build + deploy tự động khi cập nhật `main`
+- ✅ Bổ sung WebSocket endpoint `/ws` để hỗ trợ realtime comments cho công việc
+- ✅ Bổ sung OTP, Google login và GitHub login trong luồng xác thực
+
+### 12️⃣ Ghi Chú Mới Về UX
+- ✅ Chặn copy/paste ở các ô mật khẩu nhạy cảm để giảm lỗi thao tác người dùng
+- ✅ Các màn hình xác thực và nộp báo cáo có validate rõ ràng hơn để giảm nhập sai
 
 ---
 
