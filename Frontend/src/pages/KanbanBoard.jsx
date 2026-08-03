@@ -148,8 +148,17 @@ const KanbanBoard = ({
   };
 
   const formatDateTime = (isoString) => {
-    if (!isoString) return "";
-    const dateObj = new Date(isoString);
+    if (!isoString) return "Đang gửi...";
+    let safeIso = isoString;
+    if (
+      typeof isoString === "string" &&
+      !isoString.endsWith("Z") &&
+      !isoString.includes("+")
+    ) {
+      safeIso = isoString + "Z";
+    }
+
+    const dateObj = new Date(safeIso);
     if (isNaN(dateObj)) return isoString;
 
     const options = {
@@ -161,6 +170,7 @@ const KanbanBoard = ({
       year: "numeric",
       hour12: false,
     };
+
     const formatter = new Intl.DateTimeFormat("vi-VN", options);
     const parts = formatter.formatToParts(dateObj);
 

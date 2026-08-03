@@ -206,7 +206,7 @@ public class TaskServiceImpl implements TaskService {
                 .task(task)
                 .user(user)
                 .build();
-        commentRepository.save(comment);
+        commentRepository.saveAndFlush(comment);
 
         CommentResponse response = CommentResponse.builder()
                 .commentId(comment.getCommentId())
