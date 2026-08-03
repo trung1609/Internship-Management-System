@@ -45,7 +45,7 @@ public class InternshipAssignmentController {
 
     @PutMapping("/{assignmentId}/status")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<InternshipAssignmentResponse>> updateStatusAssignment(@PathVariable Long assignmentId, @Valid @RequestBody InternshipAssignmentUpdateRequest request) throws ResourceNotFoundException, ResourceBadRequestException {
+    public ResponseEntity<ApiResponse<InternshipAssignmentResponse>> updateStatusAssignment(@PathVariable Long assignmentId, @Valid @RequestBody InternshipAssignmentUpdateRequest request) throws ResourceNotFoundException, ResourceBadRequestException, ResourceConflictException {
         return new ResponseEntity<>(internshipAssignmentService.updateInternshipAssignment(assignmentId, request), HttpStatus.OK);
     }
 }

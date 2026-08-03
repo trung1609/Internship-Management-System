@@ -35,7 +35,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/**",
-            "/api/v1/health"
+            "/api/v1/health",
+            "/ws/**"
     };
 
     private static final String[] COMMON_ENDPOINTS = {
@@ -49,7 +50,8 @@ public class SecurityConfig {
             "/api/v1/internship-assignments/**",
             "/api/v1/assessment-results/**",
             "/api/v1/reports/**",
-            "/api/v1/dashboards/**"
+            "/api/v1/dashboards/**",
+            "/api/v1/tasks/**"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
@@ -74,7 +76,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:5174", "http://localhost:5173", "https://trung1609.github.io"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

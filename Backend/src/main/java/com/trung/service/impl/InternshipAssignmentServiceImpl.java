@@ -1,5 +1,6 @@
 package com.trung.service.impl;
 
+import com.trung.repository.*;
 import com.trung.util.enums.AssignmentStatus;
 import com.trung.util.enums.Role;
 import com.trung.dto.request.InternshipAssignmentCreateRequest;
@@ -14,10 +15,6 @@ import com.trung.exception.ResourceConflictException;
 import com.trung.exception.ResourceForbiddenException;
 import com.trung.exception.ResourceNotFoundException;
 import com.trung.mapper.InternshipAssignmentMapper;
-import com.trung.repository.IMentorRepository;
-import com.trung.repository.IStudentRepository;
-import com.trung.repository.InternshipAssignmentRepository;
-import com.trung.repository.InternshipPhaseRepository;
 import com.trung.service.InternshipAssignmentService;
 import com.trung.util.CurrentUserUtil;
 import com.trung.util.PaginationUtil;
@@ -39,6 +36,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
     private final IMentorRepository iMentorRepository;
     private final IStudentRepository iStudentRepository;
     private final CurrentUserUtil currentUserUtil;
+    private final TaskRepository taskRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -72,7 +70,6 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
             throw new ResourceConflictException("Validation failed", errorList);
         }
 
-        // THAY ĐỔI: Chỉ tạo ra 1 Object Đề tài (Assignment) duy nhất, chứa tất cả sinh viên
         InternshipAssignment assignment = InternshipAssignmentMapper.toEntity(request, studentList, mentor, phase);
         InternshipAssignment savedAssignment = internshipAssignmentRepository.save(assignment);
 
@@ -131,7 +128,7 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ApiResponse<InternshipAssignmentResponse> updateInternshipAssignment(Long internshipAssignmentId, InternshipAssignmentUpdateRequest request) throws ResourceNotFoundException, ResourceBadRequestException {
+    public ApiResponse<InternshipAssignmentResponse> updateInternshipAssignment(Long internshipAssignmentId, InternshipAssignmentUpdateRequest request) throws ResourceNotFoundException, ResourceBadRequestException, ResourceConflictException {
         Map<String, String> errorList = ValidationErrorUtil.createErrorMap();
         InternshipAssignment internshipAssignment = internshipAssignmentRepository.findById(internshipAssignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Internship assignment not found with id: " + internshipAssignmentId));
@@ -165,10 +162,27 @@ public class InternshipAssignmentServiceImpl implements InternshipAssignmentServ
         }
 
         if (request.getStudentIds() != null) {
+
+            Set<Long> uniqueStudentIds = new HashSet<>(request.getStudentIds());
+            if (uniqueStudentIds.size() != request.getStudentIds().size()) {
+                errorList.put("studentIds", "Has duplicate student IDs in the request");
+                throw new ResourceConflictException("Validation failed", errorList);
+            }
+
             List<Student> newStudentList = iStudentRepository.findAllByStudentId(request.getStudentIds());
 
             if (newStudentList.size() != request.getStudentIds().size()) {
                 throw new ResourceNotFoundException("One or more students not found with the provided IDs");
+            }
+
+            List<Long> oldStudentIds = internshipAssignment.getStudents().stream()
+                    .map(Student::getStudentId)
+                    .toList();
+
+            for (Long oldId : oldStudentIds) {
+                if (!request.getStudentIds().contains(oldId)) {
+                    taskRepository.removeStudentFromAllTasksInAssignment(internshipAssignmentId, oldId);
+                }
             }
 
             internshipAssignment.setStudents(newStudentList);

@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -119,4 +120,11 @@ public interface InternshipAssignmentRepository extends JpaRepository<Internship
     @Query("UPDATE InternshipAssignment ia SET ia.status = 'COMPLETED' " +
             "WHERE ia.dueDate <= :today AND ia.status = 'IN_PROGRESS'")
     int updateExpiredAssignments(@Param("today") LocalDate today);
+
+    @Query("select case when count(ia) > 0 then true else false end from InternshipAssignment ia " +
+            "join ia.students s " +
+            "where s.studentId = :studentId and " +
+            "ia.assignmentId = :assignmentId")
+    boolean existsStudentsByAssignmentId(@Param("assignmentId") Long assignmentId,
+                                         @Param("studentId") Long studentId);
 }

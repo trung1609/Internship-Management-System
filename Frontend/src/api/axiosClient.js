@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify'; // Import thư viện thông báo
 
-const BASE_URL = import.meta.env.DEV
+export const BASE_URL = import.meta.env.DEV
     ? 'http://localhost:8080'
     : 'https://internship-management-system-zqj0.onrender.com';
 
