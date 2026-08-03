@@ -225,6 +225,7 @@ const KanbanBoard = ({
       setFormData({
         taskTitle: task.taskTitle || "",
         description: task.description || "",
+        priority: task.priority || "",
         dueDate: safeDate,
         assignedStudentIds: task.assignees
           ? task.assignees.map((a) => a.studentId)
@@ -242,6 +243,7 @@ const KanbanBoard = ({
         taskTitle: "",
         description: "",
         dueDate: "",
+        priority: "",
         assignedStudentIds: [],
       });
     }
